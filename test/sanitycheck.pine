@@ -1,0 +1,33 @@
+# Gotta do polymorphs, bro. Can't avoid it forever.
+
+{:foo (fn [x] (bar baz))}
+
+###
+
+foo:bar.0.baz
+
+(sym factorial [n]
+  (if
+    (lt n 2) 1
+    (* n (factorial (- n 1)))))
+
+(sym factorial
+  (of [1] 1)
+  (of [n] (* n (factorial (- n 1)))))
+
+(sym factorial
+  (of {n (lt n 2)} 1)
+  (of [n] (* n (factorial (- n 1)))))
+
+(sym apply [head|tail]
+  (head.apply tail))
+
+(sym x 4)
+(sym y 6)
+
+<div {:fart 'shart'}>
+</div>
+
+{:foo (fn [] (bar baz))}
+
+###

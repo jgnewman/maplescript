@@ -1,0 +1,358 @@
+.docs {
+  $sidebarwidth: 294px;
+
+  overflow-x: hidden;
+
+  &:after {
+    content: '';
+    display: block;
+    clear: both;
+    width: 100%;
+    height: 1px;
+  }
+
+  h1, h2, h3, h4, h5, h6,
+  .h1, .h2, .h3, .h4, .h5, .h6 {
+    margin: 0;
+    line-height: 1.2;
+    @include tablet {
+      line-height: 1.4;
+    }
+  }
+
+  h1, .h1 {
+    font-size: 52px;
+  }
+
+  h2, .h2 {
+    font-size: 32px;
+
+    &.subhead {
+      font-family: $sans;
+      font-weight: 300;
+      font-size: 18px;
+      letter-spacing: 1px;
+      margin-top: 5px;
+    }
+  }
+
+  h3, .h3 {
+    font-size: 24px;
+  }
+
+  h4, .h4 {
+    @include prefix('transition', all 1s ease);
+    font-family: $codefont;
+    font-weight: 400;
+    font-size: 16px;
+    position: relative;
+    padding: 5px 0 5px 15px;
+    margin-top: 2em;
+    margin-bottom: 1em;
+    opacity: 0;
+    margin-left: -36px;
+    background: $offgray;
+
+    &:before {
+      content: '';
+      width: 5px;
+      height: 100%;
+      background: $offblack;
+      display: block;
+      position: absolute;
+      left: 0;
+      bottom: 0;
+    }
+
+    &:after {
+      content: '';
+      width: 5px;
+      height: 100%;
+      background: $offblack;
+      display: block;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+    }
+
+    &.visible {
+      @include prefix('transition', all 1s ease);
+      opacity: 1;
+      margin-left: 0;
+    }
+
+    .bif {
+      font-weight: 700;
+      color: $docsred;
+    }
+  }
+
+  h5, .h5 {
+    font-size: 14px;
+  }
+
+  h6, .h6 {
+    font-size: 12px;
+    text-transform: uppercase;
+    font-family: $sans;
+  }
+
+  .branding {
+    background: url(../images/coffee-cup.jpg) right center no-repeat transparent;
+    background-size: cover;
+    height: 100%;
+    color: $offwhite;
+    position: fixed;
+    width: $sidebarwidth;
+
+    @include smalldesk {
+      width: 100%;
+      position: static;
+      height: 100px;
+    }
+
+    @include phone {
+      height: 66px;
+    }
+  }
+
+  .content {
+    @include prefix('box-sizing', border-box);
+    margin: 0 0 0 $sidebarwidth;
+    position: relative;
+    padding: 40px calc((100% - 220px)/2) 50px 36px;
+    color: $offblack;
+    line-height: 2.1;
+    font-size: 13px;
+    font-weight: 400;
+
+    @include smalldesk {
+      margin: 0;
+      padding: 50px 54% 50px 36px;
+    }
+
+    @include tablet {
+      padding: 36px;
+    }
+
+    &:before {
+      content: '';
+      display: block;
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      background: $offgray;
+
+      @include tablet {
+        display: none;
+      }
+    }
+
+    a {
+      color: $docsred;
+      text-decoration: none;
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+      white-space: nowrap;
+
+      &:after {
+        @include prefix('transition', width .3s ease);
+        content: '';
+        display: block;
+        width: 0;
+        height: 1px;
+        background: $docsred;
+        position: absolute;
+        right: 0;
+        left: auto;
+        bottom: 2px;
+      }
+
+      &:hover {
+        &:after {
+          @include prefix('transition', width .3s ease);
+          width: 100%;
+          left: 0;
+          right: auto;
+        }
+      }
+    }
+  }
+
+  .left-border {
+    margin-bottom: 25px;
+    position: relative;
+
+    &:before {
+      content: '';
+      width: 5px;
+      height: 100%;
+      background: $docsred;
+      margin-left: -36px;
+      display: block;
+      position: absolute;
+    }
+  }
+
+  blockquote {
+    @include prefix('border-radius', 3px);
+    margin: 0 0 25px 0;
+    position: relative;
+    padding: 35px 25px 5px;
+    font-weight: 400;
+    background: $offgray;
+    overflow: hidden;
+    font-style: italic;
+
+    &:before {
+      content: '';
+      width: 5px;
+      height: 100%;
+      background: $docsred;
+      display: block;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    &:after {
+      @include prefix('box-sizing', border-box);
+      content: 'IMPORTANT NOTE';
+      font-style: normal;
+      letter-spacing: .5px;
+      font-weight: 700;
+      font-family: $serif;
+      display: block;
+      position: absolute;
+      padding-left: 25px;
+      padding-top: 3px;
+      top: 0;
+      left: 0;
+      width: 100%;
+      border-bottom: 1px dashed rgba(0, 0, 0, .06);
+      background: rgba(0, 0, 0, .03);
+    }
+
+    code {
+      background: $white !important;
+    }
+  }
+
+  pre, pre code {
+    font-size: 13px;
+    line-height: 1.4;
+    display: block;
+
+    @include smalldesk {
+      font-size: 12px;
+    }
+  }
+
+  p code, li code {
+    @include prefix('border-radius', 3px);
+    background: $offgray;
+    border: 1px solid darken($offgray, 2%);
+    padding: 0 3px;
+    font-size: 12px;
+    white-space: nowrap;
+    display: inline-block;
+    margin-right: 1px;
+    line-height: 1.9;
+    font-variant-ligatures: none;
+  }
+
+  code {
+    font-family: $codefont;
+  }
+
+  pre {
+    margin: 0 0 0 calc(100% + 72px);
+    position: relative;
+    height: 0;
+
+    @include smalldesk {
+      margin: 0 0 0 115%;
+    }
+
+    @include tablet {
+      margin: 0 -36px;
+      height: auto;
+      padding: 10px 36px 15px;
+      background: $offgray;
+      border: 1px solid darken($offgray, 5%);
+    }
+  }
+
+  pre code {
+    @include prefix('transition', all .6s ease);
+    padding-top: 1em;
+    opacity: 0;
+    margin-left: 25px;
+
+    &.visible {
+      @include prefix('transition', all .6s ease);
+      opacity: 1;
+      margin-left: 0;
+    }
+  }
+
+  .hljs {
+    overflow-x: inherit;
+    padding-left: 0;
+    background: transparent;
+  }
+
+  .hljs-comment {
+    opacity: .5;
+  }
+
+  .nav {
+    @include phone {
+      top: 25px;
+      right: 25px;
+    }
+    .line {
+      background: $offblack;
+      @include smalldesk {
+        background: $white;
+      }
+    }
+    &.open .line {
+      background: $white;
+    }
+  }
+
+  .logo {
+    position: fixed;
+    left: 40px;
+    top: 40px;
+
+    @include smalldesk {
+      position: absolute;
+      padding: 0;
+      top: 35px;
+    }
+
+    @include phone {
+      top: 15px;
+      left: 25px;
+    }
+
+    .logo-line {
+      @include smalldesk {
+        height: 0;
+        opacity: 0;
+      }
+    }
+
+    .logo-text {
+      @include smalldesk {
+        opacity: 0;
+      }
+    }
+  }
+
+}

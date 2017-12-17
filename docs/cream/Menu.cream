@@ -1,0 +1,119 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
+import PropTypes from 'prop-types'
+import reactify from './util/reactify'
+import Download from './Download'
+
+propTypes = {
+  menuOpen: PropTypes.bool.isRequired,
+  downloadOptions: PropTypes.object.isRequired,
+  downloadSelection: PropTypes.object.isRequired,
+  handleSelectLink: PropTypes.func.isRequired,
+  handleClickMenuLink: PropTypes.func.isRequired,
+  selectLink: PropTypes.func.isRequired,
+  toggleMenu: PropTypes.func.isRequired
+}
+
+getLeftContent _ =>
+  [
+    {inner: 'Overview', href: '/reference/overview/'},
+    {inner: 'Data Types', href: '/reference/data-types/'},
+    {inner: 'Logic & Infix Operators', href: '/reference/logic-infix/'},
+    {inner: 'Functions', href: '/reference/functions/'},
+    {inner: 'Modules', href: '/reference/modules/'},
+    {inner: 'Conditions', href: '/reference/conditions/'},
+    {inner: 'Iterations', href: '/reference/iterations/'}
+  ]
+
+getRightContent _ =>
+  [
+    {inner: 'CreamML (JSX)', href: '/reference/creamml/'},
+    {inner: 'Error Handling', href: '/reference/error-handling/'},
+    {inner: 'Method Chaining', href: '/reference/method-chaining/'},
+    {inner: 'Curry Piping', href: '/reference/curry-piping/'},
+    {inner: 'Processes', href: '/reference/processes/'},
+    {inner: 'Built-In Functions', href: '/reference/bifs/'},
+    {inner: 'An Example C&S App', href: 'https://github.com/jgnewman/react-cns'}
+  ]
+
+isRelative path =>
+  !/^https?\:/.test path
+
+normalizePath path =>
+  when
+    /cream-and-sugar/.test location.pathname
+      if isRelative path do `/cream-and-sugar${path}` else path
+    true
+      path
+
+
+render _ =>
+  {
+    menuOpen, downloadOptions, handleSelectLink, downloadSelection,
+    selectLink, handleClickMenuLink
+  } = @props
+
+  classes =
+    when
+      menuOpen  -> 'menu'
+      !menuOpen -> 'menu hidden'
+
+  <div className={classes}>
+    <div className="menu-inner">
+      <h1>"Main Menu"</h1>
+      <h2>"Everything You Need Is Here"</h2>
+      <div className="row">
+        <div className="column">
+
+          (getLeftContent _).map fn obj, index ::=>
+
+            isActive    = location.pathname == obj.href
+            linkClasses = if isActive do 'menu-link active' else 'menu-link'
+            href        = if isActive do null else normalizePath obj.href
+            onClick     = if isActive do null else ::handleClickMenuLink
+
+            <a
+              className={linkClasses}
+              href={href}
+              key={index}
+              onClick={onClick}
+            >
+              obj.inner
+            </a>
+
+        </div>
+        <div className="column">
+
+          (getRightContent _).map fn obj, index ::=>
+
+            isActive    = location.pathname == obj.href
+            linkClasses = if isActive do 'menu-link active' else 'menu-link'
+            href        = if isActive do null else normalizePath obj.href
+            onClick     = if isActive do null else ::handleClickMenuLink
+
+            <a
+              className={linkClasses}
+              href={href}
+              key={index}
+              onClick={onClick}
+            >
+              obj.inner
+            </a>
+
+        </div>
+      </div>
+
+      <Download
+        downloadOptions={downloadOptions}
+        downloadSelection={downloadSelection}
+        handleSelectLink={handleSelectLink}
+        selectLink={selectLink}
+      />
+
+    </div>
+    <span className="copyright">
+      "Copyright © 2016 John Newman."
+    </span>
+  </div>
+
+export reactify {render: render}, propTypes

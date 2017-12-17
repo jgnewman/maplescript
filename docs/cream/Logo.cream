@@ -1,0 +1,42 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
+import PropTypes from 'prop-types'
+import reactify from './util/reactify'
+
+propTypes = {
+  toggleMenu: PropTypes.func.isRequired,
+  handleClickLogo: PropTypes.func.isRequired
+}
+
+logoClick evt =>
+  { handleClickLogo, menuOpen } = @props
+
+  boundHandler = ::handleClickLogo
+  isHomePage   = location.pathname == '/cream-and-sugar/'
+
+  when
+    menuOpen
+      boundHandler _
+      setTimeout (fn => if isHomePage do evt.preventDefault _ else null), 500
+    !menuOpen
+      if isHomePage do evt.preventDefault _ else null
+
+siteIsLive _ =>
+  /cream-and-sugar/.test location.href
+
+render _ =>
+  { handleClickLogo, menuOpen } = @props
+
+  url = if siteIsLive _ do '/cream-and-sugar/' else '/'
+
+  <a className="logo" href={url} onClick={::logoClick}>
+    <img className="logo-main" src="https://jgnewman.github.io/cream-and-sugar/assets/images/logo.svg" />
+    <span className="logo-line top-left"></span>
+    <span className="logo-line top-right"></span>
+    <span className="logo-line bottom-right"></span>
+    <span className="logo-line bottom-left"></span>
+    <span className="logo-text top">'EST.'</span>
+    <span className="logo-text bottom">'2016'</span>
+  </a>
+
+export reactify {render: render}, propTypes
