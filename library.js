@@ -38,6 +38,52 @@ var PINE_ = {
     return false;
   },
 
+  match_: function (args, descriptors) {
+    if (args.length !== descriptors.length) return false;
+    if (!args.length && !descriptors.length) return true;
+
+    var SYMREPLACE = /^Symbol\.for\(\'|\'\)$/g;
+
+    function convertSpecial(special) {
+      switch (special) {
+        case 'null': return null;
+        case 'undefined': return undefined;
+        case 'true': return true;
+        case 'false': return false;
+        default: return special;
+      }
+    }
+
+    function isSpecial(ident) {
+      return ident === 'null' || ident === 'undefined' || ident === 'true' || ident === 'false';
+    }
+
+    return args.every((arg, index) => {
+      var desc = descriptors[index];
+      var type = desc.type;
+      var value = desc.value;
+
+      switch (type) {
+        case 'Identifier': return isSpecial(value) ? arg === convertSpecial(value) : true;
+        case 'Atom': return arg === Symbol.for(value.replace(SYMREPLACE, ''));
+        case 'String': return arg === value;
+        case 'Number': return arg === parseFloat(value);
+
+        // Matching against an array is going to MEAN destructuring.
+        // So we fail if the arg isn't an array or if it has more than 1 item.
+        // Then we match for an empty array, or we pass.
+        case 'Arr':
+          if (!Array.isArray(arg) || value.match(/,/)) return false;
+          if (value === "[]") return arg.length === 0;
+          return true;
+
+        default: PINE_.die('Can not pattern match against type ' + type);
+      }
+      // return (matches = false);
+    });
+    return matches;
+  },
+
   /* Public functions */
 
   apply: function (fn, list, ctx) {
@@ -237,3 +283,5 @@ var PINE_ = {
 
 
 };
+
+module.exports = PINE_;

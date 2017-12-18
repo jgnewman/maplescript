@@ -78,6 +78,19 @@ function compileBody(body, delim) {
   return !bodyPieces.length ? '' : bodyPieces.join(`${end}\n`) + (delim === ';' ? ';' : '');
 }
 
+function ensurePolymorphicStructure(bodyItems) {
+  let bad = false;
+  bodyItems.some(item => {
+    const isList = item.type === 'List';
+    const isMorph = isList && item.items[0] && item.items[0].text === 'of';
+    if (!isList || !isMorph) {
+      bad = true;
+      return true;
+    }
+  });
+  return !bad;
+}
+
 // Official list of exposed system functions
 function getExposedFns() {
   return [
@@ -137,8 +150,8 @@ function getSpecialForms() {
     'do',
     'fn',
     'if',
-    'none',
-    'sym'
+    'make',
+    'none'
   ];
 }
 
@@ -164,5 +177,6 @@ export {
   getMsgPassingFns,
   getReservedWords,
   getSpecialForms,
-  getOperatorForms
+  getOperatorForms,
+  ensurePolymorphicStructure
 };

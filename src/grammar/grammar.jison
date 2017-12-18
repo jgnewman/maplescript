@@ -54,7 +54,7 @@
 \'([^\']|\\[\'])*\'                  return "STRING";       /* ' fix syntax highlighting */
 \`([^\`]|\\[\`])*\`                  return "STRING";       /* ` fix syntax highlighting */
 
-\:[A-Za-z][^\s\(\)\[\]\{\}\<\>]+     return "ATOM";
+\:[A-Za-z][^\s\(\)\[\]\{\}\<\>]*     return "ATOM";
 [^\s\(\)\[\]\{\}\<\>]+               return "IDENTIFIER";
 
 <<EOF>>                              return "EOF";
@@ -94,7 +94,7 @@ SourceElement
   | Arr
   | Obj
   | Str
-  | Regex
+  | Regexp
   | Atom
   | Identifier
   | Num
@@ -286,11 +286,10 @@ function NumberNode(num, loc) {
   this.shared = shared;
 }
 
-function ListNode(items, isWrapped, loc) {
+function ListNode(items, loc) {
   this.src = '(' + items.map(function (item) { return item.src }).join(', ') + ')';
   this.type = 'List';
   this.length = items.length;
-  this.isWrapped = isWrapped;
   this.items = items;
   this.loc = loc;
   this.shared = shared;

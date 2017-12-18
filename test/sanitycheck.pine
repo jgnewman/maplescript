@@ -1,33 +1,48 @@
-# Gotta do polymorphs, bro. Can't avoid it forever.
+# html special form
+# compiles like a non-polymorphic function
+# takes only 1 argument for attributes
+# name must be capitalized
+# defines a new html macro at the application level
+# when you call PINE_.createElement, it will call this function.
 
-{:foo (fn [x] (bar baz))}
+(html Title [attrs]
+  <div {:class attrs:class}>
+    <span> attrs:text </span>
+  </div>
+)
+
+<Title {:class 'foo' :text 'bar'} />
 
 ###
 
-foo:bar.0.baz
+foo:bar.baz.0.qux
 
-(sym factorial [n]
+foo:bar?.baz?.0.qux?
+
+(make factorial [n]
   (if
     (lt n 2) 1
     (* n (factorial (- n 1)))))
 
-(sym factorial
+(make factorial
   (of [1] 1)
   (of [n] (* n (factorial (- n 1)))))
 
-(sym factorial
-  (of {n (lt n 2)} 1)
-  (of [n] (* n (factorial (- n 1)))))
-
-(sym apply [head|tail]
+(make apply [[head|tail]]
   (head.apply tail))
 
-(sym x 4)
-(sym y 6)
+(make x 4)
+(make y 6)
 
-<div {:fart 'shart'}>
+<div {:fart "shart"}>
 </div>
 
 {:foo (fn [] (bar baz))}
+
+(make render [props]
+  <div { :class "foo bar" }>
+    "This is my new DOM element"
+  </div>
+)
 
 ###

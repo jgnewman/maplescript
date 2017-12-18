@@ -5,6 +5,6 @@ function prepend(str, withStr) {
 }
 
 export default function finalize(tree) {
-  tree.shared.output = prepend(tree.shared.output, 'var PINE_ = require("pine-lang-lib");\n');
+  tree.shared.output = prepend(tree.shared.output, 'var PINE_ = require("pine/library");\n');
   return tree;
 }

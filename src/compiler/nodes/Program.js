@@ -16,6 +16,7 @@ compile(nodes.ProgramNode, function () {
   newBody.forEach(node => {
     try {
       node.compile();
+      this.shared.output += ';\n';
     } catch (err) {
       die(node, `Could not compile ${node.type ? node.type : 'node ' + JSON.stringify(node)}`);
     }
