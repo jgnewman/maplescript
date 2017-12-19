@@ -1,4 +1,4 @@
-import { compile, nodes, die, getExposedFns, getMsgPassingFns } from '../utils';
+import { compile, nodes, die, getReservedWords, getSpecialForms, getExposedFns, getMsgPassingFns } from '../utils';
 
 function stripQ(word) {
   return word.replace(/\?$/, '');
@@ -10,6 +10,15 @@ function maybeQ(word) {
 
 function isBif(word) {
   return getExposedFns().indexOf(word) > -1;
+}
+
+function isReserved(word) {
+  return getReservedWords().indexOf(word) > -1 &&
+         getSpecialForms().indexOf(word) === -1;
+}
+
+function isSystemPattern(word) {
+  return /[^_]_$/.test(word);
 }
 
 function splitter(word) {
@@ -38,11 +47,11 @@ function unconfidentLookup(precompiled) {
           return (function(){
             ref = ref["baz"];
             return ref;
-          }())
+          }).call(this)
         } else { return }
-      }())
+      }).call(this)
     } else { return }
-  }())
+  }).call(this)
   */
   const pieces = precompiled.split('?');
 
@@ -67,7 +76,7 @@ function unconfidentLookup(precompiled) {
       return `(function(){
         ${index === 0 ? "var " : ""}ref_ = ${ref};
         return ref_;
-      }())`;
+      }).call(this)`;
     }
 
     // average case
@@ -76,7 +85,7 @@ function unconfidentLookup(precompiled) {
       if (ref_) {
         return ${recur(pieces.slice(1), index + 1)};
       } else { return }
-    }())`;
+    }).call(this)`;
 
   }
 
@@ -89,6 +98,22 @@ function unconfidentLookup(precompiled) {
  */
 compile(nodes.IdentifierNode, function () {
   let word = this.text;
+
+  if (word === '@') {
+    word = 'this';
+  } else {
+    word = word.replace(/^\@(\:|\.)/, 'this$1').replace(/^\@/, 'this.');
+  }
+
+  const maybeReserved = word.replace(/(\?|\.|\:).*$/, '');
+
+  if (isReserved(maybeReserved)) {
+    return die(this, `${maybeReserved} is a reserved word in JavaScript and can't be used in this way.`);
+  }
+
+  if (isSystemPattern(maybeReserved)) {
+    return die(this, `${maybeReserved} follows the system's reserved pattern of suffixing an identifier with "_".`)
+  }
 
   if (isBif(stripQ(word))) {
     word = 'PINE_.' + word;

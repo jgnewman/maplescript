@@ -11,6 +11,16 @@ function compileTail(arr) {
   return arr.map(item => item.compile(true)).join(', ');
 }
 
+function compileContextChain(items) {
+  return `(function(){
+    var ref_ = this;
+    ${items.map(item => {
+      return "(function(){ ref_ = " + item.compile(true) + " }).call(ref_);"
+    }).join('\n')}
+    return ref_;
+  }).call(this)`;
+}
+
 function compileCondition(items) {
   let sets = [];
   let ifcase = null;
@@ -31,7 +41,7 @@ function compileCondition(items) {
     +   "if (" + ifcase[0].compile(true) + ") {\nreturn " + ifcase[1].compile(true) + "\n}"
     +   sets.map(pair => " else if (" + pair[0].compile(true) + ") {\nreturn " + pair[1].compile(true) + "\n}").join('')
     +   (!elsecase ? " else {\nreturn\n}" : " else {\nreturn " + elsecase.compile(true) + "\n}")
-    + "\n}())";
+    + "\n}).call(this)";
 }
 
 function getVarsFromParamList(items, isPolymorph) {
@@ -97,14 +107,22 @@ function compilePolymorph(body) {
 }
 
 // Handles all named and anonymous functions defined by the user
-function compileFunction(body) {
-  if (body[0].type !== 'Arr') return compilePolymorph.call(this, body);
+function compileFunction(body, async) {
+  if (!async && body[0].type !== 'Arr') return compilePolymorph.call(this, body);
 
   // Die if the user accidentally put a top-level param list into a polymorph
-  if (body[1].type === 'List' && body[1].items[0] && body[1].items[0].text === 'of') die(this, `
+  if (!async && body[1].type === 'List' && body[1].items[0] && body[1].items[0].text === 'of') die(this, `
     Polymorphic functions can not contain a parameter list outside of an \`of\`
     statement. Give each of these statements its own parameter list instead.
   `.trim().replace(/\s+/g, ' '));
+
+  // Tweak the body to fit async functions
+  let attemptChannel;
+  if (async && body[0].type !== 'Arr') {
+    if (body[0].type !== 'Atom') die('Async functions must either begin with a parameter list or a symbol.');
+    attemptChannel = body[0].compile(true);
+    body = body.slice(1);
+  }
 
   // Create list of parameters
   const params = getVarsFromParamList(body[0].items);
@@ -123,7 +141,19 @@ function compileFunction(body) {
   }).join(';\n') + ';';
 
   // Put the pieces together
-  return "function () {\n" + argsLine + varsLine + cleanBody + "\n}";
+  if (async && attemptChannel) {
+    return `async function () {
+      try {
+        ${argsLine}
+        ${varsLine}
+        ${cleanBody}
+      } catch (err_) {
+        return PINE_.signal(${attemptChannel}, err);
+      }
+    }`;
+  } else {
+    return (async ? "async " : "") + "function () {\n" + argsLine + varsLine + cleanBody + "\n}";
+  }
 }
 
 function listIsPolymorph(listNode) {
@@ -143,16 +173,110 @@ function compileDoBlock(items) {
   const body = items.map((action, index) => {
     return (index === items.length - 1 ? "return " : "") + action.compile(true);
   }).join(';\n') + ';';
-  return "(function () {\n"+ body +"\n}())";
+  return "(function () {\n"+ body +"\n}).call(this)";
+}
+
+function compileHtmlDefinition(items) {
+  const name = items[0].compile(true);
+  const params = items[1].items.map(param => param.compile(true)).join(', ');
+  const body = compileDoBlock.call(this, items.slice(2));
+
+  if (!/^[A-Z]/.test(name)) {
+    die(items[0], 'New html tags must begin with a capital letter.');
+  }
+
+  return `(PINE_.html_.${name} = PINE_.html_.${name} || function (${params}) {
+    const out_ = ${body};
+    if (out_ && PINE_.dataType(out_) !== 'htmlelement') {
+      throw new Error('If ${name} returns a truthy value, that value must be a single html element.');
+    }
+    return out_;
+  })`
+}
+
+function compileImport(items) {
+  if (items.length === 1) { // just location
+    return `require(${items[0].compile(true)})`;
+  }
+
+  if (items.length === 2) { // location and name
+    return `const ${items[1].compile(true)} = require(${items[0].compile(true)})`;
+  }
+
+  die(this, 'Import statements can only take 1 or 2 arguments.');
+}
+
+function aritize(word) {
+  const arityMatch = /\/\d+$/;
+  let arity = null;
+  if (arityMatch.test(word)) {
+    arity = word.match(arityMatch)[0].slice(1);
+    word = word.replace(arityMatch, '');
+  }
+  return {
+    clean: word,
+    aritized: arity ? `PINE_.aritize_(${word}, ${arity})` : word
+  };
+}
+
+function compileExport(items) {
+  const toExport = items[0];
+
+  if (items.length > 1) {
+    die(this, 'You can only export a single value. Try an object or an array instead.');
+  }
+
+  if (toExport.type === 'Arr') {
+    return 'module.exports = {'
+      + toExport.items.map(item => {
+          const ident = aritize(item.compile(true));
+          return `[Symbol.for("${ident.clean}")]: ${ident.aritized}`;
+        }).join(', ')
+      + '}'
+  }
+
+  if (toExport.type === 'Obj') {
+    return 'module.exports = {'
+      + toExport.items.map((item, index) => {
+          if (index % 2 === 0) { // key
+            const atom = item.type === 'Atom';
+            return (atom ? '[' : '"') + item.compile(true) + (atom ? ']' : '"') + ':';
+          } else { // value
+            const ident = aritize(item.compile(true));
+            return ident.aritized + (index === toExport.length - 1 ? '' : ',');
+          }
+        }).join(' ')
+      + '}';
+  }
+
+  if (toExport.type === 'Identifier') {
+    const ident = aritize(toExport.compile(true));
+    return `module.exports = {[Symbol.for("${ident.clean}")]: ${ident.aritized}}`;
+  }
+
+  die(this, 'You can only export named references.');
+}
+
+function compileAwait(items) {
+  if (items.length > 1) {
+    return die(this, 'Await can only take 1 argument.')
+  }
+  return `await ${items[0].compile(true)}`
 }
 
 function compileSpecial(form, items) {
   switch (form) {
+    case '->': return compileContextChain.call(this, items);
     case 'all': return compileOperator.call(this, '&&', items);
     case 'any': return compileOperator.call(this, '||', items);
+    case 'async': return compileFunction.call(this, items, true);
+    case 'await': return compileAwait.call(this, items);
     case 'do': return compileDoBlock.call(this, items);
+    case 'elem': return compileHtmlDefinition.call(this, items);
+    case 'export': return compileExport.call(this, items);
     case 'fn': return compileFunction.call(this, items);
     case 'if': return compileCondition.call(this, items);
+    case 'import': return compileImport.call(this, items);
     case 'make': return compileAssignment.call(this, items);
     case 'none': return compileOperator.call(this, '&& !', items, "true");
   }

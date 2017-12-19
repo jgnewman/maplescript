@@ -9,7 +9,7 @@ Lisp is a family of programming languages where the most distinctive feature is 
 
 ClojureScript is awesome. But it's also big and heavy because it tries to implement as much of the full Clojure language as possible. It has a lot of features that, while cool, aren't really necessary and can slow things down.
 
-Pine, on the other hand, is extremely light-weight, and focuses on applying functionalism to JavaScript without too much unfamiliarity. In most cases, it has approximately the same overhead as CoffeeScript, with many similar benefits.
+Pine, on the other hand, is extremely light-weight, and focuses on applying functionalism to JavaScript without too much unfamiliarity. Like CoffeeScript, it has minimal overhead and contains many similar benefits.
 
 ## What are some of Pine's distinguishing features?
 
@@ -113,7 +113,7 @@ Notice, you've still got access to all of JavaScript's native object functionali
 Math.round(2.3)
 ```
 
-But when you make your own objects, they look a little different. Objects in Pine are syntactically just another kind of list where each even-numbered item represents a key and each odd-numbered item represents the associated value.
+But when you make your own objects, they look a little different. Objects in Pine are syntactically just another kind of list where each even-numbered index represents a key and each odd-numbered index represents the associated value.
 
 ```
 # Pine
@@ -201,7 +201,7 @@ But let's forget about tree lookups for a second and talk about HTML. Pine provi
 const myDiv = document.createElement('div');
 myDiv.setAttribute('id', 'foo');
 myDiv.setAttribute('class', 'bar');
-myDiv.innerHTML = 'Hello!';
+myDiv.appendChild(document.createTextNode('Hello'));
 const body = document.querySelector('body');
 body.append(myDiv);
 ```

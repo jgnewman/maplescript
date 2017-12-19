@@ -6,6 +6,22 @@ var PINE_ = {
 
   /* Private functions */
 
+  // This is where we'll store user-defined html blocks.
+  html_: {},
+
+  // This is where we'll store all event channels.
+  channels_: {},
+
+  aritize_: function (fn, arity) {
+    return function () {
+      var args = Array.prototype.slice.call(arguments || []);
+      if (args.length !== arity) {
+        throw new Error('Wrong number of arguments passed to ' + (fn.name || 'anonymous') + ' function.');
+      }
+      return fn.apply(null, args);
+    }
+  },
+
   args_: function (args) {
     const out = [];
     Array.prototype.push.apply(out, args);
@@ -90,6 +106,17 @@ var PINE_ = {
     return fn.apply(ctx || null, list);
   },
 
+  attempt: function (channel, fun) {
+    if (PINE_.dataType(channel) !== 'symbol') {
+      throw new Error('Signal channels must be identified with symbols.');
+    }
+    try {
+      return fun();
+    } catch (err) {
+      PINE_.signal(channel, err);
+    }
+  },
+
   create: function(cls) {
     return new (Function.prototype.bind.apply(cls, arguments));
   },
@@ -103,16 +130,21 @@ var PINE_ = {
       return PINE_.die('No HTML document is available.');
     }
 
+    // User-defined html blocks will begin with capital letters.
+    if (/^[A-Z]/.test(type)) {
+      return PINE_.html_[type](a, b);
+    }
+
     // Create an element and set attributes.
     var elem = document.createElement(type);
-    Object.keys(a).forEach(function (key) {
+    Object.keys(a).concat(Object.getOwnPropertySymbols(a)).forEach(function (key) {
       var strKey = typeof key === 'symbol' ? Symbol.keyFor(key) : key;
       return elem.setAttribute(strKey.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(), a[key]);
     });
 
     // Append children.
     b.forEach(function (node) {
-      elem.appendChild(node);
+      elem.appendChild(PINE_.dataType(node) === 'htmlelement' ? node : document.createTextNode(node))
     });
     return elem;
   },
@@ -125,7 +157,7 @@ var PINE_ = {
   dataType: function (val) {
     var type = typeof val;
     switch (type) {
-      case 'symbol': return 'atom';
+      case 'symbol': return 'symbol';
       case 'number': return isNaN(val) ? 'nan' : type;
       case 'object':
         if (val === null) return 'null';
@@ -177,12 +209,24 @@ var PINE_ = {
     return x >= y;
   },
 
+  handle: function (channel, fun) {
+    if (PINE_.dataType(channel) !== 'symbol') {
+      throw new Error('Signal channels must be identified with symbols.');
+    }
+    const handlers = PINE_.channels_[channel] = PINE_.channels_[channel] || [];
+    handlers.push(fun);
+  },
+
   head: function (list) {
     return list[0];
   },
 
   instanceof: function (val, type) {
     return val instanceof type;
+  },
+
+  keys: function (object) {
+    return Object.keys(object).concat(Object.getOwnPropertySymbols(object));
   },
 
   last: function (list) {
@@ -241,14 +285,29 @@ var PINE_ = {
     }
   },
 
+  signal: function (channel, message) {
+    if (PINE_.dataType(channel) !== 'symbol') {
+      throw new Error('Signal channels must be identified with symbols.');
+    }
+    const handlers = PINE_.channels_[channel];
+    if (handlers && handlers.length) {
+      handlers.forEach(handler => handler(message));
+    }
+  },
+
   tail: function (list) {
-    const out = list.slice(1);
-    if (CNS_.isTuple(list)) return CNS_.tuple(out);
-    return out;
+    return list.slice(1);
   },
 
   throw: function (err) {
     throw err;
+  },
+
+  unhandle: function (channel, fun) {
+    const handlers = PINE_.channels_[channel];
+    if (handlers) {
+      handlers.splice(handlers.indexOf(fun), 1);
+    }
   },
 
   update: function (keyOrIndex, val, collection) {

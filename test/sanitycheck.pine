@@ -1,11 +1,25 @@
-# html special form
-# compiles like a non-polymorphic function
-# takes only 1 argument for attributes
-# name must be capitalized
-# defines a new html macro at the application level
-# when you call PINE_.createElement, it will call this function.
+# write tests
 
-(html Title [attrs]
+###
+(function() {
+  var ref_ = this;
+  (function(){ ref_ = $('#dom') }).call(ref_);
+  (function(){ ref_ = this.addClass('foo') }).call(ref_);
+  return ref_;
+}).call(this)
+
+(function() {
+  var ref_ = this;
+  (function(){ ref_ = get(promise) }).call(ref_);
+  (function(){ ref_ = this.then(function (result) { return get(promise) }) }).call(ref_);
+  return ref_;
+}).call(this)
+###
+
+
+###
+
+(elem Title [attrs children]
   <div {:class attrs:class}>
     <span> attrs:text </span>
   </div>
@@ -13,11 +27,15 @@
 
 <Title {:class 'foo' :text 'bar'} />
 
-###
-
 foo:bar.baz.0.qux
 
 foo:bar?.baz?.0.qux?
+
+@foo
+
+@.foo
+
+@:foo
 
 (make factorial [n]
   (if
@@ -34,8 +52,7 @@ foo:bar?.baz?.0.qux?
 (make x 4)
 (make y 6)
 
-<div {:fart "shart"}>
-</div>
+<div {:fart "shart"}></div>
 
 {:foo (fn [] (bar baz))}
 
@@ -44,5 +61,43 @@ foo:bar?.baz?.0.qux?
     "This is my new DOM element"
   </div>
 )
+
+# Will always export an object. Just a matter of
+# how you want that object put together.
+(export [foo/2 bar baz])
+(export foo/2)
+(export {:foo foo/2 :bar bar})
+
+# you can either import a single value
+# from a module or execute it
+# (import "module/location" mod)
+# (import "module/location")
+
+# events
+(signal :channel "message")
+(handle :channel (fn [message] (read message)))
+
+# error handling
+(attempt :foozle-poozle
+  (do
+    (lots o stuff)
+    (even more stuff)))
+
+(handle :foozle-poozle
+  (fn [err]
+    (tryagain now)
+    (right now)))
+
+# async/await
+# pass in an error channel and handle as necessary
+(make foo (async :foozle-poozle []
+  (await (something cool))
+  (await (more cool stuff))
+  (await (thats it))))
+
+# promises and other chaining
+(-> ($ "#dom")
+    (@addClass "foo")
+    (@addClass "bar"))
 
 ###

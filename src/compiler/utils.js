@@ -94,6 +94,7 @@ function ensurePolymorphicStructure(bodyItems) {
 // Official list of exposed system functions
 function getExposedFns() {
   return [
+    'attempt',
     'apply',
     'create',
     'createElement',
@@ -106,8 +107,10 @@ function getExposedFns() {
     'get',
     'gt',
     'gte',
+    'handle',
     'head',
     'instanceof',
+    'keys',
     'last',
     'lead',
     'log',
@@ -118,8 +121,10 @@ function getExposedFns() {
     'random',
     'range',
     'remove',
+    'signal',
     'tail',
     'throw',
+    'unhandle',
     'update',
     'warn'
   ];
@@ -145,11 +150,17 @@ function getMsgPassingFns() {
 
 function getSpecialForms() {
   return [
+    '->',
     'all',
     'any',
+    'async',
+    'await',
     'do',
+    'elem',
+    'export',
     'fn',
     'if',
+    'import',
     'make',
     'none'
   ];
@@ -158,12 +169,31 @@ function getSpecialForms() {
 // Official list of reserved words
 function getReservedWords() {
   return [
-    'fn', 'caseof', 'match', 'if', 'default', 'catch',
-    'for', 'in', 'when', 'var', 'const', 'let', 'while',
-    'switch', 'function', 'with', 'else', 'super',
-    'enum', 'break', 'extends', 'new', 'class',
-    'try', 'continue', 'typeof', 'delete', 'return',
-    'static', 'PINE_'
+    'break',
+    'catch',
+    'class',
+    'const',
+    'continue',
+    'default',
+    'delete',
+    'else',
+    'extends',
+    'enum',
+    'for',
+    'function',
+    'if',
+    'in',
+    'let',
+    'of',
+    'return',
+    'static',
+    'super',
+    'switch',
+    'try',
+    'typeof',
+    'var',
+    'while',
+    'with'
   ];
 }
 

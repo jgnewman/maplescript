@@ -156,7 +156,7 @@ case 25:
 break;
 case 26:
 
-      this.$ = new HtmlNode(true, $$[$0-1], [], null, null, createSourceLocation(null, _$[$0-2], _$[$0]));
+      this.$ = new HtmlNode(true, $$[$0-1], null, null, null, createSourceLocation(null, _$[$0-2], _$[$0]));
     
 break;
 case 27:
@@ -166,12 +166,12 @@ case 27:
 break;
 case 28:
 
-      this.$ = new HtmlNode(false, $$[$0-2], [], [], $$[$0], createSourceLocation(null, _$[$0-3], _$[$0]));
+      this.$ = new HtmlNode(false, $$[$0-2], null, [], $$[$0], createSourceLocation(null, _$[$0-3], _$[$0]));
     
 break;
 case 29:
 
-      this.$ = new HtmlNode(false, $$[$0-3], [], $$[$0-1], $$[$0], createSourceLocation(null, _$[$0-4], _$[$0]));
+      this.$ = new HtmlNode(false, $$[$0-3], null, $$[$0-1], $$[$0], createSourceLocation(null, _$[$0-4], _$[$0]));
     
 break;
 case 30:
@@ -828,38 +828,40 @@ case 6:return "{";
 break;
 case 7:return "}";
 break;
-case 8:return "CLOSER";
+case 8:return "IDENTIFIER";
 break;
-case 9:return "</";
+case 9:return "CLOSER";
 break;
-case 10:return "<";
+case 10:return "</";
 break;
-case 11:return "/>";
+case 11:return "<";
 break;
-case 12:return ">";
+case 12:return "/>";
 break;
-case 13:/* skip other whitespace */
+case 13:return ">";
 break;
-case 14:return "NUMBER";
+case 14:/* skip other whitespace */
 break;
-case 15:return "REGEXP";
+case 15:return "NUMBER";
 break;
-case 16:return "STRING";       /* " fix syntax highlighting */
+case 16:return "REGEXP";
 break;
-case 17:return "STRING";       /* ' fix syntax highlighting */
+case 17:return "STRING";       /* " fix syntax highlighting */
 break;
-case 18:return "STRING";       /* ` fix syntax highlighting */
+case 18:return "STRING";       /* ' fix syntax highlighting */
 break;
-case 19:return "ATOM";
+case 19:return "STRING";       /* ` fix syntax highlighting */
 break;
-case 20:return "IDENTIFIER";
+case 20:return "ATOM";
 break;
-case 21:return "EOF";
+case 21:return "IDENTIFIER";
+break;
+case 22:return "EOF";
 break;
 }
 },
-rules: [/^(?:###(.|\r|\n)*?###)/,/^(?:#.*($|\r\n|\r|\n))/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:\{)/,/^(?:\})/,/^(?:<\/[^\>]+>)/,/^(?:<\/\s*)/,/^(?:<\s*)/,/^(?:\/>)/,/^(?:>)/,/^(?:\s+)/,/^(?:(-)?[0-9]+(\.[0-9]+)?(e-?[0-9]+)?)/,/^(?:\/([^\/\s]|\/)+\/[gim]*)/,/^(?:"([^\"]|\\[\"])*")/,/^(?:'([^\']|\\[\'])*')/,/^(?:`([^\`]|\\[\`])*`)/,/^(?::[A-Za-z][^\s\(\)\[\]\{\}\<\>]*)/,/^(?:[^\s\(\)\[\]\{\}\<\>]+)/,/^(?:$)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],"inclusive":true}}
+rules: [/^(?:###(.|\r|\n)*?###)/,/^(?:#.*($|\r\n|\r|\n))/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:\{)/,/^(?:\})/,/^(?:->)/,/^(?:<\/[^\>]+>)/,/^(?:<\/\s*)/,/^(?:<\s*)/,/^(?:\/>)/,/^(?:>)/,/^(?:\s+)/,/^(?:(-)?[0-9]+(\.[0-9]+)?(e-?[0-9]+)?)/,/^(?:\/([^\/\s]|\/)+\/[gim]*)/,/^(?:"([^\"]|\\[\"])*")/,/^(?:'([^\']|\\[\'])*')/,/^(?:`([^\`]|\\[\`])*`)/,/^(?::[A-Za-z][^\s\(\)\[\]\{\}\<\>]*)/,/^(?:[^\s\(\)\[\]\{\}\<\>]+)/,/^(?:$)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],"inclusive":true}}
 });
 return lexer;
 })();

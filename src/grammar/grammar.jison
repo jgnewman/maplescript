@@ -40,6 +40,8 @@
 "{"                                  return "{";
 "}"                                  return "}";
 
+"->"                                 return "IDENTIFIER";
+
 \<\/[^\>]+\>                         return "CLOSER";
 \<\/\s*                              return "</";
 \<\s*                                return "<";
@@ -183,7 +185,7 @@ Num
 Html
   : "<" Identifier "/>"
     {
-      $$ = new HtmlNode(true, $2, [], null, null, createSourceLocation(null, @1, @3));
+      $$ = new HtmlNode(true, $2, null, null, null, createSourceLocation(null, @1, @3));
     }
   | "<" Identifier Obj "/>"
     {
@@ -191,11 +193,11 @@ Html
     }
   | "<" Identifier ">" CLOSER
     {
-      $$ = new HtmlNode(false, $2, [], [], $4, createSourceLocation(null, @1, @4));
+      $$ = new HtmlNode(false, $2, null, [], $4, createSourceLocation(null, @1, @4));
     }
   | "<" Identifier ">" NodeSequence CLOSER
     {
-      $$ = new HtmlNode(false, $2, [], $4, $5, createSourceLocation(null, @1, @5));
+      $$ = new HtmlNode(false, $2, null, $4, $5, createSourceLocation(null, @1, @5));
     }
   | "<" Identifier Obj ">" CLOSER
     {
