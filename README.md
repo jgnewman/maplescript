@@ -9,7 +9,7 @@ Lisp is a family of programming languages where the most distinctive feature is 
 
 ClojureScript is awesome. But it's also big and heavy because it tries to implement as much of the full Clojure language as possible. It has a lot of features that, while cool, aren't really necessary and can slow things down.
 
-Pine, on the other hand, is extremely light-weight, and focuses on applying functionalism to JavaScript without too much unfamiliarity. Like CoffeeScript, it has minimal overhead and contains many similar benefits.
+Pine, on the other hand, is extremely light-weight and focuses on applying functionalism to JavaScript without too much unfamiliarity. Like CoffeeScript, it has relatively minimal overhead and contains many similar benefits.
 
 ## What are some of Pine's distinguishing features?
 
@@ -43,7 +43,7 @@ Even math is done this way!
 2 + 3 + 4
 ```
 
-And the most important function to learn about in Pine is `make` because it's what you'll use to define _everything_:
+And the most important function to learn about in Pine is `make` because it's what you'll use to define almost _everything_:
 
 ```
 # Pine
@@ -79,29 +79,6 @@ const factorial = function (n) {
 }
 ```
 
-Polymorphism works really nicely with recursion as well:
-
-```
-# Pine
-(make map
-  (of [arr fun] (map arr fun []))
-  (of [[] _ accum] accum)
-  (of [[head|tail] fun accum]
-    (map tail fun (accum.concat (fun head)))))
-
-# JavaScript (more or less)
-const map = function (arr, fun, accum) {
-  if (!accum) {
-    return map(arr, fun, []);
-  } else if (!arr.length) {
-    return accum;
-  } else {
-    const head = arr[0];
-    const tail = arr.slice(1);
-    return map(tail, fun, accum.concat(fun(head)));
-  }
-}
-```
 
 Notice, you've still got access to all of JavaScript's native object functionality.
 
@@ -113,7 +90,7 @@ Notice, you've still got access to all of JavaScript's native object functionali
 Math.round(2.3)
 ```
 
-But when you make your own objects, they look a little different. Objects in Pine are syntactically just another kind of list where each even-numbered index represents a key and each odd-numbered index represents the associated value.
+But when you make your own objects, things are just a little different. Objects in Pine are syntactically just another kind of list where each odd-numbered item represents a key and each even-numbered item represents the associated value.
 
 ```
 # Pine
@@ -193,15 +170,124 @@ But let's forget about tree lookups for a second and talk about HTML. Pine provi
 
 ```
 # Pine
-(make myDiv <div {:id 'foo' :class 'bar'}>'Hello!'</div>)
-(make body (dom 'body'))
-(body.append myDiv)
+(elem Title [attrs]
+  <h1 {:class attrs:class}>
+    attrs:text
+  </h1>
+)
+
+(-> (dom 'body')
+    (@appendChild <Title {:class "foo" :text "Hello, world!"} />))
 
 # JavaScript
-const myDiv = document.createElement('div');
-myDiv.setAttribute('id', 'foo');
-myDiv.setAttribute('class', 'bar');
-myDiv.appendChild(document.createTextNode('Hello'));
-const body = document.querySelector('body');
-body.append(myDiv);
+function Title(attrs) {
+  const h1 = document.createElement('h1');
+  h1.setAttribute('class', attrs[Symbol.for('class')]);
+  const text = document.createTextNode(attrs[Symbol.for('text')]);
+  h1.appendChild(text);
+  return h1;
+}
+
+document.querySelector('body').appendChild(Title({
+  [Symbol.for('class')]: "foo",
+  [Symbol.for('text')]: "Hello, world!"
+}));
+```
+
+I know you're probably scratching your head a little bit at that `->` syntax. Here's the thing: chaining methods doesn't really work so well with a Lisp -
+
+```
+# JavaScript
+createPromise()
+  .then(result => createPromise())
+  .then(result => createPromise())
+  .then(result => console.log(result));
+
+# Any Lisp's best attempt
+((((createPromise).then
+  (fn [result] (createPromise))).then
+  (fn [result] (createPromise))).then
+  (fn [result] (console.log result)))
+```
+
+Chaining off of a function call tends to mean that you end up stacking parentheses on both sides of everything. Tell me, how easily can you read (much less write) those parentheses?
+
+To make this nicer, Pine includes a special form called "chain syntax" in which each link in the chain receives the result of the previous link as its `this` context (which can be referenced via `@` in Pine).
+
+```
+# Pine
+(-> (createPromise)
+    (@then (fn [result] (createPromise)))
+    (@then (fn [result] (createPromise)))
+    (@then (fn [result] (log result))))
+
+# A direct JavaScript equivalent would be
+var context = createPromise();
+context = context.then(result => createPromise());
+context = context.then(result => createPromise());
+context = context.then(result => console.log(result));
+```
+
+## How to Use It
+
+### Directly
+
+```javascript
+import { compile, compileCode } from 'pine';
+
+compile('path/to/file.pine', (err, result) => {
+  if (err) throw err;
+  fs.writeFileSync('path/to/output.js', result);
+})
+
+// or...
+
+const javascript = compileCode("(make x 4)");
+```
+
+### As a webpack loader
+
+```javascript
+import pine from 'pine/plugins/webpack';
+
+// ...in the config...
+
+{
+  module: {
+    loaders: [
+      { test: /\.pine$/, loader: pine },
+    ]
+  }
+}
+```
+
+### In a gulp task
+
+```javascript
+import gulp from 'gulp';
+import { log } from 'gulp-util';
+import pine from 'pine/plugins/gulp';
+
+gulp.task('pine', () => {
+  gulp.src('./src/*.pine')
+    .pipe(pine().on('error', log))
+    .pipe(gulp.dest('./public/'));
+});
+```
+
+### With Browserify
+
+```javascript
+import gulp from 'gulp';
+import browserify from 'browserify';
+import pineify from 'pine/plugins/browserify';
+import source from 'vinyl-source-stream'; // <- standard re-gulpification
+
+gulp.task('pine', function () {
+  return browserify({entries: ['/path/to/entry.pine'], extensions: ['.pine']})
+         .transform(pineify)
+         .bundle()
+         .pipe(source('app.js'))
+         .pipe(gulp.dest('path/to/output_directory'));
+});
 ```

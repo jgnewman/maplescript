@@ -3,7 +3,7 @@ import { parser } from './utils';
 import finalize from './finalize';
 import './nodes/Program';
 import './nodes/String';
-import './nodes/Atom';
+import './nodes/Symbol';
 import './nodes/Identifier';
 import './nodes/Number';
 import './nodes/Arr';

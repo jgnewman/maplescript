@@ -6,8 +6,8 @@ import { compile, nodes } from '../utils';
 compile(nodes.ObjNode, function () {
   return `{ ${this.items.map((item, index) => {
     if (index % 2 === 0) { // key
-      const atom = item.type === 'Atom';
-      return (atom ? '[' : '"') + item.compile(true) + (atom ? ']' : '"') + ':';
+      const symbol = item.type === 'Symbol';
+      return (symbol ? '[' : '"') + item.compile(true) + (symbol ? ']' : '"') + ':';
     } else { // value
       return item.compile(true) + (index === this.length - 1 ? '' : ',');
     }

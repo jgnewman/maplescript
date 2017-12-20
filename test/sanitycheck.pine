@@ -1,29 +1,18 @@
-# write tests
+# test children param with html definitions
+# write tests for functions and special forms
+# hows about a syntax highlighter
+# new docs site
+# SOURCEMAPS
+# cleaner readme
 
-###
-(function() {
-  var ref_ = this;
-  (function(){ ref_ = $('#dom') }).call(ref_);
-  (function(){ ref_ = this.addClass('foo') }).call(ref_);
-  return ref_;
-}).call(this)
-
-(function() {
-  var ref_ = this;
-  (function(){ ref_ = get(promise) }).call(ref_);
-  (function(){ ref_ = this.then(function (result) { return get(promise) }) }).call(ref_);
-  return ref_;
-}).call(this)
-###
-
-
-###
 
 (elem Title [attrs children]
   <div {:class attrs:class}>
     <span> attrs:text </span>
   </div>
 )
+
+<br/>
 
 <Title {:class 'foo' :text 'bar'} />
 
@@ -99,5 +88,3 @@ foo:bar?.baz?.0.qux?
 (-> ($ "#dom")
     (@addClass "foo")
     (@addClass "bar"))
-
-###

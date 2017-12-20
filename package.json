@@ -1,35 +1,36 @@
 {
-  "name": "cream-and-sugar",
-  "version": "0.7.1",
-  "description": "A deliciously functional syntax for JavaScript with native support for JSX",
+  "name": "pine",
+  "version": "0.0.1",
+  "description": "A friendlier Lisp over JavaScript",
   "dependencies": {
-    "cns-lib": "^0.5.0"
+    "cns-lib": "^0.5.0",
+    "gulp-util": "^3.0.8",
+    "loader-utils": "^1.1.0",
+    "merge": "^1.2.0",
+    "through2": "^2.0.3",
+    "vinyl-sourcemaps-apply": "^0.2.1"
   },
   "keywords": [
     "javascript",
     "language",
-    "cream and sugar",
-    "cream & sugar",
-    "cns",
-    "cream",
-    "sugar",
+    "pine",
     "compiler",
     "transpiler",
     "functional"
   ],
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=8.9.0"
   },
   "main": "index.js",
   "bin": {
-    "cns": "index.js"
+    "pine": "index.js"
   },
   "preferGlobal": true,
-  "homepage": "https://github.com/jgnewman/cream-and-sugar",
-  "bugs": "https://github.com/jgnewman/cream-and-sugar/issues",
+  "homepage": "https://github.com/jgnewman/pine",
+  "bugs": "https://github.com/jgnewman/pine/issues",
   "repository": {
     "type": "git",
-    "url": "git://github.com/jgnewman/cream-and-sugar.git"
+    "url": "git://github.com/jgnewman/pine.git"
   },
   "scripts": {
     "test": "gulp test"
@@ -57,7 +58,6 @@
     "gulp-rename": "^1.2.2",
     "gulp-server-livereload": "^1.8.4",
     "gulp-uglify": "^2.0.0",
-    "gulp-util": "^3.0.7",
     "gulp-watch": "^4.3.9",
     "jison": "^0.4.17",
     "mocha": "^3.0.2",

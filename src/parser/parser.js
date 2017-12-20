@@ -75,8 +75,8 @@ var parser = (function(){
 var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[5,17,19,21,23,24,25,26,27,28],$V1=[1,14],$V2=[1,15],$V3=[1,16],$V4=[1,17],$V5=[1,18],$V6=[1,19],$V7=[1,20],$V8=[1,21],$V9=[1,22],$Va=[5,17,18,19,20,21,22,23,24,25,26,27,28,31],$Vb=[17,19,21,23,24,25,26,27,28],$Vc=[2,14],$Vd=[5,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31];
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"Program":3,"ProgramBody":4,"EOF":5,"SourceElement":6,"List":7,"Arr":8,"Obj":9,"Str":10,"Regexp":11,"Atom":12,"Identifier":13,"Num":14,"Html":15,"NodeSequence":16,"(":17,")":18,"[":19,"]":20,"{":21,"}":22,"STRING":23,"REGEXP":24,"ATOM":25,"IDENTIFIER":26,"NUMBER":27,"<":28,"/>":29,">":30,"CLOSER":31,"$accept":0,"$end":1},
-terminals_: {2:"error",5:"EOF",17:"(",18:")",19:"[",20:"]",21:"{",22:"}",23:"STRING",24:"REGEXP",25:"ATOM",26:"IDENTIFIER",27:"NUMBER",28:"<",29:"/>",30:">",31:"CLOSER"},
+symbols_: {"error":2,"Program":3,"ProgramBody":4,"EOF":5,"SourceElement":6,"List":7,"Arr":8,"Obj":9,"Str":10,"Regexp":11,"Sym":12,"Identifier":13,"Num":14,"Html":15,"NodeSequence":16,"(":17,")":18,"[":19,"]":20,"{":21,"}":22,"STRING":23,"REGEXP":24,"SYMBOL":25,"IDENTIFIER":26,"NUMBER":27,"<":28,"/>":29,">":30,"CLOSER":31,"$accept":0,"$end":1},
+terminals_: {2:"error",5:"EOF",17:"(",18:")",19:"[",20:"]",21:"{",22:"}",23:"STRING",24:"REGEXP",25:"SYMBOL",26:"IDENTIFIER",27:"NUMBER",28:"<",29:"/>",30:">",31:"CLOSER"},
 productions_: [0,[3,2],[4,2],[4,0],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[16,2],[16,0],[7,3],[7,2],[8,3],[8,2],[9,3],[9,2],[10,1],[11,1],[12,1],[13,1],[14,1],[15,3],[15,4],[15,4],[15,5],[15,5],[15,6]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
@@ -141,7 +141,7 @@ case 22:
 break;
 case 23:
 
-      this.$ = new AtomNode($$[$0], createSourceLocation(null, _$[$0], _$[$0]));
+      this.$ = new SymbolNode($$[$0], createSourceLocation(null, _$[$0], _$[$0]));
     
 break;
 case 24:
@@ -395,9 +395,9 @@ function StringNode(text, loc) {
   this.shared = shared;
 }
 
-function AtomNode(text, loc) {
+function SymbolNode(text, loc) {
   this.src = text;
-  this.type = 'Atom';
+  this.type = 'Symbol';
   this.text = text;
   this.loc = loc;
   this.shared = shared;
@@ -457,7 +457,7 @@ n.shared = shared;
 n.ProgramNode = ProgramNode;
 n.RegexpNode = RegexpNode;
 n.StringNode = StringNode;
-n.AtomNode = AtomNode;
+n.SymbolNode = SymbolNode;
 n.IdentifierNode = IdentifierNode;
 n.NumberNode = NumberNode;
 n.ListNode = ListNode;
@@ -793,28 +793,28 @@ performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
 case 0:
-                                        if (yy_.yytext.match(/\r|\n/)) {
-                                            parser.newLine = true;
-                                        }
+                                         if (yy_.yytext.match(/\r|\n/)) {
+                                             parser.newLine = true;
+                                         }
 
-                                        if (parser.restricted && parser.newLine) {
-                                            this.unput(yy_.yytext);
-                                            parser.restricted = false;
-                                            return ";";
-                                        }
-                                     
+                                         if (parser.restricted && parser.newLine) {
+                                             this.unput(yy_.yytext);
+                                             parser.restricted = false;
+                                             return ";";
+                                         }
+                                      
 break;
 case 1:
-                                        if (yy_.yytext.match(/\r|\n/)) {
-                                            parser.newLine = true;
-                                        }
+                                         if (yy_.yytext.match(/\r|\n/)) {
+                                             parser.newLine = true;
+                                         }
 
-                                        if (parser.restricted && parser.newLine) {
-                                            this.unput(yy_.yytext);
-                                            parser.restricted = false;
-                                            return ";";
-                                        }
-                                     
+                                         if (parser.restricted && parser.newLine) {
+                                             this.unput(yy_.yytext);
+                                             parser.restricted = false;
+                                             return ";";
+                                         }
+                                      
 break;
 case 2:return "(";
 break;
@@ -844,24 +844,26 @@ case 14:/* skip other whitespace */
 break;
 case 15:return "NUMBER";
 break;
-case 16:return "REGEXP";
+case 16:return "NUMBER";
 break;
-case 17:return "STRING";       /* " fix syntax highlighting */
+case 17:return "REGEXP";
 break;
-case 18:return "STRING";       /* ' fix syntax highlighting */
+case 18:return "STRING";       /* " fix syntax highlighting */
 break;
-case 19:return "STRING";       /* ` fix syntax highlighting */
+case 19:return "STRING";       /* ' fix syntax highlighting */
 break;
-case 20:return "ATOM";
+case 20:return "STRING";       /* ` fix syntax highlighting */
 break;
-case 21:return "IDENTIFIER";
+case 21:return "SYMBOL";
 break;
-case 22:return "EOF";
+case 22:return "IDENTIFIER";
+break;
+case 23:return "EOF";
 break;
 }
 },
-rules: [/^(?:###(.|\r|\n)*?###)/,/^(?:#.*($|\r\n|\r|\n))/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:\{)/,/^(?:\})/,/^(?:->)/,/^(?:<\/[^\>]+>)/,/^(?:<\/\s*)/,/^(?:<\s*)/,/^(?:\/>)/,/^(?:>)/,/^(?:\s+)/,/^(?:(-)?[0-9]+(\.[0-9]+)?(e-?[0-9]+)?)/,/^(?:\/([^\/\s]|\/)+\/[gim]*)/,/^(?:"([^\"]|\\[\"])*")/,/^(?:'([^\']|\\[\'])*')/,/^(?:`([^\`]|\\[\`])*`)/,/^(?::[A-Za-z][^\s\(\)\[\]\{\}\<\>]*)/,/^(?:[^\s\(\)\[\]\{\}\<\>]+)/,/^(?:$)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],"inclusive":true}}
+rules: [/^(?:###(.|\r|\n)*?###)/,/^(?:#.*($|\r\n|\r|\n))/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:\{)/,/^(?:\})/,/^(?:->)/,/^(?:<\/[^\>]+>)/,/^(?:<\/\s*)/,/^(?:<\s*)/,/^(?:\/>)/,/^(?:>)/,/^(?:\s+)/,/^(?:0x[A-z0-9]+)/,/^(?:(-)?[0-9]+(\.[0-9]+)?(e-?[0-9]+)?)/,/^(?:\/([^\/\s]|\/)+\/[gim]*)/,/^(?:"([^\"]|\\[\"])*")/,/^(?:'([^\']|\\[\'])*')/,/^(?:`([^\`]|\\[\`])*`)/,/^(?::[A-Za-z][^\s\(\)\[\]\{\}\<\>]*)/,/^(?:[^\s\(\)\[\]\{\}\<\>\/]+(\/\d+)?)/,/^(?:$)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],"inclusive":true}}
 });
 return lexer;
 })();

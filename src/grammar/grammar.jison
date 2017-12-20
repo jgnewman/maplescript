@@ -8,58 +8,59 @@
 %%
 
 /* Comments */
-"###"(.|\r|\n)*?"###"                %{
-                                        if (yytext.match(/\r|\n/)) {
-                                            parser.newLine = true;
-                                        }
+"###"(.|\r|\n)*?"###"                 %{
+                                         if (yytext.match(/\r|\n/)) {
+                                             parser.newLine = true;
+                                         }
 
-                                        if (parser.restricted && parser.newLine) {
-                                            this.unput(yytext);
-                                            parser.restricted = false;
-                                            return ";";
-                                        }
-                                     %}
-"#".*($|\r\n|\r|\n)                  %{
-                                        if (yytext.match(/\r|\n/)) {
-                                            parser.newLine = true;
-                                        }
+                                         if (parser.restricted && parser.newLine) {
+                                             this.unput(yytext);
+                                             parser.restricted = false;
+                                             return ";";
+                                         }
+                                      %}
+"#".*($|\r\n|\r|\n)                   %{
+                                         if (yytext.match(/\r|\n/)) {
+                                             parser.newLine = true;
+                                         }
 
-                                        if (parser.restricted && parser.newLine) {
-                                            this.unput(yytext);
-                                            parser.restricted = false;
-                                            return ";";
-                                        }
-                                     %}
+                                         if (parser.restricted && parser.newLine) {
+                                             this.unput(yytext);
+                                             parser.restricted = false;
+                                             return ";";
+                                         }
+                                      %}
 
-"("                                  return "(";
-")"                                  return ")";
+"("                                   return "(";
+")"                                   return ")";
 
-"["                                  return "[";
-"]"                                  return "]";
+"["                                   return "[";
+"]"                                   return "]";
 
-"{"                                  return "{";
-"}"                                  return "}";
+"{"                                   return "{";
+"}"                                   return "}";
 
-"->"                                 return "IDENTIFIER";
+"->"                                  return "IDENTIFIER";
 
-\<\/[^\>]+\>                         return "CLOSER";
-\<\/\s*                              return "</";
-\<\s*                                return "<";
-"/>"                                 return "/>";
-">"                                  return ">";
+\<\/[^\>]+\>                          return "CLOSER";
+\<\/\s*                               return "</";
+\<\s*                                 return "<";
+"/>"                                  return "/>";
+">"                                   return ">";
 
-\s+                                  /* skip other whitespace */
+\s+                                   /* skip other whitespace */
 
-(\-)?[0-9]+(\.[0-9]+)?(e\-?[0-9]+)?  return "NUMBER";
-\/([^\/\s]|\/)+\/[gim]*              return "REGEXP";
-\"([^\"]|\\[\"])*\"                  return "STRING";       /* " fix syntax highlighting */
-\'([^\']|\\[\'])*\'                  return "STRING";       /* ' fix syntax highlighting */
-\`([^\`]|\\[\`])*\`                  return "STRING";       /* ` fix syntax highlighting */
+0x[A-z0-9]+                           return "NUMBER";
+(\-)?[0-9]+(\.[0-9]+)?(e\-?[0-9]+)?   return "NUMBER";
+\/([^\/\s]|\/)+\/[gim]*               return "REGEXP";
+\"([^\"]|\\[\"])*\"                   return "STRING";       /* " fix syntax highlighting */
+\'([^\']|\\[\'])*\'                   return "STRING";       /* ' fix syntax highlighting */
+\`([^\`]|\\[\`])*\`                   return "STRING";       /* ` fix syntax highlighting */
 
-\:[A-Za-z][^\s\(\)\[\]\{\}\<\>]*     return "ATOM";
-[^\s\(\)\[\]\{\}\<\>]+               return "IDENTIFIER";
+\:[A-Za-z][^\s\(\)\[\]\{\}\<\>]*      return "SYMBOL";
+[^\s\(\)\[\]\{\}\<\>\/]+(\/\d+)?      return "IDENTIFIER";
 
-<<EOF>>                              return "EOF";
+<<EOF>>                               return "EOF";
 
 %%
 
@@ -97,7 +98,7 @@ SourceElement
   | Obj
   | Str
   | Regexp
-  | Atom
+  | Sym
   | Identifier
   | Num
   | Html
@@ -161,10 +162,10 @@ Regexp
     }
   ;
 
-Atom
-  : ATOM
+Sym
+  : SYMBOL
     {
-      $$ = new AtomNode($1, createSourceLocation(null, @1, @1));
+      $$ = new SymbolNode($1, createSourceLocation(null, @1, @1));
     }
   ;
 
@@ -272,9 +273,9 @@ function StringNode(text, loc) {
   this.shared = shared;
 }
 
-function AtomNode(text, loc) {
+function SymbolNode(text, loc) {
   this.src = text;
-  this.type = 'Atom';
+  this.type = 'Symbol';
   this.text = text;
   this.loc = loc;
   this.shared = shared;
@@ -334,7 +335,7 @@ n.shared = shared;
 n.ProgramNode = ProgramNode;
 n.RegexpNode = RegexpNode;
 n.StringNode = StringNode;
-n.AtomNode = AtomNode;
+n.SymbolNode = SymbolNode;
 n.IdentifierNode = IdentifierNode;
 n.NumberNode = NumberNode;
 n.ListNode = ListNode;

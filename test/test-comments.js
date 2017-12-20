@@ -6,7 +6,7 @@ describe('Comments', () => {
 
   it('should ignore comments', () => {
     const toCompile = '# this is a comment';
-    const expected = '\n';
+    const expected = '';
     assert.equal(compileCode(toCompile), expected);
   });
 

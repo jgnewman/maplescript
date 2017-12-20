@@ -81,7 +81,7 @@ var PINE_ = {
 
       switch (type) {
         case 'Identifier': return isSpecial(value) ? arg === convertSpecial(value) : true;
-        case 'Atom': return arg === Symbol.for(value.replace(SYMREPLACE, ''));
+        case 'Symbol': return arg === Symbol.for(value.replace(SYMREPLACE, ''));
         case 'String': return arg === value;
         case 'Number': return arg === parseFloat(value);
 
