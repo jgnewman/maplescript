@@ -1,11 +1,23 @@
-# test children param with html definitions
 # write tests for functions and special forms
 # hows about a syntax highlighter
 # new docs site
 # SOURCEMAPS
 # cleaner readme
 
+(elem Title [attrs children]
+  <div {:class attrs:class}>
+    children
+  </div>
+)
 
+(log
+  <Title {:class 'foo'}>
+    <span>'Hello'</span>
+    <span>'World'</span>
+  </Title>
+)
+
+###
 (elem Title [attrs children]
   <div {:class attrs:class}>
     <span> attrs:text </span>
@@ -88,3 +100,8 @@ foo:bar?.baz?.0.qux?
 (-> ($ "#dom")
     (@addClass "foo")
     (@addClass "bar"))
+
+(-> (build promise)
+    (@then (fn [] (get promise)))
+    (@then (fn [] (get promise))))
+###

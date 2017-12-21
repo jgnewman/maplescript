@@ -142,10 +142,21 @@ var PINE_ = {
       return elem.setAttribute(strKey.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(), a[key]);
     });
 
+    function append(node) {
+      elem.appendChild(PINE_.dataType(node) === 'htmlelement' ? node : document.createTextNode(node))
+    }
+
     // Append children.
     b.forEach(function (node) {
-      elem.appendChild(PINE_.dataType(node) === 'htmlelement' ? node : document.createTextNode(node))
+      if (Array.isArray(node)) {
+        node.forEach(function (subnode) {
+          append(subnode);
+        });
+      } else {
+        append(node);
+      }
     });
+
     return elem;
   },
 
