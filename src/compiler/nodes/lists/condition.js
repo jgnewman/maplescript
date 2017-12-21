@@ -14,7 +14,7 @@ function compileCondition(items) {
   ifcase = sets.shift();
 
   return ""
-    + "(function () {\n"
+    + "(function(){\n"
     +   "if (" + ifcase[0].compile(true) + ") {\nreturn " + ifcase[1].compile(true) + "\n}"
     +   sets.map(pair => " else if (" + pair[0].compile(true) + ") {\nreturn " + pair[1].compile(true) + "\n}").join('')
     +   (!elsecase ? " else {\nreturn\n}" : " else {\nreturn " + elsecase.compile(true) + "\n}")

@@ -1,4 +1,5 @@
-# write tests for functions and special forms
+# write tests for make function, fn, do, async
+# smarter identifier/symbol regex in the grammar
 # hows about a syntax highlighter
 # new docs site
 # SOURCEMAPS
