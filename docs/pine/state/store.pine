@@ -1,0 +1,7 @@
+(import 'redux' [createStore])
+(import './initialstate' [:initialState])
+(import './reducer' [:reducer])
+
+(make store (createStore reducer initialState))
+
+(export store)

@@ -8,7 +8,7 @@ describe('Sanity Check', () => {
 
   it('should pass a basic sanity check', () => {
     const toCompile = fs.readFileSync(path.resolve(__dirname, '../test/sanitycheck.pine')).toString();
-    assert.ok(compileCode(toCompile));
+    assert.doesNotThrow(function () { return compileCode(toCompile) });
   });
 
 });

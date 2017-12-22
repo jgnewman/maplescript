@@ -61,7 +61,7 @@ export function compileCode(str, callback, options) {
   // Finalize the code
   if (options.finalize) {
     try {
-      finalize(tree);
+      finalize(tree, options.isPineProjectDirectory);
     } catch (err3) {
       if (callback) {
         return callback(err3);

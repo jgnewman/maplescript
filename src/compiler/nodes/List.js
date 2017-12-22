@@ -9,6 +9,7 @@ import compileExport from './lists/export';
 import compileAwait from './lists/await';
 import compileFunction from './lists/function';
 import compileAssignment from './lists/assignment';
+import compileDestructure from './lists/destructure';
 
 function compileTail(arr) {
   return arr.map(item => item.compile(true)).join(', ');
@@ -21,6 +22,7 @@ function compileSpecial(form, items) {
     case 'any': return compileOperator.call(this, '||', items);
     case 'async': return compileFunction.call(this, items, true);
     case 'await': return compileAwait.call(this, items);
+    case 'destr': return compileDestructure.call(this, items);
     case 'do': return compileDoBlock.call(this, items);
     case 'elem': return compileHtmlDefinition.call(this, items);
     case 'export': return compileExport.call(this, items);

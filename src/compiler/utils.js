@@ -94,9 +94,9 @@ function ensurePolymorphicStructure(bodyItems) {
 // Official list of exposed system functions
 function getExposedFns() {
   return [
+    ">>=",
     'attempt',
     'apply',
-    'create',
     'createElement',
     'dangerouslyMutate',
     'dataType',
@@ -109,6 +109,7 @@ function getExposedFns() {
     'gte',
     'handle',
     'head',
+    'instance',
     'instanceof',
     'keys',
     'last',
@@ -155,6 +156,7 @@ function getSpecialForms() {
     'any',
     'async',
     'await',
+    'destr',
     'do',
     'elem',
     'export',

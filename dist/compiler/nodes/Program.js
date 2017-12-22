@@ -8,7 +8,9 @@ var _utils = require('../utils');
  * to contain the output.
  */
 (0, _utils.compile)(_utils.nodes.ProgramNode, function () {
-  var newBody = (0, _utils.groupPolymorphs)(this.body);
+  var _this = this;
+
+  var newBody = this.body;
   this.shared.output = '';
   this.shared.insertSemis = true; // Turn this off when we're going to manually handle it
   this.shared.refs = -1;
@@ -18,9 +20,9 @@ var _utils = require('../utils');
   newBody.forEach(function (node) {
     try {
       node.compile();
+      _this.shared.output += ';\n';
     } catch (err) {
-      console.log('Error: Could not compile ' + (node.type ? node.type : 'node ' + JSON.stringify(node)));
-      throw err;
+      (0, _utils.die)(node, 'Could not compile ' + (node.type ? node.type : 'node ' + JSON.stringify(node)));
     }
   });
   return '';

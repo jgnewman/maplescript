@@ -42,6 +42,16 @@ var PINE_ = {
     return Object.assign({}, base, toAdd);
   },
 
+  callChain_: function () {
+    var starter = arguments[0];
+    var lists = Array.prototype.slice.call(arguments || [], 1);
+    var output = starter;
+    lists.forEach(function (list) {
+      output = output.apply(null, list);
+    });
+    return output;
+  },
+
   isReserved_: function (val) {
     if (
       typeof val === 'string'   &&
@@ -58,7 +68,7 @@ var PINE_ = {
     if (args.length !== descriptors.length) return false;
     if (!args.length && !descriptors.length) return true;
 
-    var SYMREPLACE = /^Symbol\.for\(\'|\'\)$/g;
+    var SYMREPLACE = /^Symbol\.for\((\'|\"|\`)|((\'|\"|\`))\)$/g;
 
     function convertSpecial(special) {
       switch (special) {
@@ -81,9 +91,9 @@ var PINE_ = {
 
       switch (type) {
         case 'Identifier': return isSpecial(value) ? arg === convertSpecial(value) : true;
-        case 'Symbol': return arg === Symbol.for(value.replace(SYMREPLACE, ''));
         case 'String': return arg === value;
         case 'Number': return arg === parseFloat(value);
+        case 'Symbol': return typeof arg === 'symbol' && Symbol.keyFor(arg) === value.replace(SYMREPLACE, '');
 
         // Matching against an array is going to MEAN destructuring.
         // So we fail if the arg isn't an array or if it has more than 1 item.
@@ -115,10 +125,6 @@ var PINE_ = {
     } catch (err) {
       PINE_.signal(channel, err);
     }
-  },
-
-  create: function(cls) {
-    return new (Function.prototype.bind.apply(cls, arguments));
   },
 
   createElement: function (type, attrs, body) {
@@ -232,6 +238,10 @@ var PINE_ = {
     return list[0];
   },
 
+  instance: function(cls) {
+    return new (Function.prototype.bind.apply(cls, arguments));
+  },
+
   instanceof: function (val, type) {
     return val instanceof type;
   },
@@ -322,7 +332,7 @@ var PINE_ = {
   },
 
   update: function (keyOrIndex, val, collection) {
-    PINE_.isReserved(keyOrIndex);
+    PINE_.isReserved_(keyOrIndex);
     if (Array.isArray(collection)) {
       var newSlice = collection.slice();
       newSlice[keyOrIndex] = val;

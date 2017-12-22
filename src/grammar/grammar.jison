@@ -41,6 +41,7 @@
 "}"                                   return "}";
 
 "->"                                  return "IDENTIFIER";
+">>="                                 return "IDENTIFIER";
 
 \<\/[^\>]+\>                          return "CLOSER";
 \<\/\s*                               return "</";
@@ -57,8 +58,14 @@
 \'([^\']|\\[\'])*\'                   return "STRING";       /* ' fix syntax highlighting */
 \`([^\`]|\\[\`])*\`                   return "STRING";       /* ` fix syntax highlighting */
 
+/*
 \:[A-Za-z][^\s\(\)\[\]\{\}\<\>]*      return "SYMBOL";
 [^\s\(\)\[\]\{\}\<\>\/]+(\/\d+)?      return "IDENTIFIER";
+*/
+
+(\+|\-|\*|\/|\%|\!\=|\=)                       return "IDENTIFIER";
+\:[A-Za-z_\$][A-Za-z0-9_\$\-\.]*               return "SYMBOL";
+[A-Za-z\_\$\@][A-Za-z0-9_\$\.\:\|\?]*(\/\d+)?  return "IDENTIFIER";
 
 <<EOF>>                               return "EOF";
 

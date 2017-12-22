@@ -1,0 +1,20 @@
+(import 'react' React)
+(import 'react-dom' ReactDOM)
+(import './state/store'  [:store])
+(import './util/storage' [:saveState])
+
+(import './containers/AppContainer'  {:connected AppContainer})
+(import './containers/DocsContainer' {:connected DocsContainer})
+
+(make appDom (dom '#app'))
+(make docsDom (dom '#docs-app'))
+
+# Persist the state whenever it changes
+(store.subscribe (fn [] (saveState (store.getState))))
+
+# Render the application
+(if
+  appDom
+    (ReactDOM.render (React.createElement AppContainer {store store}) appDom)
+  docsDom
+    (ReactDOM.render (React.createElement DocsContainer {store store}) docsDom))

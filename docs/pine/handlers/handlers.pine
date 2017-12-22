@@ -1,0 +1,15 @@
+
+(make handleClickNav [] (@props.toggleMenu))
+
+(make handleClickMenuLink [] (@props.toggleMenu))
+
+(make handleSelectLink [evt] (@props.selectLink evt.target.value))
+
+(make handleClickLogo [] (@props.toggleMenu))
+
+(export [
+  handleClickNav
+  handleSelectLink
+  handleClickMenuLink
+  handleClickLogo
+])

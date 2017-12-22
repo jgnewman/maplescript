@@ -1,0 +1,19 @@
+(import './initialstate' [:initialState])
+(import '../util/storage' [:uniqueId])
+
+
+# If we don't have state, recurse with the initial state
+# If we have state, begin reducing
+(make reducer
+  (of [undefined action] (reducer initialState action))
+  (of [state action]
+    (if
+      (= action.type :TOGGLE_MENU)
+        (Object.assign {} state {menuOpen (not state.menuOpen)})
+      (= action.type :SELECT_LINK)
+        (do
+          (make newOption (get state.downloadOptions action.payload))
+          (Object.assign {} state {downloadSelection newOption}))
+      state)))
+
+(export reducer)

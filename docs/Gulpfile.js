@@ -9,7 +9,7 @@ var gulp = require('gulp'),
     source = require('vinyl-source-stream'),
     buffer = require('vinyl-buffer'),
     sequence = require('run-sequence'),
-    creamify = require('creamify'),
+    pineify = require('../plugins/browserify'),
     panini = require('panini'),
     rename = require('gulp-rename'),
     reload = browserSync.reload;
@@ -48,8 +48,8 @@ gulp.task('clean', function(cb) {
  * js compilation
  */
 .task('js', function() {
-  return browserify({entries: ['cream/app.cream'], extensions: ['.cns', '.cream']})
-  .transform(creamify)
+  return browserify({entries: ['pine/app.pine'], extensions: ['.pine']})
+  .transform(pineify)
   .bundle()
   .pipe(source('app.js'))
   .pipe(gulp.dest('assets/js'));
@@ -59,8 +59,8 @@ gulp.task('clean', function(cb) {
  * minified js compilation
  */
 .task('js:min', function() {
-  return browserify({entries: ['cream/app.cream'], extensions: ['.cns', '.cream']})
-  .transform(creamify)
+  return browserify({entries: ['pine/app.pine'], extensions: ['.pine']})
+  .transform(pineify)
   .bundle()
   .pipe(source('app.js'))
   .pipe(buffer())
@@ -92,7 +92,7 @@ gulp.task('clean', function(cb) {
 .task('watch', function () {
   return gulp.watch(
     [
-      'cream/**/*.cream',
+      'pine/**/*.pine',
       'scss/**/*.scss',
       'markdown/**/*.md',
       'layouts/**/*.html',

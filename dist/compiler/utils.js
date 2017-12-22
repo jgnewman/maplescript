@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getReservedWords = exports.getMsgPassingFns = exports.getExposedFns = exports.groupPolymorphs = exports.compileBody = exports.compile = exports.die = exports.nodes = exports.parser = undefined;
+exports.ensurePolymorphicStructure = exports.getOperatorForms = exports.getSpecialForms = exports.getReservedWords = exports.getMsgPassingFns = exports.getExposedFns = exports.compileBody = exports.compile = exports.die = exports.nodes = exports.parser = undefined;
 
 var _parser = require('../parser/parser');
 
@@ -68,71 +68,6 @@ function removeNewlines(body) {
 }
 
 /**
- * Iterates over an array of nodes and groups together sequential
- * named functions with matching names into PolymorphNodes.
- *
- * @param   {Array} body  A list of compilable nodes.
- *
- * @returns {Array}       A modified list of nodes.
- */
-function groupPolymorphs(body) {
-  var newBody = [];
-  var fnCollect = [];
-
-  var resetCollect = function resetCollect(newVal) {
-    if (fnCollect.length) {
-      if (fnCollect.length > 1) {
-        newBody.push(new nodes.PolymorphNode(fnCollect, true, fnCollect[0].loc));
-      } else {
-        newBody.push(fnCollect[0]);
-      }
-      newBody.push(new nodes.NewLineNode());
-    }
-    fnCollect = newVal;
-  };
-
-  body.forEach(function (node, index) {
-    var isLast = index === body.length - 1;
-
-    // Always add a newline to the body.
-    // They shouldn't prevent us from collecting polymorphic functions.
-    if (node.type === 'NewLine') {
-      newBody.push(node);
-
-      // If we have a named function and...
-    } else if (node.type === 'Fun' && node.preArrow.fn && node.preArrow.fn.text) {
-
-      // If we either haven't collected any functions yet or this one's name
-      // matches the names of the ones previously collected,
-      // collect it.
-      if (!fnCollect.length || fnCollect[0].preArrow.fn.text === node.preArrow.fn.text) {
-        fnCollect.push(node);
-
-        // If its name doesn't match the names of functions we're collecting,
-        // push the right thing into the body from the collection and reset the
-        // collection to contain this new node.
-      } else {
-        resetCollect([node]);
-      }
-
-      // If we don't have a named function,
-      // push the right thing into the body from the collection and reset the
-      // collection, then push this node into the body.
-    } else {
-      resetCollect([]);
-      newBody.push(node);
-    }
-
-    // If we happen to be on the last node and there are items in the
-    // collection, push the right thing into the body from the collection.
-    if (isLast) {
-      resetCollect();
-    }
-  });
-  return newBody;
-}
-
-/**
  * Runs through a series of compilable nodes, compiles them all,
  * and returns the last one.
  *
@@ -143,7 +78,7 @@ function groupPolymorphs(body) {
  */
 function compileBody(body, delim) {
   var end = delim || ';';
-  var cleanBody = removeNewlines(groupPolymorphs(body));
+  var cleanBody = removeNewlines(body);
   var bodyPieces = [];
   cleanBody.forEach(function (item, index) {
     var prefix = index === cleanBody.length - 1 && !delim ? 'return ' : '';
@@ -155,18 +90,39 @@ function compileBody(body, delim) {
   return !bodyPieces.length ? '' : bodyPieces.join(end + '\n') + (delim === ';' ? ';' : '');
 }
 
+function ensurePolymorphicStructure(bodyItems) {
+  var bad = false;
+  bodyItems.some(function (item) {
+    var isList = item.type === 'List';
+    var isMorph = isList && item.items[0] && item.items[0].text === 'of';
+    if (!isList || !isMorph) {
+      bad = true;
+      return true;
+    }
+  });
+  return !bad;
+}
+
 // Official list of exposed system functions
 function getExposedFns() {
-  return ['apply', 'get', 'throw', 'create', 'dataType', 'instanceof', 'head', 'tail', 'random', 'lead', 'last', 'update', 'remove', 'eql', 'dom', 'domArray', 'spawn', 'receive', 'kill', 'reply', 'send', 'aritize', 'tupleToObject', 'tupleToArray', 'arrayToTuple', 'log', 'warn', 'debug', 'die', 'range', 'lang', 'dangerouslyMutate', 'cache', 'decache', 'classof', 'noop'];
+  return [">>=", 'attempt', 'apply', 'createElement', 'dangerouslyMutate', 'dataType', 'die', 'dom', 'domArray', 'eql', 'get', 'gt', 'gte', 'handle', 'head', 'instance', 'instanceof', 'keys', 'last', 'lead', 'log', 'lt', 'lte', 'noop', 'not', 'random', 'range', 'remove', 'signal', 'tail', 'throw', 'unhandle', 'update', 'warn'];
+}
+
+function getOperatorForms() {
+  return ["+", "-", "*", "/", "%", "=", "!="];
 }
 
 function getMsgPassingFns() {
   return ['spawn', 'receive', 'kill', 'reply', 'send'];
 }
 
+function getSpecialForms() {
+  return ['->', 'all', 'any', 'async', 'await', 'do', 'elem', 'export', 'fn', 'if', 'import', 'make', 'none'];
+}
+
 // Official list of reserved words
 function getReservedWords() {
-  return ['fn', 'caseof', 'match', 'if', 'default', 'catch', 'for', 'in', 'when', 'var', 'const', 'let', 'while', 'switch', 'function', 'with', 'else', 'super', 'enum', 'break', 'extends', 'new', 'class', 'try', 'continue', 'typeof', 'delete', 'return', 'static', 'CNS_'];
+  return ['break', 'catch', 'class', 'const', 'continue', 'default', 'delete', 'else', 'extends', 'enum', 'for', 'function', 'if', 'in', 'let', 'of', 'return', 'static', 'super', 'switch', 'try', 'typeof', 'var', 'while', 'with'];
 }
 
 exports.parser = _parser2.default;
@@ -174,7 +130,9 @@ exports.nodes = nodes;
 exports.die = die;
 exports.compile = compile;
 exports.compileBody = compileBody;
-exports.groupPolymorphs = groupPolymorphs;
 exports.getExposedFns = getExposedFns;
 exports.getMsgPassingFns = getMsgPassingFns;
 exports.getReservedWords = getReservedWords;
+exports.getSpecialForms = getSpecialForms;
+exports.getOperatorForms = getOperatorForms;
+exports.ensurePolymorphicStructure = ensurePolymorphicStructure;

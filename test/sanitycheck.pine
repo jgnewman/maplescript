@@ -1,24 +1,12 @@
-# write tests for make function, fn, do, async
-# smarter identifier/symbol regex in the grammar
+# test creating a variable array doesn't accidentally make a function
+# finish redoing docs site
+
 # hows about a syntax highlighter
 # new docs site
 # SOURCEMAPS
 # cleaner readme
 
-(elem Title [attrs children]
-  <div {:class attrs:class}>
-    children
-  </div>
-)
 
-(log
-  <Title {:class 'foo'}>
-    <span>'Hello'</span>
-    <span>'World'</span>
-  </Title>
-)
-
-###
 (elem Title [attrs children]
   <div {:class attrs:class}>
     <span> attrs:text </span>
@@ -72,8 +60,10 @@ foo:bar?.baz?.0.qux?
 
 # you can either import a single value
 # from a module or execute it
-# (import "module/location" mod)
-# (import "module/location")
+(import "module/location" mod)
+(import "module/location")
+(import 'path/to/file' [:foo :bar])
+(import 'path/to/file' {:foo bar :baz quux})
 
 # events
 (signal :channel "message")
@@ -90,6 +80,9 @@ foo:bar?.baz?.0.qux?
     (tryagain now)
     (right now)))
 
+(destr @props [:foo bar])
+(destr @props {:foo bar baz quux})
+
 # async/await
 # pass in an error channel and handle as necessary
 (make foo (async :foozle-poozle []
@@ -105,4 +98,6 @@ foo:bar?.baz?.0.qux?
 (-> (build promise)
     (@then (fn [] (get promise)))
     (@then (fn [] (get promise))))
-###
+
+# dosomething(1, 2)(3, 4)(5, 6)
+(>>= dosomething [1 2] [3 4] [5 6])

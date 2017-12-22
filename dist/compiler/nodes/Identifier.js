@@ -2,46 +2,129 @@
 
 var _utils = require('../utils');
 
-function isReserved(word, index, hasProtector) {
-  return index === 0 && !hasProtector && (0, _utils.getReservedWords)().indexOf(word) > -1;
+function stripQ(word) {
+  return word.replace(/\?$/, '');
 }
 
-function isBif(word, index, hasProtector) {
-  return index === 0 && !hasProtector && (0, _utils.getExposedFns)().indexOf(word) > -1;
+function maybeQ(word) {
+  return (/\?$/.test(word) ? "?" : ""
+  );
+}
+
+function isBif(word) {
+  return (0, _utils.getExposedFns)().indexOf(word) > -1;
+}
+
+function isReserved(word) {
+  return (0, _utils.getReservedWords)().indexOf(word) > -1 && (0, _utils.getSpecialForms)().indexOf(word) === -1;
+}
+
+function isSystemPattern(word) {
+  return (/[^_]_$/.test(word)
+  );
+}
+
+function splitter(word) {
+  var out = [];
+  var accum = { type: null, piece: '' };
+  for (var i = 0; i < word.length; i += 1) {
+    if (word[i] === '.' || word[i] === ':') {
+      out.push(accum);
+      accum = { type: word[i], piece: '' };
+    } else {
+      accum.piece += word[i];
+    }
+  }
+  out.push(accum);
+  return out;
+}
+
+function unconfidentLookup(precompiled) {
+  /* foo?.bar?.baz ->
+  (function(){
+    var ref = typeof foo !== 'undefined' ? foo : undefined;
+    if (ref) {
+      return (function(){
+        ref = ref["bar"];
+        if (ref) {
+          return (function(){
+            ref = ref["baz"];
+            return ref;
+          }).call(this)
+        } else { return }
+      }).call(this)
+    } else { return }
+  }).call(this)
+  */
+  var pieces = precompiled.split('?');
+
+  function recur(pieces, index) {
+    index = index || 0;
+
+    // catchall end
+    if (!pieces.length) {
+      return 'ref_';
+    }
+
+    var piece = pieces[0];
+
+    var ref = index === 0 && piece.indexOf('[') === -1 ? 'typeof ' + piece + ' !== "undefined" ? ' + piece + ' : undefined' : '' + (index === 0 ? '' : 'ref_') + piece;
+
+    var isLastPiece = piece && pieces.length === 1 || piece && pieces.length === 2 && !pieces[1];
+
+    if (isLastPiece) {
+      return '(function(){\n        ' + (index === 0 ? "var " : "") + 'ref_ = ' + ref + ';\n        return ref_;\n      }).call(this)';
+    }
+
+    // average case
+    return '(function(){\n      ' + (index === 0 ? "var " : "") + 'ref_ = ' + ref + ';\n      if (ref_) {\n        return ' + recur(pieces.slice(1), index + 1) + ';\n      } else { return }\n    }).call(this)';
+  }
+
+  return recur(pieces);
 }
 
 /*
  * Drop in identifiers.
  */
 (0, _utils.compile)(_utils.nodes.IdentifierNode, function () {
-  var _this = this;
+  var word = this.text;
 
-  if (this.text === '@') return 'this';
-
-  var base = this.text.replace(/^(\@|\~)/, '');
-  var hasProtector = this.text[0] === '~';
-  var clean = base.split('.').map(function (piece, pieceIndex) {
-
-    // Disallow identifiers that look like "this_"
-    if (/[^_]_$/.test(piece)) {
-      (0, _utils.die)(_this, _this.text + ' matches the pattern IDENTIFIER_ which is reserved for system variables.');
-
-      // Disallow reserved words
-    } else if (isReserved(piece, pieceIndex, hasProtector)) {
-      (0, _utils.die)(_this, _this.text + ' is a reserved word or contains a reserved word.');
-
-      // Translate system library functions
-    } else if (isBif(piece, pieceIndex, hasProtector)) {
-      return 'CNS_.' + _this.text;
-    } else {
-      return piece;
-    }
-  });
-
-  // Use @ lookups if we have them
-  if (this.text[0] === '@') {
-    return 'this.' + clean.join('.');
+  if (word === '@') {
+    word = 'this';
   } else {
-    return clean.join('.');
+    word = word.replace(/^\@(\:|\.)/, 'this$1').replace(/^\@/, 'this.');
   }
+
+  var maybeReserved = word.replace(/(\?|\.|\:).*$/, '');
+
+  if (isReserved(maybeReserved)) {
+    return (0, _utils.die)(this, maybeReserved + ' is a reserved word in JavaScript and can\'t be used in this way.');
+  }
+
+  if (isSystemPattern(maybeReserved)) {
+    return (0, _utils.die)(this, maybeReserved + ' follows the system\'s reserved pattern of suffixing an identifier with "_".');
+  }
+
+  if (isBif(stripQ(word))) {
+    word = word.replace(/^\>\>\=/, 'callChain_');
+    word = 'PINE_.' + word;
+  } else if (/\.|\:/.test(word)) {
+    var lookupChain = splitter(word);
+    word = lookupChain.map(function (node) {
+      if (node.type === ':') {
+        return '[Symbol.for("' + stripQ(node.piece) + '")]' + maybeQ(node.piece);
+      }
+      if (node.type === '.') {
+        var cleanPiece = stripQ(node.piece);
+        return (/^\d+$/.test(cleanPiece) ? '[' + cleanPiece + ']' : '["' + cleanPiece + '"]') + maybeQ(node.piece);
+      }
+      return node.piece;
+    }).join('');
+  }
+
+  if (/\?/.test(word)) {
+    word = unconfidentLookup(word);
+  }
+
+  return word;
 });

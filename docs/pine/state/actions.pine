@@ -1,0 +1,10 @@
+(make toggleMenu [] {
+  type :TOGGLE_MENU
+})
+
+(make selectLink [value] {
+  type :SELECT_LINK
+  payload value
+})
+
+(export [toggleMenu selectLink])

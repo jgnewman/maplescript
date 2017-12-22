@@ -104,7 +104,7 @@ function compileFunction(body, async) {
         ${varsLine}
         ${cleanBody}
       } catch (err_) {
-        return PINE_.signal(${attemptChannel}, err);
+        return PINE_.signal(${attemptChannel}, err_);
       }
     }`;
   } else {

@@ -1,0 +1,33 @@
+(import 'react' React)
+(import 'react' [Component])
+(import 'react-dom' ReactDOM)
+(import 'create-react-class' createReactClass)
+
+(dangerouslyMutate 'Component' Component window)
+
+# Iterate over a list of functions to generate a React class.
+(make reactify
+  (of [fnList]        (reactify fnList {}))
+  (of [[] accum]      (createReactClass accum))
+  (of [[hd|tl] accum] (reactify tl (update hd.name hd accum))))
+
+
+# A function for calculating factorials
+(make factorial
+  (of [0] 1)
+  (of [n] (* n (factorial (- n 1)))))
+
+# A function for rendering the view
+(make render []
+  (React.createElement 'h1' {} [
+    `Hello, friends. The factorial of ${@props.calc} is ${(factorial @props.calc)}`
+  ])
+)
+
+# Create a React class from our functions
+(make Title (reactify [factorial render]))
+
+# Render the react class in the dom
+(ReactDOM.render
+  (React.createElement Title {calc 5} [])
+  (dom '#app'))

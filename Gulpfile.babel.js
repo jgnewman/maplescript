@@ -35,7 +35,7 @@ gulp.task('sanitycheck', next => {
 });
 
 gulp.task('test', next => {
-  return gulp.src(['test/test-*.js'], { read: false })
+  return gulp.src(['test/**/test-*.js'], { read: false })
     .pipe(mocha({
       reporter: 'spec'
     }));
@@ -52,7 +52,7 @@ gulp.task('private:build-test-irl', next => {
         .pipe(gulp.dest('./test-irl/output/'));
       next();
     });
-  }, {finalize: true});
+  }, {finalize: true, isPineProjectDirectory: true});
 });
 
 gulp.task('private:serve', () => {
