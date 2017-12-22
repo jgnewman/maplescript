@@ -83,7 +83,7 @@ describe('Functions', () => {
           const foo = await bar();
           return foo;
         } catch (err_) {
-          return PINE_.signal(Symbol.for("err"), err_);
+          return MAPLE_.signal(Symbol.for("err"), err_);
         }
       };
     `);
@@ -120,23 +120,23 @@ describe('Functions', () => {
     const expected = nlToSpace(`
       const foo = function () {
         const args = Array.prototype.slice.call(arguments || []);
-        if (PINE_.match_(args, [{type:"Number", value: "1" }])) {
+        if (MAPLE_.match_(args, [{type:"Number", value: "1" }])) {
           return 1;
         }
-        if (PINE_.match_(args, [{type:"Number", value: "2" }, {type:"Identifier", value: "n" }])) {
+        if (MAPLE_.match_(args, [{type:"Number", value: "2" }, {type:"Identifier", value: "n" }])) {
           var n = args[1];
           return 2;
         }
-        if (PINE_.match_(args, [{type:"Identifier", value: "n" }, {type:"Identifier", value: "_" }])) {
+        if (MAPLE_.match_(args, [{type:"Identifier", value: "n" }, {type:"Identifier", value: "_" }])) {
           var n = args[0];
           return 3;
         }
-        if (PINE_.match_(args, [{type:"Arr", value: "[hd|tl]" }])) {
+        if (MAPLE_.match_(args, [{type:"Arr", value: "[hd|tl]" }])) {
           var hd = args[0][0];
           var tl = args[0].slice(1);
           return 4;
         }
-        if (PINE_.match_(args, [{type:"Identifier", value: "n" }])) {
+        if (MAPLE_.match_(args, [{type:"Identifier", value: "n" }])) {
           var n = args[0];
           if ((n === 5)) {
             return 5;

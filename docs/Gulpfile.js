@@ -9,7 +9,7 @@ var gulp = require('gulp'),
     source = require('vinyl-source-stream'),
     buffer = require('vinyl-buffer'),
     sequence = require('run-sequence'),
-    pineify = require('../plugins/browserify'),
+    mapleify = require('../plugins/browserify'),
     panini = require('panini'),
     rename = require('gulp-rename'),
     reload = browserSync.reload;
@@ -48,8 +48,8 @@ gulp.task('clean', function(cb) {
  * js compilation
  */
 .task('js', function() {
-  return browserify({entries: ['pine/app.pine'], extensions: ['.pine']})
-  .transform(pineify)
+  return browserify({entries: ['maple/app.maple'], extensions: ['.maple']})
+  .transform(mapleify)
   .bundle()
   .pipe(source('app.js'))
   .pipe(gulp.dest('assets/js'));
@@ -59,8 +59,8 @@ gulp.task('clean', function(cb) {
  * minified js compilation
  */
 .task('js:min', function() {
-  return browserify({entries: ['pine/app.pine'], extensions: ['.pine']})
-  .transform(pineify)
+  return browserify({entries: ['maple/app.maple'], extensions: ['.maple']})
+  .transform(mapleify)
   .bundle()
   .pipe(source('app.js'))
   .pipe(buffer())
@@ -92,7 +92,7 @@ gulp.task('clean', function(cb) {
 .task('watch', function () {
   return gulp.watch(
     [
-      'pine/**/*.pine',
+      'maple/**/*.maple',
       'scss/**/*.scss',
       'markdown/**/*.md',
       'layouts/**/*.html',

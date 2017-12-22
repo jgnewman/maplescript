@@ -1,8 +1,8 @@
 /*
- * Pine Language Function Library
+ * Maple Language Function Library
  */
 
-var PINE_ = {
+var MAPLE_ = {
 
   /* Private functions */
 
@@ -100,7 +100,7 @@ var PINE_ = {
           if (value === "[]") return arg.length === 0;
           return true;
 
-        default: PINE_.die('Can not pattern match against type ' + type);
+        default: MAPLE_.die('Can not pattern match against type ' + type);
       }
       // return (matches = false);
     });
@@ -114,13 +114,13 @@ var PINE_ = {
   },
 
   attempt: function (channel, fun) {
-    if (PINE_.dataType(channel) !== 'symbol') {
+    if (MAPLE_.dataType(channel) !== 'symbol') {
       throw new Error('Signal channels must be identified with symbols.');
     }
     try {
       return fun();
     } catch (err) {
-      PINE_.signal(channel, err);
+      MAPLE_.signal(channel, err);
     }
   },
 
@@ -130,7 +130,7 @@ var PINE_ = {
 
     // Die if we're not in a browser environment.
     if (typeof document === 'undefined') {
-      return PINE_.die('No HTML document is available.');
+      return MAPLE_.die('No HTML document is available.');
     }
 
     // User-defined html blocks will begin with capital letters.
@@ -146,7 +146,7 @@ var PINE_ = {
     });
 
     function append(node) {
-      elem.appendChild(PINE_.dataType(node) === 'htmlelement' ? node : document.createTextNode(node))
+      elem.appendChild(MAPLE_.dataType(node) === 'htmlelement' ? node : document.createTextNode(node))
     }
 
     // Append children.
@@ -199,14 +199,14 @@ var PINE_ = {
   },
 
   eql: function (a, b) {
-    if (a === PINE_ || b === PINE_) return true; // <- Hack to force a match
+    if (a === MAPLE_ || b === MAPLE_) return true; // <- Hack to force a match
     if (a === b || (typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b))) return true;
     if (typeof a !== typeof b) return false;
     if (typeof a === 'object') {
-      if (Array.isArray(a)) return a.every(function(item, index) { return PINE_.eql(item, b[index]) }.bind(this));
+      if (Array.isArray(a)) return a.every(function(item, index) { return MAPLE_.eql(item, b[index]) }.bind(this));
       const ks = Object.keys, ak = ks(a), bk = ks(b);
-      if (!PINE_.eql(ak, bk)) return false;
-      return ak.every(function (key) { return PINE_.eql(a[key], b[key]) }.bind(this));
+      if (!MAPLE_.eql(ak, bk)) return false;
+      return ak.every(function (key) { return MAPLE_.eql(a[key], b[key]) }.bind(this));
     }
     return false;
   },
@@ -224,10 +224,10 @@ var PINE_ = {
   },
 
   handle: function (channel, fun) {
-    if (PINE_.dataType(channel) !== 'symbol') {
+    if (MAPLE_.dataType(channel) !== 'symbol') {
       throw new Error('Signal channels must be identified with symbols.');
     }
-    const handlers = PINE_.channels_[channel] = PINE_.channels_[channel] || [];
+    const handlers = MAPLE_.channels_[channel] = MAPLE_.channels_[channel] || [];
     handlers.push(fun);
   },
 
@@ -271,7 +271,7 @@ var PINE_ = {
 
   merge: function () {
     var args = Array.prototype.slice.call(arguments || []);
-    var type = PINE_.dataType(arguments[0]);
+    var type = MAPLE_.dataType(arguments[0]);
     var out;
     switch (type) {
       case 'array':
@@ -285,7 +285,7 @@ var PINE_ = {
       case 'object':
         out = {};
         args.forEach(function (arg) {
-          PINE_.keys(arg).forEach(function (key) {
+          MAPLE_.keys(arg).forEach(function (key) {
             out[key] = arg[key];
           });
         });
@@ -311,7 +311,7 @@ var PINE_ = {
   },
 
   remove: function (keyOrIndex, collection) {
-    PINE_.isReserved_(keyOrIndex);
+    MAPLE_.isReserved_(keyOrIndex);
     if (Array.isArray(collection)) {
       var splicer = collection.slice();
       splicer.splice(keyOrIndex, 1);
@@ -329,10 +329,10 @@ var PINE_ = {
   },
 
   signal: function (channel, message) {
-    if (PINE_.dataType(channel) !== 'symbol') {
+    if (MAPLE_.dataType(channel) !== 'symbol') {
       throw new Error('Signal channels must be identified with symbols.');
     }
-    const handlers = PINE_.channels_[channel];
+    const handlers = MAPLE_.channels_[channel];
     if (handlers && handlers.length) {
       handlers.forEach(handler => handler(message));
     }
@@ -347,14 +347,14 @@ var PINE_ = {
   },
 
   unhandle: function (channel, fun) {
-    const handlers = PINE_.channels_[channel];
+    const handlers = MAPLE_.channels_[channel];
     if (handlers) {
       handlers.splice(handlers.indexOf(fun), 1);
     }
   },
 
   update: function (keyOrIndex, val, collection) {
-    PINE_.isReserved_(keyOrIndex);
+    MAPLE_.isReserved_(keyOrIndex);
     if (Array.isArray(collection)) {
       var newSlice = collection.slice();
       newSlice[keyOrIndex] = val;
@@ -372,7 +372,7 @@ var PINE_ = {
     } else {
       const replacer = {};
       replacer[keyOrIndex] = val;
-      return PINE_.assign_(collection, replacer);
+      return MAPLE_.assign_(collection, replacer);
     }
   },
 
@@ -380,10 +380,10 @@ var PINE_ = {
     if (typeof console !== 'undefined' && typeof console.warn === 'function') {
       return console.warn.apply(console, arguments);
     }
-    return PINE_.log.apply(null, arguments);
+    return MAPLE_.log.apply(null, arguments);
   }
 
 
 };
 
-module.exports = PINE_;
+module.exports = MAPLE_;

@@ -1,5 +1,5 @@
 {
-  "name": "pine",
+  "name": "maplescript",
   "version": "0.0.1",
   "description": "A friendlier Lisp over JavaScript",
   "dependencies": {
@@ -13,7 +13,8 @@
   "keywords": [
     "javascript",
     "language",
-    "pine",
+    "maple",
+    "maplescript",
     "compiler",
     "transpiler",
     "functional"
@@ -23,14 +24,14 @@
   },
   "main": "index.js",
   "bin": {
-    "pine": "index.js"
+    "maple": "index.js"
   },
   "preferGlobal": true,
-  "homepage": "https://github.com/jgnewman/pine",
-  "bugs": "https://github.com/jgnewman/pine/issues",
+  "homepage": "https://github.com/jgnewman/maplescript",
+  "bugs": "https://github.com/jgnewman/maplescript/issues",
   "repository": {
     "type": "git",
-    "url": "git://github.com/jgnewman/pine.git"
+    "url": "git://github.com/jgnewman/maplescript.git"
   },
   "scripts": {
     "test": "gulp test"

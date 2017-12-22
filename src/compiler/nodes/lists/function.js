@@ -51,7 +51,7 @@ function compilePolymorph(body) {
 
     const qualifier = paramList.qualifier ? paramList.qualifier.compile(true) : null;
 
-    return  "if (PINE_.match_(args, " + params + ")) {\n"
+    return  "if (MAPLE_.match_(args, " + params + ")) {\n"
           +   vars.map(obj => "var " + obj.varName + " = " + obj.position + ';\n').join('')
           +   (qualifier ? `if (${qualifier}) {\n` : "")
           +   actions.map((action, index) => {
@@ -109,7 +109,7 @@ function compileFunction(body, async) {
         ${varsLine}
         ${cleanBody}
       } catch (err_) {
-        return PINE_.signal(${attemptChannel}, err_);
+        return MAPLE_.signal(${attemptChannel}, err_);
       }
     }`;
   } else {

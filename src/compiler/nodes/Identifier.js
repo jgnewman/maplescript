@@ -117,7 +117,7 @@ compile(nodes.IdentifierNode, function () {
 
   if (isBif(stripQ(word))) {
     word = word.replace(/^\>\>\=/, 'callChain_');
-    word = 'PINE_.' + word;
+    word = 'MAPLE_.' + word;
 
   } else if (/\.|\:/.test(word)) {
     const lookupChain = splitter(word);

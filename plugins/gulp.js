@@ -1,5 +1,5 @@
 var through = require('through2');
-var pine = require('../index');
+var maple = require('../index');
 var gutil = require('gulp-util');
 var applySourceMap = require('vinyl-sourcemaps-apply');
 var path = require('path');
@@ -14,14 +14,14 @@ module.exports = function () {
 
   function transform(file, enc, cb) {
     if (file.isNull()) return cb(null, file);
-    if (file.isStream()) return cb(new PluginError('gulp-pine', 'Streaming not supported'));
+    if (file.isStream()) return cb(new PluginError('gulp-maple', 'Streaming not supported'));
 
     var data;
     var err;
     var str = file.contents.toString('utf8');
     var dest = replaceExtension(file.path);
 
-    pine.compileCode(str, function (e, result) {
+    maple.compileCode(str, function (e, result) {
       if (e) {
         err = e;
       } else {
@@ -30,7 +30,7 @@ module.exports = function () {
     }, {finalize: true});
 
     if (err) {
-      return cb(new PluginError('gulp-pine', err));
+      return cb(new PluginError('gulp-maple', err));
     }
 
     // Be ready to support source maps in the future

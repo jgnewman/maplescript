@@ -5,7 +5,7 @@ Saves our redux state to local storage
   (attempt :save-state
     (do
       (make serialized (JSON.stringify state))
-      (localStorage.setItem 'pine' serialized))))
+      (localStorage.setItem 'maple' serialized))))
 
 ###
 Retrieves a previous state from local storage
@@ -13,7 +13,7 @@ Retrieves a previous state from local storage
 (make retrieveState []
   (attempt :get-state
     (do
-      (make serialized (localStorage.getItem 'pine'))
+      (make serialized (localStorage.getItem 'maple'))
       (JSON.parse serialized))))
 
 ###

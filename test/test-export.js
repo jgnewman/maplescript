@@ -11,7 +11,7 @@ describe('Export', () => {
 
   it('should compile a single reference as an object with aritization', () => {
     const toCompile = '(export foo/2)';
-    assert.equal(compileCode(toCompile).trim(), 'module.exports = {[Symbol.for("foo")]: PINE_.aritize_(foo, 2)};');
+    assert.equal(compileCode(toCompile).trim(), 'module.exports = {[Symbol.for("foo")]: MAPLE_.aritize_(foo, 2)};');
   });
 
   it('should compile an array of references as an object', () => {

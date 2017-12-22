@@ -1,4 +1,4 @@
-import { compile, nodes, compileBody, die } from '../utils';
+MAPLEimport { compile, nodes, compileBody, die } from '../utils';
 
 function compileAttrs(attrs) {
   if (!attrs) return "null";
@@ -19,5 +19,5 @@ compile(nodes.HtmlNode, function () {
   if (!/^[A-Z]/.test(name)) {
     name = '"' + name + '"';
   }
-  return `PINE_.createElement(${name}, ${attrs}, [${body ? '\n' + body + '\n' : ''}])`;
+  return `MAPLE_.createElement(${name}, ${attrs}, [${body ? '\n' + body + '\n' : ''}])`;
 });

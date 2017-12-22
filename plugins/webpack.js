@@ -2,14 +2,14 @@
   Adapted from coffee-loader by Tobias Koppers @sokra
   MIT License http://www.opensource.org/licenses/mit-license.php
 */
-var pine = require("../index");
+var maple = require("../index");
 var loaderUtils = require("loader-utils");
 
 // Export the loader function.
 module.exports = function(source) {
   this.cacheable && this.cacheable();
 
-  var pineRequest = loaderUtils.getRemainingRequest(this);
+  var mapleRequest = loaderUtils.getRemainingRequest(this);
   var jsRequest = loaderUtils.getCurrentRequest(this);
   var query = loaderUtils.parseQuery(this.query);
   var result;
@@ -23,11 +23,11 @@ module.exports = function(source) {
     //   bare: true,
     //   sourceMap: true,
     //   sourceRoot: "",
-    //   sourceFiles: [pineRequest],
+    //   sourceFiles: [mapleRequest],
     //   generatedFile: jsRequest
     // });
 
-    result = pine.compileCode(source, null, {finalize: true});
+    result = maple.compileCode(source, null, {finalize: true});
 
   // Handle the error if there is one.
   } catch (e) {

@@ -1,6 +1,6 @@
 // Adapted from babelify (https://github.com/babel/babelify)
 
-var pine   = require("../index");
+var maple  = require("../index");
 var stream = require("stream");
 var path   = require("path");
 var util   = require("util");
@@ -44,14 +44,14 @@ function canCompile(filename, altExts) {
   var ext = path.extname(filename);
   return exts.indexOf(ext) > -1;
 }
-canCompile.EXTENSIONS = [".pine"];
+canCompile.EXTENSIONS = [".maple"];
 
-module.exports = Pineify;
-util.inherits(Pineify, stream.Transform);
+module.exports = Mapleify;
+util.inherits(Mapleify, stream.Transform);
 
-function Pineify(filename, opts) {
-  if (!(this instanceof Pineify)) {
-    return Pineify.configure(opts)(filename);
+function Mapleify(filename, opts) {
+  if (!(this instanceof Mapleify)) {
+    return Mapleify.configure(opts)(filename);
   }
 
   stream.Transform.call(this);
@@ -60,15 +60,15 @@ function Pineify(filename, opts) {
   this._opts = assign({filename: filename}, opts);
 }
 
-Pineify.prototype._transform = function (buf, enc, callback) {
+Mapleify.prototype._transform = function (buf, enc, callback) {
   this._data += buf;
   callback();
 };
 
-Pineify.prototype._flush = function (callback) {
+Mapleify.prototype._flush = function (callback) {
   try {
-    var result = pine.compileCode(this._data.toString(), null, { finalize: true });
-    this.emit("pineify", result, this._filename);
+    var result = maple.compileCode(this._data.toString(), null, { finalize: true });
+    this.emit("mapleify", result, this._filename);
     this.push(result);
   } catch(err) {
     if (console && typeof console.log === 'function') {
@@ -83,26 +83,26 @@ Pineify.prototype._flush = function (callback) {
 
 // Keeping all this for when we want to support source maps and
 // other stuff later.
-Pineify.configure = function (opts) {
+Mapleify.configure = function (opts) {
   opts = assign({}, opts);
   var extensions = opts.extensions ? arrayify(opts.extensions) : null;
   var sourceMapsAbsolute = opts.sourceMapsAbsolute;
   if (opts.sourceMaps !== false) opts.sourceMaps = "inline";
 
-  // Pineify specific options
+  // Mapleify specific options
   // delete opts.sourceMapsAbsolute;
   delete opts.extensions;
   delete opts.filename;
 
-  // Pineify backwards-compat
+  // Mapleify backwards-compat
   // delete opts.sourceMapRelative;
 
-  // Pineify specific options
+  // Mapleify specific options
   delete opts._flags;
   delete opts.basedir;
   delete opts.global;
 
-  // Pineify cli options
+  // Mapleify cli options
   delete opts._;
   // "--opt [ a b ]" and "--opt a --opt b" are allowed:
   if (opts.ignore && opts.ignore._) opts.ignore = opts.ignore._;
@@ -119,6 +119,6 @@ Pineify.configure = function (opts) {
       ? assign({sourceFileName: filename}, opts)
       : opts;
 
-    return new Pineify(filename, _opts);
+    return new Mapleify(filename, _opts);
   };
 };

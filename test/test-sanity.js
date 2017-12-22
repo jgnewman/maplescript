@@ -7,7 +7,7 @@ import path from 'path';
 describe('Sanity Check', () => {
 
   it('should pass a basic sanity check', () => {
-    const toCompile = fs.readFileSync(path.resolve(__dirname, '../test/sanitycheck.pine')).toString();
+    const toCompile = fs.readFileSync(path.resolve(__dirname, '../test/sanitycheck.maple')).toString();
     assert.doesNotThrow(function () { return compileCode(toCompile) });
   });
 
