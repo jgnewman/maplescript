@@ -8,6 +8,10 @@ describe('Html', () => {
     assert.equal(compileCode('<br/>').trim(), 'PINE_.createElement("br", null, []);');
   });
 
+  it('should not apply quotes when the html type is capitalized', () => {
+    assert.equal(compileCode('<Foo/>').trim(), 'PINE_.createElement(Foo, null, []);');
+  });
+
   it('should compile a self-closing html node with a string attribute', () => {
     assert.equal(compileCode('<br {:id "foo"}/>').trim(), 'PINE_.createElement("br", { [Symbol.for("id")]: "foo" }, []);');
   });
@@ -31,6 +35,26 @@ describe('Html', () => {
         PINE_.createElement("li", { [Symbol.for("class")]: bar(baz) }, [])
       ])
     ]);`);
+    assert.equal(nlToSpace(compileCode(toCompile)), expected);
+  });
+
+  it('should allow creating new elements', () => {
+    const toCompile = `
+      (elem Foo [attrs children]
+        <h1>children</h1>
+      )
+    `;
+    const expected = nlToSpace(`
+      const Foo = function (attrs, children) {
+        const out_ = (function(){
+          return PINE_.createElement("h1", null, [ children ]);
+        }).call(this);
+        if (out_ && PINE_.dataType(out_) !== 'htmlelement') {
+          throw new Error('If Foo returns a truthy value, that value must be a single html element.');
+        }
+        return out_;
+      };
+    `);
     assert.equal(nlToSpace(compileCode(toCompile)), expected);
   });
 

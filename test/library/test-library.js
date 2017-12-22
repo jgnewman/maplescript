@@ -279,6 +279,21 @@ describe('Library', () => {
       assert.equal(lib.lte(3, 3), true);
     });
 
+    it('merge', () => {
+      const obj1 = {a: 1};
+      const obj2 = {b: 2};
+      const obj3 = {c: 3};
+      const combinedObj = {a: 1, b: 2, c: 3};
+
+      const arr1 = [1];
+      const arr2 = [2];
+      const arr3 = [3];
+      const combinedArr = [1, 2, 3];
+
+      assert.deepEqual(lib.merge(obj1, obj2, obj3), combinedObj, 'merges objects');
+      assert.deepEqual(lib.merge(arr1, arr2, arr3), combinedArr, 'merges arrays');
+    });
+
     it('noop', () => {
       assert.equal(typeof lib.noop, 'function');
       assert.equal(lib.noop(), undefined);

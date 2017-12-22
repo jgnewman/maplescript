@@ -10,13 +10,13 @@ function compileHtmlDefinition(items) {
     die(items[0], 'New html tags must begin with a capital letter.');
   }
 
-  return `(PINE_.html_.${name} = PINE_.html_.${name} || function (${params}) {
+  return `const ${name} = function (${params}) {
     const out_ = ${body};
     if (out_ && PINE_.dataType(out_) !== 'htmlelement') {
       throw new Error('If ${name} returns a truthy value, that value must be a single html element.');
     }
     return out_;
-  })`
+  }`
 }
 
 export default compileHtmlDefinition;

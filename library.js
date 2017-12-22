@@ -6,9 +6,6 @@ var PINE_ = {
 
   /* Private functions */
 
-  // This is where we'll store user-defined html blocks.
-  html_: {},
-
   // This is where we'll store all event channels.
   channels_: {},
 
@@ -137,8 +134,8 @@ var PINE_ = {
     }
 
     // User-defined html blocks will begin with capital letters.
-    if (/^[A-Z]/.test(type)) {
-      return PINE_.html_[type](a, b);
+    if (typeof type === 'function') {
+      return type(a, b);
     }
 
     // Create an element and set attributes.
@@ -270,6 +267,31 @@ var PINE_ = {
 
   lte: function (x, y) {
     return x <= y;
+  },
+
+  merge: function () {
+    var args = Array.prototype.slice.call(arguments || []);
+    var type = PINE_.dataType(arguments[0]);
+    var out;
+    switch (type) {
+      case 'array':
+        out = [];
+        args.forEach(function (arg) {
+          arg.forEach(function (item) {
+            out.push(item);
+          });
+        });
+        return out;
+      case 'object':
+        out = {};
+        args.forEach(function (arg) {
+          PINE_.keys(arg).forEach(function (key) {
+            out[key] = arg[key];
+          });
+        });
+        return out;
+      default: throw new Error('Can only merge objects or arrays.');
+    }
   },
 
   noop: function(){},

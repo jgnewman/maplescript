@@ -117,6 +117,7 @@ function getExposedFns() {
     'log',
     'lt',
     'lte',
+    'merge',
     'noop',
     'not',
     'random',
