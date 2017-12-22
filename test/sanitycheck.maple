@@ -1,4 +1,3 @@
-
 # finish redoing docs site
 
 # hows about a syntax highlighter
@@ -6,14 +5,25 @@
 # SOURCEMAPS
 # cleaner readme
 
+true
+null
+undefined
+12
+0xffee
+12e4
+1234512
+
+`foo ${(and stuff)} bar`
+
 (make factorial
   (of [n :: (lt n 2)] 1)
   (of [n] (* n (factorial (- n 1)))))
 
-###
 <br/>
 
 <Title {:class 'foo' :text 'bar'} />
+
+foo
 
 foo:bar.baz.0.qux
 
@@ -103,4 +113,3 @@ foo:bar?.baz?.0.qux?
 
 # dosomething(1, 2)(3, 4)(5, 6)
 (>>= dosomething [1 2] [3 4] [5 6])
-###

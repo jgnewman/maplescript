@@ -1,4 +1,4 @@
-MAPLEimport { compile, nodes, compileBody, die } from '../utils';
+import { compile, nodes, compileBody, die } from '../utils';
 
 function compileAttrs(attrs) {
   if (!attrs) return "null";
