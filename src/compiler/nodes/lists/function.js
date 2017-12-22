@@ -41,18 +41,23 @@ function compilePolymorph(body) {
   // Compile conditional function funneling
   const compiledBodies = body.map((morph, index) => {
     const actions = morph.items.slice(2);
+    const paramList = morph.items[1];
 
     const vars = getVarsFromParamList(morph.items[1].items, true);
 
-    const params = "[" + morph.items[1].items.map(param => {
+    const params = "[" + paramList.items.map(param => {
       return '{type:"' + param.type + '", value: "' + param.compile(true).replace(/(\'|\"|\`)/g, "\\$1") + '" }';
     }).join(', ') + "]";
 
+    const qualifier = paramList.qualifier ? paramList.qualifier.compile(true) : null;
+
     return  "if (PINE_.match_(args, " + params + ")) {\n"
           +   vars.map(obj => "var " + obj.varName + " = " + obj.position + ';\n').join('')
+          +   (qualifier ? `if (${qualifier}) {\n` : "")
           +   actions.map((action, index) => {
                 return (index === actions.length - 1 ? "return " : "") + action.compile(true);
               }).join(';\n') + ';\n'
+          +   (qualifier ? "}\n" : "")
           + "}\n";
   }).join('');
 

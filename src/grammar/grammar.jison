@@ -31,6 +31,8 @@
                                          }
                                       %}
 
+"::"                                  return "::";
+
 "("                                   return "(";
 ")"                                   return ")";
 
@@ -122,6 +124,28 @@ NodeSequence
     }
   ;
 
+ArrSequence
+  : ArrSequence SourceElement
+    {
+      $$ = $1.concat($2);
+    }
+  | ArrSequence Qualifier
+    {
+      $$ = $1.concat($2);
+    }
+  | /* empty */
+    {
+      $$ = [];
+    }
+  ;
+
+Qualifier
+  : "::" List
+    {
+      $$ = new QualifierNode($2, createSourceLocation(null, @1, @2));
+    }
+  ;
+
 List
   : "(" NodeSequence ")"
     {
@@ -134,13 +158,22 @@ List
   ;
 
 Arr
-  : "[" NodeSequence "]"
+  : "[" ArrSequence "]"
     {
-      $$ = new ArrNode($2, createSourceLocation(null, @1, @3));
+      var lastItem = $2[$2.length - 1];
+      var sequence = $2;
+      var qualifier = null;
+
+      if (lastItem.type === 'Qualifier') {
+        qualifier = lastItem.list;
+        sequence = $2.slice(0, $2.length - 1);
+      }
+
+      $$ = new ArrNode(sequence, qualifier, createSourceLocation(null, @1, @3));
     }
   | "[" /* empty */ "]"
     {
-      $$ = new ArrNode([], createSourceLocation(null, @1, @2));
+      $$ = new ArrNode([], null, createSourceLocation(null, @1, @2));
     }
   ;
 
@@ -305,13 +338,19 @@ function ListNode(items, loc) {
   this.shared = shared;
 }
 
-function ArrNode(items, loc) {
+function ArrNode(items, qualifier, loc) {
   this.src = "[" + items.map(function (item) { return item.src; }).join(', ') + "]";
   this.type = 'Arr';
   this.length = items.length;
   this.items = items;
+  this.qualifier = qualifier;
   this.loc = loc;
   this.shared = shared;
+}
+
+function QualifierNode(list) {
+  this.type = 'Qualifier';
+  this.list = list;
 }
 
 function ObjNode(items, loc) {

@@ -90,7 +90,7 @@ describe('Functions', () => {
     assert.equal(nlToSpace(compileCode(toCompile)), expected);
   });
 
-  it('should compile a polymorphic function', () => {
+  it('should compile a non-polymorphic function', () => {
     const toCompile = `
       (make foo [x _ y]
         (+ x y)
@@ -114,7 +114,8 @@ describe('Functions', () => {
         (of [1] 1)
         (of [2 n] 2)
         (of [n _] 3)
-        (of [[hd|tl]] 4))
+        (of [[hd|tl]] 4)
+        (of [n :: (= n 5)] 5))
     `;
     const expected = nlToSpace(`
       const foo = function () {
@@ -134,6 +135,12 @@ describe('Functions', () => {
           var hd = args[0][0];
           var tl = args[0].slice(1);
           return 4;
+        }
+        if (PINE_.match_(args, [{type:"Identifier", value: "n" }])) {
+          var n = args[0];
+          if ((n === 5)) {
+            return 5;
+          }
         }
         throw new Error('Could not find an argument match.');
       };

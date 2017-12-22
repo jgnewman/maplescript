@@ -5,15 +5,17 @@
 # If we don't have state, recurse with the initial state
 # If we have state, begin reducing
 (make reducer
-  (of [undefined action] (reducer initialState action))
-  (of [state action]
-    (if
-      (= action.type :TOGGLE_MENU)
-        (Object.assign {} state {menuOpen (not state.menuOpen)})
-      (= action.type :SELECT_LINK)
-        (do
-          (make newOption (get state.downloadOptions action.payload))
-          (Object.assign {} state {downloadSelection newOption}))
-      state)))
+
+  (of [undefined action]
+    (reducer initialState action))
+
+  (of [state action ::
+    (= action.type :TOGGLE_MENU)]
+      (merge state {menuOpen (not state.menuOpen)}))
+
+  (of [state action ::
+    (= action.type :SELECT_LINK)]
+      (make newOption (get state.downloadOptions action.payload))
+      (merge state {downloadSelection newOption})))
 
 (export reducer)

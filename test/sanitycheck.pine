@@ -1,21 +1,15 @@
-# better way to merge objects and arrays?
-# finish redoing docs site
 
-(merge x y z)
+# finish redoing docs site
 
 # hows about a syntax highlighter
 # new docs site
 # SOURCEMAPS
 # cleaner readme
 
+(make factorial
+  (of [n :: (lt n 2)] 1)
+  (of [n] (* n (factorial (- n 1)))))
 
-(elem Title [attrs children]
-  <div {:class attrs:class}>
-    <span> attrs:text </span>
-  </div>
-)
-
-<Title {:class 'foo' :text 'bar'} />
 ###
 <br/>
 
@@ -37,7 +31,11 @@ foo:bar?.baz?.0.qux?
     (* n (factorial (- n 1)))))
 
 (make factorial
-  (of [1] 1)
+  (of [0] 1)
+  (of [n] (* n (factorial (- n 1)))))
+
+(make factorial
+  (of [n :: (lt n 2)] 1)
   (of [n] (* n (factorial (- n 1)))))
 
 (make apply [[head|tail]]
