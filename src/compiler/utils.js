@@ -97,7 +97,6 @@ function getExposedFns() {
     ">>=",
     'attempt',
     'apply',
-    'createElement',
     'dangerouslyMutate',
     'dataType',
     'die',
@@ -128,6 +127,7 @@ function getExposedFns() {
     'throw',
     'unhandle',
     'update',
+    'vdom',
     'warn'
   ];
 }

@@ -8,7 +8,8 @@
     "loader-utils": "^1.1.0",
     "merge": "^1.2.0",
     "through2": "^2.0.3",
-    "vinyl-sourcemaps-apply": "^0.2.1"
+    "vinyl-sourcemaps-apply": "^0.2.1",
+    "virtual-dom": "^2.1.1"
   },
   "keywords": [
     "javascript",

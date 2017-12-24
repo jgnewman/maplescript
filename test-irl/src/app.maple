@@ -1,33 +1,37 @@
-(import 'react' React)
-(import 'react' [Component])
-(import 'react-dom' ReactDOM)
-(import 'create-react-class' createReactClass)
-
-(dangerouslyMutate 'Component' Component window)
-
-# Iterate over a list of functions to generate a React class.
-(make reactify
-  (of [fnList]        (reactify fnList {}))
-  (of [[] accum]      (createReactClass accum))
-  (of [[hd|tl] accum] (reactify tl (update hd.name hd accum))))
-
-
-# A function for calculating factorials
-(make factorial
-  (of [0] 1)
-  (of [n] (* n (factorial (- n 1)))))
-
-# A function for rendering the view
-(make render []
-  (React.createElement 'h1' {} [
-    `Hello, friends. The factorial of ${@props.calc} is ${(factorial @props.calc)}`
-  ])
+(elem Title [props children]
+  <h1 {
+    :class props:class
+    :data-bar props:data-bar
+    :aria-label props:aria-label
+    :tabIndex props:tab-index
+    :onclick (fn [] (log 'worked!'))}>
+    <span>children</span>
+  </h1>
 )
 
-# Create a React class from our functions
-(make Title (reactify [factorial render]))
+(make title1
+  <Title {
+    :class 'foo'
+    :data-bar 'bar'
+    :aria-label 'baz'
+    :tabindex 1
+  }> 'Hello world!' </Title>
+)
 
-# Render the react class in the dom
-(ReactDOM.render
-  (React.createElement Title {calc 5} [])
-  (dom '#app'))
+(make title2
+  <Title {
+    :class 'foo2'
+    :data-bar 'bar2'
+    :aria-label 'baz2'
+    :tabindex 2
+  }> 'Goodbye world!' </Title>
+)
+
+(make renderedTitle (vdom:render title1))
+
+(vdom:injectNodes renderedTitle '#app')
+
+(setTimeout (fn []
+  (make patches (vdom:diff title1 title2))
+  (vdom:patchNodes renderedTitle patches)
+) 5000)

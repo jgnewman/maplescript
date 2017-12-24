@@ -12,10 +12,7 @@ function compileHtmlDefinition(items) {
 
   return `const ${name} = function (${params}) {
     const out_ = ${body};
-    if (out_ && MAPLE_.dataType(out_) !== 'htmlelement') {
-      throw new Error('If ${name} returns a truthy value, that value must be a single html element.');
-    }
-    return out_;
+    return out_ || null;
   }`
 }
 

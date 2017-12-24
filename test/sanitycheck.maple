@@ -1,3 +1,4 @@
+# createElement should generate an object tree with a produce method that will actually build dom nodes
 # finish redoing docs site
 
 # hows about a syntax highlighter
@@ -5,6 +6,9 @@
 # SOURCEMAPS
 # cleaner readme
 
+foo:bar-baz
+
+###
 true
 null
 undefined
@@ -113,3 +117,4 @@ foo:bar?.baz?.0.qux?
 
 # dosomething(1, 2)(3, 4)(5, 6)
 (>>= dosomething [1 2] [3 4] [5 6])
+###

@@ -65,9 +65,9 @@
 [^\s\(\)\[\]\{\}\<\>\/]+(\/\d+)?      return "IDENTIFIER";
 */
 
-(\+|\-|\*|\/|\%|\!\=|\=)                       return "IDENTIFIER";
-\:[A-Za-z_\$][A-Za-z0-9_\$\-\.]*               return "SYMBOL";
-[A-Za-z\_\$\@][A-Za-z0-9_\$\.\:\|\?]*(\/\d+)?  return "IDENTIFIER";
+(\+|\-|\*|\/|\%|\!\=|\=)                         return "IDENTIFIER";
+\:[A-Za-z_\$][A-Za-z0-9_\$\-\.]*                 return "SYMBOL";
+[A-Za-z\_\$\@][A-Za-z0-9_\$\.\:\|\?\-]*(\/\d+)?  return "IDENTIFIER";
 
 <<EOF>>                               return "EOF";
 

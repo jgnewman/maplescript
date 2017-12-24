@@ -14,8 +14,12 @@ MapleScript, on the other hand, is extremely light-weight and focuses on applyin
 ## What are some of MapleScript's distinguishing features?
 
 1. You get polymorphic functions with pattern matching and argument destructuring!
-2. There is a native syntax for building DOM nodes, similar to JSX but baked right in!
-3. The syntax is clear and intuitive, and makes heavy use of ES6 Symbols.
+2. The syntax is clear and intuitive (you'll pick it up quick!), and makes heavy use of ES6 Symbols.
+3. There is a built-in event bus and it's used to power error handling, allowing you to decouple your tries from your catches.
+
+Oh, and one other thing: there is a **VIRTUAL DOM AND NATIVE HTML-LIKE SYNTAX _BUILT IN_ TO THE LANGUAGE**.
+
+That means you can do things like build your very own reactive, component-based JS framework with just a couple of functions. And with all of this, the entire language comes in at only around 24k minified. That's 1/4 the size of jQuery 3 or Vue 2, and just over 1/5 the size of React 16 (with react-dom) — the point being that you won't need these big heavy frameworks anymore. Which is good. Because it's time for the rise of functionalism!
 
 ## Can I see some examples?
 
@@ -31,7 +35,7 @@ In MapleScript, everything is structured like a function call, and function call
 function_to_call(arg1, arg2)
 ```
 
-It's just a list wrapped in parentheses where the first list item is a function to call and each subsequent item is an argument to pass in.
+It's just a list wrapped in parentheses where the first list item is a function to call and each subsequent item is an argument to pass in. In the world of Lisps, we call these "s-expressions".
 
 Even math is done this way!
 
@@ -100,7 +104,7 @@ But when you make your own objects, things are just a little different. Objects 
 {a: b, c: d}
 ```
 
-So in order to add some visual clarity, it's conventional to use Symbols for keys where possible (kind of like in Ruby). In MapleScript, you can reference a symbol simply by placing a colon in front of a keyword `:like_this`, for example.
+So in order to add some visual clarity, it's conventional to use Symbols for keys where possible (kind of like in Ruby). In MapleScript, you can reference a symbol simply by placing a colon in front of a keyword `:like-this`, for example.
 
 ```
 # MapleScript
@@ -150,6 +154,8 @@ const obj = {
 obj[Symbol.for('foo')].bar[0][Symbol.for('baz')]
 ```
 
+FYI, you can't use array notation to retrieve items from objects. That means no more `foo[0]` and a lot more `foo.0`. If you need to grab something dynamically, you use the `get` function. Like so: `(get object item)`.
+
 But what if you're not sure if all those nodes in your nested tree are defined? You probably don't want it to throw an error if, for example, the `bar` object doesn't exist. In that case, you can use the `?` character for safety.
 
 ```
@@ -166,32 +172,38 @@ if (a.b.c && a.b.c.d && a.b.c.d.e) {
 }
 ```
 
-But let's forget about tree lookups for a second and talk about HTML. MapleScript provides a very nice way to create DOM nodes. The syntax is inspired by React's JSX dialect, but you don't need any extra libraries to make it work.
+But let's forget about tree lookups for a second and talk about DOM stuff. MapleScript provides a very nice way to create virtual DOM nodes (meaning an object tree _representing_ the DOM). Virtual nodes can be rendered into real nodes or diffed against other virtual nodes to find the differences between the two virtual trees. With those differences, you can quickly make changes to an existing real DOM.
+
+The syntax for this is inspired by React's JSX dialect, but you don't need any extra libraries to make it work.
 
 ```
 # MapleScript
+
+# Create a custom dom node called Title
 (elem Title [attrs]
   <h1 {:class attrs:class}>
     attrs:text
   </h1>
 )
 
-(-> (dom 'body')
-    (@appendChild <Title {:class "foo" :text "Hello, world!"} />))
+# Build a couple virtual instances of Title
+(make vTitle1 <Title {:class 'foo' :text 'Hello world!'}/>)
+(make vTitle2 <Title {:class 'foo' :text 'Goodbye world!'}/>)
+
+# Render real dom nodes from one of our virtual titles
+(make realTitle (vdom:render vTitle))
+
+# Drop our real dom nodes into the document body
+(-> (dom 'body') (@appendChild realTitle))
+
+# Get the differences between our 2 virtual dom trees
+(make changes (vdom:diff vTitle1 vTitle2))
+
+# Use those changes to modify the real DOM. BOOM.
+(vdom:patchNodes realTitle changes)
 
 # JavaScript
-function Title(attrs) {
-  const h1 = document.createElement('h1');
-  h1.setAttribute('class', attrs[Symbol.for('class')]);
-  const text = document.createTextNode(attrs[Symbol.for('text')]);
-  h1.appendChild(text);
-  return h1;
-}
-
-document.querySelector('body').appendChild(Title({
-  [Symbol.for('class')]: "foo",
-  [Symbol.for('text')]: "Hello, world!"
-}));
+... yeah, I'm not even gonna try to write an equivalent.
 ```
 
 I know you're probably scratching your head a little bit at that `->` syntax. Here's the thing: chaining methods doesn't really work so well with a Lisp -
@@ -210,9 +222,9 @@ createPromise()
   (fn [result] (console.log result)))
 ```
 
-Chaining off of a function call tends to mean that you end up stacking parentheses on both sides of everything. Tell me, how easily can you read (much less write) those parentheses?
+Chaining off of a function call tends to mean that you end up stacking parentheses on both sides of everything. Tell me, how easily can you parse those parentheses?
 
-To make this nicer, MapleScript includes a special form called "chain syntax" in which each link in the chain receives the result of the previous link as its `this` context (which can be referenced via `@` in MapleScript).
+To make this nicer, MapleScript includes a special form called "context chains" in which each link in the chain receives the result of the previous link as its `this` context (which can be referenced via `@` in MapleScript).
 
 ```
 # MapleScript
@@ -227,6 +239,74 @@ context = context.then(result => createPromise());
 context = context.then(result => createPromise());
 context = context.then(result => console.log(result));
 ```
+
+And while we're talking about special syntaxes, there's one more you should know about. This one is called a call chain. It solves another Lisp syntax problem. In JavaScript, if the result of a function call is another function, you can call it pretty easily. But our s-expressions make it kind of annoying. Consider:
+
+```
+# JavaScript
+foo(1, 2)(3, 4)(5, 6);
+
+# The Lispy Equivalent
+(((foo 1 2) 3 4) 5 6)
+```
+
+Any time you have to start stacking parentheses on the left hand side of an expression, it starts to get really annoying to write. So we usually do whatever we can to avoid it. In MapleScript, we do this:
+
+```
+# MapleScript
+
+(>>= foo [1 2] [3 4] [5 6])
+```
+
+You might say that's even easier to read than the JavaScript way.
+
+For those of you who are familiar with Haskell, `>>=` does **not** indicate a monad in MapleScript. It's just a function that expects its first argument to be a function and all subsequent arguments to be lists. It then executes the function and passes in the first list as its arguments. It assumes the result will be a function and that function is then executed with the second list as its arguments. It goes on and on to infinity if you'd like.
+
+But let's not go on to infinity. Instead, let's talk about MapleScript's unique technique for error handling. In JavaScript, you'll usually use a `try/catch` block. In MapleScript, however, you will not. You'll use the built-in event bus.
+
+```
+# MapleScript
+(make failer []
+  (attempt :event-channel
+    (do
+      (JSON.parse 'asdfasdf'))))
+
+(handle :event-channel
+  (fn [err]
+    (log err)))
+
+(failer)
+
+# JavaScript
+function failer() {
+  try {
+    JSON.parse('asdfasdf');
+  } catch (err) {
+    eventBus.signal([Symbol.for('event-channel')], err);
+  }
+}
+
+eventBus.subscribe([Symbol.for('event-channel')], function (err) {
+  console.log(err);
+});
+
+failer();
+```
+
+This technique even works with async functions.
+
+```
+# MapleScript
+(make failer (async :event-channel []
+  (await (doSomething))
+  (await (doSomething))
+  (end)))
+
+(handle :event-channel (fn [err]
+  (you get the idea)))  
+```
+
+Of course, you'll probably want to run that through Babel or some such until async/await starts getting implemented natively.
 
 ## How to Use It
 

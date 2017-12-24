@@ -148,22 +148,6 @@ describe('Library', () => {
       assert.ok(result);
     });
 
-    it('createElement', () => {
-      assert.throws(function () { lib.createElement('div') });
-
-      global.document = global.document || mockDocument;
-
-      const tree = lib.createElement('div', {id: 'foo', [Symbol.for('class')]: 'bar'}, [
-        "text node"
-      ]);
-
-      assert.ok(typeof tree === 'object');
-      assert.equal(tree.type, 'div', 'created a div');
-      assert.equal(tree.attributes.id, 'foo', 'applied an id');
-      assert.equal(tree.attributes.class, 'bar', 'applied a class');
-      assert.equal(tree.children[0].type, 'text', 'created a child text node');
-    });
-
     it('dangerouslyMutate', () => {
       const foo = {bar: 'baz'};
       lib.dangerouslyMutate('bar', 'quux', foo);
@@ -378,6 +362,21 @@ describe('Library', () => {
 
       assert.deepEqual(fooAfter, fooRemove, 'new object looks correct');
       assert.deepEqual(barAfter, barRemove, 'new array looks correct');
+    });
+
+    it('vdom:create', () => {
+      const vdom = lib.vdom[Symbol.for('create')]('div', {
+        [Symbol.for('class')]: 'foo',
+        [Symbol.for('data-foo')]: 'bar'
+      }, [
+        lib.vdom[Symbol.for('create')]('span'),
+        null
+      ]);
+
+      assert.ok(vdom);
+      assert.equal(vdom.tagName, 'DIV', 'produces a div tag');
+      assert.equal(vdom.children.length, 1, 'creates a child element and ignores a null element');
+      assert.equal(Object.keys(vdom.properties.attributes).length, 2, 'creates 2 properties on the div');
     });
 
   });

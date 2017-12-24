@@ -21,6 +21,10 @@ function isSystemPattern(word) {
   return /[^_]_$/.test(word);
 }
 
+function firstPiece(word) {
+  return word.split(/[\:\.]/)[0];
+}
+
 function splitter(word) {
   const out = [];
   let accum = {type: null, piece: ''};
@@ -121,13 +125,16 @@ compile(nodes.IdentifierNode, function () {
 
   } else if (/\.|\:/.test(word)) {
     const lookupChain = splitter(word);
-    word = lookupChain.map(node => {
+    word = lookupChain.map((node, index) => {
       if (node.type === ':') {
         return `[Symbol.for("${stripQ(node.piece)}")]` + maybeQ(node.piece);
       }
       if (node.type === '.') {
         const cleanPiece = stripQ(node.piece);
         return (/^\d+$/.test(cleanPiece) ? `[${cleanPiece}]` : `["${cleanPiece}"]`) + maybeQ(node.piece);
+      }
+      if (index === 0 && isBif(node.piece)) {
+        node.piece = 'MAPLE_.' + node.piece;
       }
       return node.piece;
     }).join('');

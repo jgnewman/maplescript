@@ -4,6 +4,15 @@
 
 var MAPLE_ = {
 
+  /* Dependencies */
+
+  vmanip_: {
+    h: require('virtual-dom/h'),
+    diff: require('virtual-dom/diff'),
+    patch: require('virtual-dom/patch'),
+    renderPhysical: require('virtual-dom/create-element')
+  },
+
   /* Private functions */
 
   // This is where we'll store all event channels.
@@ -107,6 +116,26 @@ var MAPLE_ = {
     return matches;
   },
 
+  // Attrs should all be symbols and should match real attr names exactly.
+  // No fancy camel casing or anything like that.
+  mapAttrsToVirtualAttrs_: function (attrs) {
+    var out = {
+      flat: {},
+      nested: { attributes: {} }
+    };
+    attrs && Object.getOwnPropertySymbols(attrs).forEach(function (key) {
+      var value = attrs[key];
+      var strKey = Symbol.keyFor(key);
+      out.flat[key] = value;
+      if (typeof value === 'function') {
+        out.nested[strKey] = value;
+      } else {
+        out.nested.attributes[strKey] = value;
+      }
+    });
+    return out;
+  },
+
   /* Public functions */
 
   apply: function (fn, list, ctx) {
@@ -122,45 +151,6 @@ var MAPLE_ = {
     } catch (err) {
       MAPLE_.signal(channel, err);
     }
-  },
-
-  createElement: function (type, attrs, body) {
-    var a = attrs || {};
-    var b = body  || [];
-
-    // Die if we're not in a browser environment.
-    if (typeof document === 'undefined') {
-      return MAPLE_.die('No HTML document is available.');
-    }
-
-    // User-defined html blocks will begin with capital letters.
-    if (typeof type === 'function') {
-      return type(a, b);
-    }
-
-    // Create an element and set attributes.
-    var elem = document.createElement(type);
-    Object.keys(a).concat(Object.getOwnPropertySymbols(a)).forEach(function (key) {
-      var strKey = typeof key === 'symbol' ? Symbol.keyFor(key) : key;
-      return elem.setAttribute(strKey.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(), a[key]);
-    });
-
-    function append(node) {
-      elem.appendChild(MAPLE_.dataType(node) === 'htmlelement' ? node : document.createTextNode(node))
-    }
-
-    // Append children.
-    b.forEach(function (node) {
-      if (Array.isArray(node)) {
-        node.forEach(function (subnode) {
-          append(subnode);
-        });
-      } else {
-        append(node);
-      }
-    });
-
-    return elem;
   },
 
   dangerouslyMutate: function (keyOrIndex, val, collection) {
@@ -373,6 +363,39 @@ var MAPLE_ = {
       const replacer = {};
       replacer[keyOrIndex] = val;
       return MAPLE_.assign_(collection, replacer);
+    }
+  },
+
+  vdom: {
+
+    [Symbol.for('create')]: function (type, attrs, children) {
+      var attributes = MAPLE_.mapAttrsToVirtualAttrs_(attrs);
+      var childNodes = arguments.length === 3 ? children : [];
+      if (!Array.isArray(childNodes)) {
+        childNodes = [childNodes];
+      }
+      if (typeof type === 'function') {
+        return type(attributes.flat, childNodes);
+      }
+      return MAPLE_.vmanip_.h(type, attributes.nested, childNodes || []);
+    },
+
+    [Symbol.for('diff')]: function (oldVirtualDOM, newVirtualDOM) {
+      return MAPLE_.vmanip_.diff(oldVirtualDOM, newVirtualDOM);
+    },
+
+    [Symbol.for('injectNodes')]: function (renderedTree, selector) {
+      selector = typeof selector === 'string' ? MAPLE_.dom(selector) : selector;
+      selector.innerHTML = '';
+      return selector.appendChild(renderedTree);
+    },
+
+    [Symbol.for('patchNodes')]: function (renderedTree, patches) {
+      return MAPLE_.vmanip_.patch(renderedTree, patches);
+    },
+
+    [Symbol.for('render')]: function (virtualDOM) {
+      return MAPLE_.vmanip_.renderPhysical(virtualDOM);
     }
   },
 

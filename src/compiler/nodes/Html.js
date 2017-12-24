@@ -19,5 +19,5 @@ compile(nodes.HtmlNode, function () {
   if (!/^[A-Z]/.test(name)) {
     name = '"' + name + '"';
   }
-  return `MAPLE_.createElement(${name}, ${attrs}, [${body ? '\n' + body + '\n' : ''}])`;
+  return `MAPLE_.vdom[Symbol.for("create")](${name}, ${attrs}, [${body ? '\n' + body + '\n' : ''}])`;
 });
