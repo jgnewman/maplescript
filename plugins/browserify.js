@@ -67,7 +67,11 @@ Mapleify.prototype._transform = function (buf, enc, callback) {
 
 Mapleify.prototype._flush = function (callback) {
   try {
-    var result = maple.compileCode(this._data.toString(), null, { finalize: true });
+    var isCompilingSelf = this._opts.isMapleProjectDirectory;
+    var result = maple.compileCode(this._data.toString(), null, {
+      finalize: true,
+      isMapleProjectDirectory: isCompilingSelf
+    });
     this.emit("mapleify", result, this._filename);
     this.push(result);
   } catch(err) {

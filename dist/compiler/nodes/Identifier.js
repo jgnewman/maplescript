@@ -24,6 +24,10 @@ function isSystemPattern(word) {
   );
 }
 
+function firstPiece(word) {
+  return word.split(/[\:\.]/)[0];
+}
+
 function splitter(word) {
   var out = [];
   var accum = { type: null, piece: '' };
@@ -107,16 +111,19 @@ function unconfidentLookup(precompiled) {
 
   if (isBif(stripQ(word))) {
     word = word.replace(/^\>\>\=/, 'callChain_');
-    word = 'PINE_.' + word;
+    word = 'MAPLE_.' + word;
   } else if (/\.|\:/.test(word)) {
     var lookupChain = splitter(word);
-    word = lookupChain.map(function (node) {
+    word = lookupChain.map(function (node, index) {
       if (node.type === ':') {
         return '[Symbol.for("' + stripQ(node.piece) + '")]' + maybeQ(node.piece);
       }
       if (node.type === '.') {
         var cleanPiece = stripQ(node.piece);
         return (/^\d+$/.test(cleanPiece) ? '[' + cleanPiece + ']' : '["' + cleanPiece + '"]') + maybeQ(node.piece);
+      }
+      if (index === 0 && isBif(node.piece)) {
+        node.piece = 'MAPLE_.' + node.piece;
       }
       return node.piece;
     }).join('');

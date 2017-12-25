@@ -240,7 +240,29 @@ context = context.then(result => createPromise());
 context = context.then(result => console.log(result));
 ```
 
-And while we're talking about special syntaxes, there's one more you should know about. This one is called a call chain. It solves another Lisp syntax problem. In JavaScript, if the result of a function call is another function, you can call it pretty easily. But our s-expressions make it kind of annoying. Consider:
+Context chains solve another syntax problem too. Often times you'll want to call a function and pass its result to another function, then maybe even pass _that_ result to _another_ function. It looks something like this:
+
+```
+# MapleScript
+(baz (bar (foo 1 2) 3 4) 5 6)
+
+# JavaScript
+baz(bar(foo(1, 2), 3, 4), 5, 6)
+```
+
+But with a context chain you can make that a heck of a lot nicer:
+
+```
+# MapleScript
+
+(-> (foo 1 2)
+    (bar @ 3 4)
+    (baz @ 5 6))
+```
+
+Because the result of each function call becomes the `this` context of the next function call, everything can now be written sequentially, making it much easier to both read and write.
+
+And while we're talking about special syntaxes, there's one more you should know about. This one is called a call chain. It solves another Lisp-specific syntax problem. In JavaScript, if the result of a function call is another function, you can call it pretty easily. But our s-expressions make it kind of annoying. Consider:
 
 ```
 # JavaScript
@@ -256,6 +278,10 @@ Any time you have to start stacking parentheses on the left hand side of an expr
 # MapleScript
 
 (>>= foo [1 2] [3 4] [5 6])
+
+# You can also use a context chain here if you want
+
+(-> (foo 1 2) (@ 3 4) (@ 5 6))
 ```
 
 You might say that's even easier to read than the JavaScript way.
@@ -335,7 +361,7 @@ import maple from 'maplescript/plugins/webpack';
 {
   module: {
     loaders: [
-      { test: /\.maple$/, loader: maple },
+      { test: /\.maple$/, loader: maple() },
     ]
   }
 }

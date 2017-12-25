@@ -7,7 +7,7 @@ var merge = require('merge');
 
 var PluginError = gutil.PluginError;
 
-module.exports = function () {
+module.exports = function (opts) {
   function replaceExtension(path) {
     return gutil.replaceExtension(path, '.js');
   }
@@ -27,7 +27,7 @@ module.exports = function () {
       } else {
         data = result;
       }
-    }, {finalize: true});
+    }, {finalize: true, isMapleProjectDirectory: opts && opts.isMapleProjectDirectory});
 
     if (err) {
       return cb(new PluginError('gulp-maple', err));

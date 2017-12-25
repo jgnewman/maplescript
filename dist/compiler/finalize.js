@@ -15,8 +15,8 @@ function prepend(str, withStr) {
   return withStr + '\n' + str;
 }
 
-function finalize(tree, isPineProjectDirectory) {
-  var libLocation = isPineProjectDirectory ? _path2.default.resolve(__dirname, '../', '../', 'library') : 'pine/library';
-  tree.shared.output = prepend(tree.shared.output, 'var PINE_ = require("' + libLocation + '");\n');
+function finalize(tree, isMapleProjectDirectory) {
+  var libLocation = isMapleProjectDirectory ? _path2.default.resolve(__dirname, '../', '../', 'library') : 'maplescript/library';
+  tree.shared.output = prepend(tree.shared.output, 'var MAPLE_ = require("' + libLocation + '");\n');
   return tree;
 }

@@ -6,7 +6,9 @@
 # SOURCEMAPS
 # cleaner readme
 
-foo:bar-baz
+(-> (foo :begin)
+    (bar @)
+    (baz @))
 
 ###
 true
@@ -16,6 +18,8 @@ undefined
 0xffee
 12e4
 1234512
+
+foo:bar-baz
 
 `foo ${(and stuff)} bar`
 

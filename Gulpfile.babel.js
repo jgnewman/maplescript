@@ -9,6 +9,7 @@ import babel from 'gulp-babel';
 import uglify from 'gulp-uglify';
 import server from 'gulp-server-livereload';
 import browserify from 'browserify';
+import mapleify from './plugins/browserify';
 import source from 'vinyl-source-stream';
 import { argv } from 'yargs';
 import { compile } from './src/compiler/compiler';
@@ -42,17 +43,11 @@ gulp.task('test', next => {
 });
 
 gulp.task('private:build-test-irl', next => {
-  compile('./test-irl/src/app.maple', function (err, result) {
-    if (err) throw err;
-    fs.writeFile('./test-irl/.browserifycache.js', result, function (err) {
-      if (err) throw err;
-      browserify('./test-irl/.browserifycache.js')
-        .bundle()
-        .pipe(source('app.js'))
-        .pipe(gulp.dest('./test-irl/output/'));
-      next();
-    });
-  }, {finalize: true, isMapleProjectDirectory: true});
+  return browserify({entries: ['./test-irl/src/app.maple'], extensions: ['.maple']})
+         .transform(mapleify, {isMapleProjectDirectory: true})
+         .bundle()
+         .pipe(source('app.js'))
+         .pipe(gulp.dest('./test-irl/output/'));
 });
 
 gulp.task('private:serve', () => {

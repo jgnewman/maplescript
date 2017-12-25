@@ -1,0 +1,40 @@
+
+
+(make render [vtree target]
+  (vdom:injectNodes vtree target))
+
+# Run a function before a node is rendered
+(make beforeRender [customElem fun]
+  (fn [attrs children]
+    (fun attrs children)
+    (customElem attrs children)))
+
+# Run a function after a node is rendered
+(make afterRender [customElem fun]
+  (fn [attrs children]
+    (customElem attrs children)
+    (fun attrs children)))
+
+(export [render])
+
+###
+
+(import 'maplescript/syrup' syrup)
+
+(elem TitleElem [attrs children]
+  <h1 { class: attrs:class }>
+    children
+  </h1>
+)
+
+(make TitleComponent
+  (-> (syrup:component TitleElem)
+      (syrup:beforeRender @ (fn [] ...))
+      (syrup:afterRender @ (fn [] ...))))
+
+(syrup:render TitleComponent state '#app')
+
+# In order for lifecycle methods to _really_ work, we'll need virtual-dom
+# to give us events for when things will changes
+
+###

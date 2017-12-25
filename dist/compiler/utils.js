@@ -105,7 +105,7 @@ function ensurePolymorphicStructure(bodyItems) {
 
 // Official list of exposed system functions
 function getExposedFns() {
-  return [">>=", 'attempt', 'apply', 'createElement', 'dangerouslyMutate', 'dataType', 'die', 'dom', 'domArray', 'eql', 'get', 'gt', 'gte', 'handle', 'head', 'instance', 'instanceof', 'keys', 'last', 'lead', 'log', 'lt', 'lte', 'noop', 'not', 'random', 'range', 'remove', 'signal', 'tail', 'throw', 'unhandle', 'update', 'warn'];
+  return [">>=", 'attempt', 'apply', 'dangerouslyMutate', 'dataType', 'die', 'dom', 'domArray', 'eql', 'get', 'gt', 'gte', 'handle', 'head', 'instance', 'instanceof', 'keys', 'last', 'lead', 'log', 'lt', 'lte', 'merge', 'noop', 'not', 'random', 'range', 'remove', 'signal', 'tail', 'throw', 'unhandle', 'update', 'vdom', 'warn'];
 }
 
 function getOperatorForms() {
@@ -117,7 +117,7 @@ function getMsgPassingFns() {
 }
 
 function getSpecialForms() {
-  return ['->', 'all', 'any', 'async', 'await', 'do', 'elem', 'export', 'fn', 'if', 'import', 'make', 'none'];
+  return ['->', 'all', 'any', 'async', 'await', 'destr', 'do', 'elem', 'export', 'fn', 'if', 'import', 'make', 'none'];
 }
 
 // Official list of reserved words

@@ -40,18 +40,21 @@ function compilePolymorph(body) {
   // Compile conditional function funneling
   var compiledBodies = body.map(function (morph, index) {
     var actions = morph.items.slice(2);
+    var paramList = morph.items[1];
 
     var vars = getVarsFromParamList(morph.items[1].items, true);
 
-    var params = "[" + morph.items[1].items.map(function (param) {
+    var params = "[" + paramList.items.map(function (param) {
       return '{type:"' + param.type + '", value: "' + param.compile(true).replace(/(\'|\"|\`)/g, "\\$1") + '" }';
     }).join(', ') + "]";
 
-    return "if (PINE_.match_(args, " + params + ")) {\n" + vars.map(function (obj) {
+    var qualifier = paramList.qualifier ? paramList.qualifier.compile(true) : null;
+
+    return "if (MAPLE_.match_(args, " + params + ")) {\n" + vars.map(function (obj) {
       return "var " + obj.varName + " = " + obj.position + ';\n';
-    }).join('') + actions.map(function (action, index) {
+    }).join('') + (qualifier ? 'if (' + qualifier + ') {\n' : "") + actions.map(function (action, index) {
       return (index === actions.length - 1 ? "return " : "") + action.compile(true);
-    }).join(';\n') + ';\n' + "}\n";
+    }).join(';\n') + ';\n' + (qualifier ? "}\n" : "") + "}\n";
   }).join('');
 
   var errLine = "throw new Error('Could not find an argument match.');\n";
@@ -93,7 +96,7 @@ function compileFunction(body, async) {
 
   // Put the pieces together
   if (async && attemptChannel) {
-    return 'async function () {\n      try {\n        ' + argsLine + '\n        ' + varsLine + '\n        ' + cleanBody + '\n      } catch (err_) {\n        return PINE_.signal(' + attemptChannel + ', err_);\n      }\n    }';
+    return 'async function () {\n      try {\n        ' + argsLine + '\n        ' + varsLine + '\n        ' + cleanBody + '\n      } catch (err_) {\n        return MAPLE_.signal(' + attemptChannel + ', err_);\n      }\n    }';
   } else {
     return (async ? "async " : "") + "function () {\n" + argsLine + varsLine + cleanBody + "\n}";
   }

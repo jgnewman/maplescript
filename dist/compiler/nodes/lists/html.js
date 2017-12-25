@@ -23,7 +23,7 @@ function compileHtmlDefinition(items) {
     (0, _utils.die)(items[0], 'New html tags must begin with a capital letter.');
   }
 
-  return '(PINE_.html_.' + name + ' = PINE_.html_.' + name + ' || function (' + params + ') {\n    const out_ = ' + body + ';\n    if (out_ && PINE_.dataType(out_) !== \'htmlelement\') {\n      throw new Error(\'If ' + name + ' returns a truthy value, that value must be a single html element.\');\n    }\n    return out_;\n  })';
+  return 'const ' + name + ' = function (' + params + ') {\n    const out_ = ' + body + ';\n    return out_ || null;\n  }';
 }
 
 exports.default = compileHtmlDefinition;

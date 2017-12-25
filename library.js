@@ -2,11 +2,16 @@
  * Maple Language Function Library
  */
 
+function s_(val) {
+  return Symbol.for(val);
+}
+
 var MAPLE_ = {
 
   /* Dependencies */
 
   vmanip_: {
+    Vnode: require('virtual-dom/vnode/vnode'),
     h: require('virtual-dom/h'),
     diff: require('virtual-dom/diff'),
     patch: require('virtual-dom/patch'),
@@ -143,7 +148,7 @@ var MAPLE_ = {
   },
 
   attempt: function (channel, fun) {
-    if (MAPLE_.dataType(channel) !== 'symbol') {
+    if (MAPLE_.dataType(channel) !== s_('symbol')) {
       throw new Error('Signal channels must be identified with symbols.');
     }
     try {
@@ -161,18 +166,19 @@ var MAPLE_ = {
   dataType: function (val) {
     var type = typeof val;
     switch (type) {
-      case 'symbol': return 'symbol';
-      case 'number': return isNaN(val) ? 'nan' : type;
+      case 'symbol': return s_('symbol');
+      case 'number': return isNaN(val) ? s_('nan') : s_(type);
       case 'object':
-        if (val === null) return 'null';
-        if (Array.isArray(val)) return 'array';
-        if (val instanceof Date) return 'date';
-        if (val instanceof RegExp) return 'regexp';
-        if (typeof HTMLElement !== 'undefined' && val instanceof HTMLElement) return 'htmlelement';
+        if (val === null) return s_('null');
+        if (Array.isArray(val)) return s_('array');
+        if (val instanceof MAPLE_.vmanip_.Vnode) return s_('vnode');
+        if (val instanceof Date) return s_('date');
+        if (val instanceof RegExp) return s_('regexp');
+        if (typeof HTMLElement !== 'undefined' && val instanceof HTMLElement) return s_('htmlelement');
         if ( (typeof Worker !== 'undefined' && val instanceof Worker) ||
-             (val.constructor.name === 'ChildProcess' && typeof val.pid === 'number') ) return 'process';
-        return type;
-      default: return type;
+             (val.constructor.name === 'ChildProcess' && typeof val.pid === 'number') ) return s_('process');
+        return s_(type);
+      default: return s_(type);
     }
   },
 
@@ -214,7 +220,7 @@ var MAPLE_ = {
   },
 
   handle: function (channel, fun) {
-    if (MAPLE_.dataType(channel) !== 'symbol') {
+    if (MAPLE_.dataType(channel) !== s_('symbol')) {
       throw new Error('Signal channels must be identified with symbols.');
     }
     const handlers = MAPLE_.channels_[channel] = MAPLE_.channels_[channel] || [];
@@ -264,7 +270,7 @@ var MAPLE_ = {
     var type = MAPLE_.dataType(arguments[0]);
     var out;
     switch (type) {
-      case 'array':
+      case s_('array'):
         out = [];
         args.forEach(function (arg) {
           arg.forEach(function (item) {
@@ -272,7 +278,7 @@ var MAPLE_ = {
           });
         });
         return out;
-      case 'object':
+      case s_('object'):
         out = {};
         args.forEach(function (arg) {
           MAPLE_.keys(arg).forEach(function (key) {
@@ -319,7 +325,7 @@ var MAPLE_ = {
   },
 
   signal: function (channel, message) {
-    if (MAPLE_.dataType(channel) !== 'symbol') {
+    if (MAPLE_.dataType(channel) !== s_('symbol')) {
       throw new Error('Signal channels must be identified with symbols.');
     }
     const handlers = MAPLE_.channels_[channel];
@@ -368,7 +374,7 @@ var MAPLE_ = {
 
   vdom: {
 
-    [Symbol.for('create')]: function (type, attrs, children) {
+    [s_('create')]: function (type, attrs, children) {
       var attributes = MAPLE_.mapAttrsToVirtualAttrs_(attrs);
       var childNodes = arguments.length === 3 ? children : [];
       if (!Array.isArray(childNodes)) {
@@ -380,21 +386,30 @@ var MAPLE_ = {
       return MAPLE_.vmanip_.h(type, attributes.nested, childNodes || []);
     },
 
-    [Symbol.for('diff')]: function (oldVirtualDOM, newVirtualDOM) {
+    [s_('diff')]: function (oldVirtualDOM, newVirtualDOM) {
       return MAPLE_.vmanip_.diff(oldVirtualDOM, newVirtualDOM);
     },
 
-    [Symbol.for('injectNodes')]: function (renderedTree, selector) {
-      selector = typeof selector === 'string' ? MAPLE_.dom(selector) : selector;
+    [s_('injectNodes')]: function (renderedTree, selector) {
+
+      renderedTree = renderedTree instanceof MAPLE_.vmanip_.Vnode
+        ? MAPLE_.vdom[s_('render')](renderedTree)
+        : renderedTree;
+
+      selector = typeof selector === 'string'
+        ? MAPLE_.dom(selector)
+        : selector;
+
       selector.innerHTML = '';
-      return selector.appendChild(renderedTree);
+      selector.appendChild(renderedTree);
+      return renderedTree;
     },
 
-    [Symbol.for('patchNodes')]: function (renderedTree, patches) {
+    [s_('patchNodes')]: function (renderedTree, patches) {
       return MAPLE_.vmanip_.patch(renderedTree, patches);
     },
 
-    [Symbol.for('render')]: function (virtualDOM) {
+    [s_('render')]: function (virtualDOM) {
       return MAPLE_.vmanip_.renderPhysical(virtualDOM);
     }
   },

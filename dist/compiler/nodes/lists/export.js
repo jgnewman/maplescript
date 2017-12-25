@@ -15,7 +15,7 @@ function aritize(word) {
   }
   return {
     clean: word,
-    aritized: arity ? 'PINE_.aritize_(' + word + ', ' + arity + ')' : word
+    aritized: arity ? 'MAPLE_.aritize_(' + word + ', ' + arity + ')' : word
   };
 }
 

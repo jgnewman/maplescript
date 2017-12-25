@@ -18,5 +18,8 @@ function compileAttrs(attrs) {
   if (!this.selfClosing && close !== name.replace(/[\'\"\`]/g, '')) {
     (0, _utils.die)(this, 'Closing tag "' + close + '" does not match opening tag ' + name + '.');
   }
-  return 'PINE_.createElement("' + name + '", ' + attrs + ', [' + (body ? '\n' + body + '\n' : '') + '])';
+  if (!/^[A-Z]/.test(name)) {
+    name = '"' + name + '"';
+  }
+  return 'MAPLE_.vdom[Symbol.for("create")](' + name + ', ' + attrs + ', [' + (body ? '\n' + body + '\n' : '') + '])';
 });

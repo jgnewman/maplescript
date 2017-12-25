@@ -42,6 +42,10 @@ var _assignment = require('./lists/assignment');
 
 var _assignment2 = _interopRequireDefault(_assignment);
 
+var _destructure = require('./lists/destructure');
+
+var _destructure2 = _interopRequireDefault(_destructure);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function compileTail(arr) {
@@ -62,6 +66,8 @@ function compileSpecial(form, items) {
       return _function2.default.call(this, items, true);
     case 'await':
       return _await2.default.call(this, items);
+    case 'destr':
+      return _destructure2.default.call(this, items);
     case 'do':
       return _immediateBlock2.default.call(this, items);
     case 'elem':

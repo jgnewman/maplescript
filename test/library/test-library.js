@@ -3,6 +3,10 @@ import lib from  '../../library';
 
 function noop() {}
 
+function s(val) {
+  return Symbol.for(val);
+}
+
 const mockDocument = {
 
   querySelector(arg) {
@@ -72,14 +76,14 @@ describe('Library', () => {
     });
 
     it('assign_', () => {
-      const x = {[Symbol.for('foo')]: 1, bar: 2};
-      const y = {[Symbol.for('baz')]: 3, qux: 4};
+      const x = {[s('foo')]: 1, bar: 2};
+      const y = {[s('baz')]: 3, qux: 4};
 
       const merged = lib.assign_(x, y);
 
       assert.deepEqual(merged, {
-        [Symbol.for('foo')]: 1,
-        [Symbol.for('baz')]: 3,
+        [s('foo')]: 1,
+        [s('baz')]: 3,
         bar: 2,
         qux: 4
       });
@@ -108,7 +112,7 @@ describe('Library', () => {
         {type: 'Identifier', value: 'x'}
       ]), true, 'matches 1 arg of identifier type');
 
-      assert.equal(lib.match_([Symbol.for("x"), 0], [
+      assert.equal(lib.match_([s("x"), 0], [
         {type: 'Symbol', value: 'Symbol.for("x")'},
         {type: 'Number', value: '0'}
       ]), true, 'matches 2 values of non-identifier type');
@@ -137,11 +141,11 @@ describe('Library', () => {
 
       assert.throws(function () { lib.attempt('foo', noop) });
 
-      lib.handle(Symbol.for('foo'), err => {
+      lib.handle(s('foo'), err => {
         result = err;
       });
 
-      lib.attempt(Symbol.for('foo'), () => {
+      lib.attempt(s('foo'), () => {
         JSON.parse('foo');
       });
 
@@ -155,15 +159,16 @@ describe('Library', () => {
     });
 
     it('dataType', () => {
-      assert.equal(lib.dataType('foo'), 'string', 'detects a string');
-      assert.equal(lib.dataType(Symbol.for('foo')), 'symbol', 'detects a symbol');
-      assert.equal(lib.dataType(4), 'number', 'detects a number');
-      assert.equal(lib.dataType(NaN), 'nan', 'detects NaN');
-      assert.equal(lib.dataType(null), 'null', 'detects null');
-      assert.equal(lib.dataType([]), 'array', 'detects an array');
-      assert.equal(lib.dataType(new Date()), 'date', 'detects a date');
-      assert.equal(lib.dataType(/foo/), 'regexp', 'detects a string');
-      assert.equal(lib.dataType({}), 'object', 'detects other objects');
+      assert.equal(lib.dataType('foo'), s('string'), 'detects a string');
+      assert.equal(lib.dataType(s('foo')), s('symbol'), 'detects a symbol');
+      assert.equal(lib.dataType(4), s('number'), 'detects a number');
+      assert.equal(lib.dataType(NaN), s('nan'), 'detects NaN');
+      assert.equal(lib.dataType(null), s('null'), 'detects null');
+      assert.equal(lib.dataType([]), s('array'), 'detects an array');
+      assert.equal(lib.dataType(new Date()), s('date'), 'detects a date');
+      assert.equal(lib.dataType(/foo/), s('regexp'), 'detects a string');
+      assert.equal(lib.dataType({}), s('object'), 'detects other objects');
+      assert.equal(lib.dataType(lib.vdom[s('create')]('div')), s('vnode'), 'detects a virtual dom node')
     });
 
     it('die', () => {
@@ -212,8 +217,8 @@ describe('Library', () => {
 
     it('handle', () => {
       lib.channels_ = {};
-      lib.handle(Symbol.for('foo'), noop);
-      assert.equal(lib.channels_[Symbol.for('foo')][0], noop);
+      lib.handle(s('foo'), noop);
+      assert.equal(lib.channels_[s('foo')][0], noop);
       assert.throws(function () { lib.handle('foo', noop) });
     });
 
@@ -234,14 +239,14 @@ describe('Library', () => {
     });
 
     it('keys', () => {
-      const foo = {[Symbol.for('bar')]: 1, baz: 2};
+      const foo = {[s('bar')]: 1, baz: 2};
       assert.deepEqual(lib.keys(foo).sort((a, b) => {
         if (typeof a !== 'string') {
           return -1;
         } else {
           return 1;
         }
-      }), [Symbol.for('bar'), 'baz']);
+      }), [s('bar'), 'baz']);
     });
 
     it('last', () => {
@@ -319,11 +324,11 @@ describe('Library', () => {
       let result = false;
       lib.channels_ = {};
 
-      lib.handle(Symbol.for('foo'), sig => {
+      lib.handle(s('foo'), sig => {
         result = sig;
       });
 
-      lib.signal(Symbol.for('foo'), true);
+      lib.signal(s('foo'), true);
 
       assert.equal(result, true, 'signal was sent and received');
       assert.throws(function () { lib.signal('foo', noop) });
@@ -341,11 +346,11 @@ describe('Library', () => {
     it('unhandle', () => {
       lib.channels_ = {};
 
-      lib.handle(Symbol.for('foo'), noop);
-      assert.equal(lib.channels_[Symbol.for('foo')][0], noop, 'function was added');
+      lib.handle(s('foo'), noop);
+      assert.equal(lib.channels_[s('foo')][0], noop, 'function was added');
 
-      lib.unhandle(Symbol.for('foo'), noop);
-      assert.equal(lib.channels_[Symbol.for('foo')].length, 0, 'function was removed');
+      lib.unhandle(s('foo'), noop);
+      assert.equal(lib.channels_[s('foo')].length, 0, 'function was removed');
     });
 
     it('update', () => {
@@ -365,11 +370,11 @@ describe('Library', () => {
     });
 
     it('vdom:create', () => {
-      const vdom = lib.vdom[Symbol.for('create')]('div', {
-        [Symbol.for('class')]: 'foo',
-        [Symbol.for('data-foo')]: 'bar'
+      const vdom = lib.vdom[s('create')]('div', {
+        [s('class')]: 'foo',
+        [s('data-foo')]: 'bar'
       }, [
-        lib.vdom[Symbol.for('create')]('span'),
+        lib.vdom[s('create')]('span'),
         null
       ]);
 

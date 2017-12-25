@@ -87,7 +87,7 @@ function compileCode(str, callback, options) {
   // Finalize the code
   if (options.finalize) {
     try {
-      (0, _finalize2.default)(tree, options.isPineProjectDirectory);
+      (0, _finalize2.default)(tree, options.isMapleProjectDirectory);
     } catch (err3) {
       if (callback) {
         return callback(err3);
