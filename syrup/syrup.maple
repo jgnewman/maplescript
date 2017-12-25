@@ -15,7 +15,11 @@
     (customElem attrs children)
     (fun attrs children)))
 
-(export [render])
+(export [
+  render
+  beforeRender
+  afterRender
+])
 
 ###
 
@@ -35,6 +39,6 @@
 (syrup:render TitleComponent state '#app')
 
 # In order for lifecycle methods to _really_ work, we'll need virtual-dom
-# to give us events for when things will changes
+# to give us events for when things will be added/removed
 
 ###

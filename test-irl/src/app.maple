@@ -23,6 +23,7 @@
   (of [prevDOM prevNodes]
     (make newDOM (buildDOM))
     (make changes (vdom:diff prevDOM newDOM))
+    (log changes)
     (vdom:patchNodes prevNodes changes)
     (setTimeout (fn [] (repeater newDOM prevNodes)) 2000)))
 
