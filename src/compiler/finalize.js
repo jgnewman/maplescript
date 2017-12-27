@@ -6,6 +6,6 @@ function prepend(str, withStr) {
 
 export default function finalize(tree, isMapleProjectDirectory) {
   const libLocation = isMapleProjectDirectory ? path.resolve(__dirname, '../', '../', 'library') : 'maplescript/library';
-  tree.shared.output = prepend(tree.shared.output, `var MAPLE_ = require("${libLocation}");\n`);
+  tree.shared.output = prepend(tree.shared.output, `var MAPLE_ = m = require("${libLocation}");\n`);
   return tree;
 }

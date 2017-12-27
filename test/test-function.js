@@ -83,7 +83,7 @@ describe('Functions', () => {
           const foo = await bar();
           return foo;
         } catch (err_) {
-          return MAPLE_.signal(Symbol.for("err"), err_);
+          return MAPLE_[Symbol.for("signal")](Symbol.for("err"), err_);
         }
       };
     `);

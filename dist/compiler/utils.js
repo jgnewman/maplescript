@@ -105,11 +105,11 @@ function ensurePolymorphicStructure(bodyItems) {
 
 // Official list of exposed system functions
 function getExposedFns() {
-  return [">>=", 'attempt', 'apply', 'dangerouslyMutate', 'dataType', 'die', 'dom', 'domArray', 'eql', 'get', 'gt', 'gte', 'handle', 'head', 'instance', 'instanceof', 'keys', 'last', 'lead', 'log', 'lt', 'lte', 'merge', 'noop', 'not', 'random', 'range', 'remove', 'signal', 'tail', 'throw', 'unhandle', 'update', 'vdom', 'warn'];
+  return [">>="];
 }
 
 function getOperatorForms() {
-  return ["+", "-", "*", "/", "%", "=", "!="];
+  return ["+", "-", "*", "/", "%", "=", "!=", "?<", "?>", "<=", ">="];
 }
 
 function getMsgPassingFns() {
@@ -117,12 +117,12 @@ function getMsgPassingFns() {
 }
 
 function getSpecialForms() {
-  return ['->', 'all', 'any', 'async', 'await', 'destr', 'do', 'elem', 'export', 'fn', 'if', 'import', 'make', 'none'];
+  return ['->', 'all', 'any', 'async', 'await', 'destr', 'do', 'element', 'export', 'fn', 'if', 'import', 'make', 'none', 'not'];
 }
 
 // Official list of reserved words
 function getReservedWords() {
-  return ['break', 'catch', 'class', 'const', 'continue', 'default', 'delete', 'else', 'extends', 'enum', 'for', 'function', 'if', 'in', 'let', 'of', 'return', 'static', 'super', 'switch', 'try', 'typeof', 'var', 'while', 'with'];
+  return ['break', 'catch', 'class', 'const', 'continue', 'default', 'delete', 'else', 'extends', 'enum', 'for', 'function', 'if', 'in', 'instanceof', 'let', 'of', 'return', 'static', 'super', 'switch', 'try', 'typeof', 'var', 'while', 'with'];
 }
 
 exports.parser = _parser2.default;

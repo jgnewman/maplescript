@@ -44,6 +44,10 @@
 
 "->"                                  return "IDENTIFIER";
 ">>="                                 return "IDENTIFIER";
+"?<"                                  return "IDENTIFIER";
+"?>"                                  return "IDENTIFIER";
+"<="                                  return "IDENTIFIER";
+">="                                  return "IDENTIFIER";
 
 \<\/[^\>]+\>                          return "CLOSER";
 \<\/\s*                               return "</";

@@ -1,0 +1,62 @@
+(make isRemoval [patch]
+  (all
+    (= patch.patch undefined)
+    (= patch.type 7)))
+
+(make isAddition [patch]
+  (all
+    (= (m:typeof patch.patch) :object)
+    (= patch.type 6)
+    (= patch.vNode null)))
+
+(make flattenHooks
+  (of [patches] (flattenHooks patches [] []))
+  (of [[] removals additions] { :removals removals :additions additions })
+  (of [[first|rest] removals additions]
+    (make childHooks
+      (if
+        patch.patch?.children
+          (do
+            (make children (Array.prototype.slice.call patch.patch.children))
+            (children.map (fn [child] (flattenHooks child))))
+        { :removals [] :additions [] }))
+    (if
+      (isRemoval first)
+        (flattenHooks
+          rest
+          (removals.concat childHooks:removals first)
+          (additions.concat childHooks:additions))
+      (isAddition patch)
+        (flattenHooks
+          rest
+          (removals.concat childHooks:removals)
+          (additions.concat childHooks:additions first))
+      (flattenHooks rest removals additions))))
+
+(make applyPatches [prevTree nextTree nodes]
+  (make changes (m:vdom:diff prevTree nextTree))
+  (make hooks (flattenHooks changes))
+  (hooks:removals.forEach
+    (fn [patch]
+      (if patch:lifecycle?:beforeunmount
+        (patch:lifecycle:beforeunmount))))
+  (m:vdom:patch nodes changes)
+  (hooks:additions.forEach
+    (fn [patch]
+      (if
+        patch:lifecycle?:aftermount
+          (patch:lifecycle:aftermount))))
+  { :newdom nextTree :nodes nodes })
+
+(make runInitialHooks [vtree]
+  (if vtree.children
+    (do
+      (make children (Array.prototype.slice.call vtree.children))
+      (children.forEach
+        (fn [child]
+          (runInitialHooks child)))))
+  (if
+    vtree:lifecycle?:aftermount
+      (vtree:lifecycle:aftermount)))
+
+(export [runInitialHooks applyPatches])

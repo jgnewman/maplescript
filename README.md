@@ -191,16 +191,16 @@ The syntax for this is inspired by React's JSX dialect, but you don't need any e
 (make vTitle2 <Title {:class 'foo' :text 'Goodbye world!'}/>)
 
 # Render real dom nodes from one of our virtual titles
-(make realTitle (vdom:render vTitle))
+(make realTitle (m:vdom:render vTitle))
 
 # Drop our real dom nodes into the document body
 (-> (dom 'body') (@appendChild realTitle))
 
 # Get the differences between our 2 virtual dom trees
-(make changes (vdom:diff vTitle1 vTitle2))
+(make changes (m:vdom:diff vTitle1 vTitle2))
 
 # Use those changes to modify the real DOM. BOOM.
-(vdom:patchNodes realTitle changes)
+(m:vdom:patchNodes realTitle changes)
 
 # JavaScript
 ... yeah, I'm not even gonna try to write an equivalent.
@@ -293,11 +293,11 @@ But let's not go on to infinity. Instead, let's talk about MapleScript's unique 
 ```
 # MapleScript
 (make failer []
-  (attempt :event-channel
+  (m:attempt :event-channel
     (do
       (JSON.parse 'asdfasdf'))))
 
-(handle :event-channel
+(m:handle :event-channel
   (fn [err]
     (log err)))
 
@@ -319,6 +319,8 @@ eventBus.subscribe([Symbol.for('event-channel')], function (err) {
 failer();
 ```
 
+Notice that you can access built-in functions via the always-available `m` namespace.
+
 This technique even works with async functions.
 
 ```
@@ -328,7 +330,7 @@ This technique even works with async functions.
   (await (doSomething))
   (end)))
 
-(handle :event-channel (fn [err]
+(m:handle :event-channel (fn [err]
   (you get the idea)))  
 ```
 

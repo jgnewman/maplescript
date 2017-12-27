@@ -12,6 +12,10 @@ describe('Operators', () => {
     assert.equal(compileCode('(% 2 3 4)').trim(), '(2 % 3 % 4);');
     assert.equal(compileCode('(= 2 3 4)').trim(), '(2 === 3 === 4);');
     assert.equal(compileCode('(!= 2 3 4)').trim(), '(2 !== 3 !== 4);');
+    assert.equal(compileCode('(?< 2 3 4)').trim(), '(2 < 3 < 4);');
+    assert.equal(compileCode('(?> 2 3 4)').trim(), '(2 > 3 > 4);');
+    assert.equal(compileCode('(<= 2 3 4)').trim(), '(2 <= 3 <= 4);');
+    assert.equal(compileCode('(>= 2 3 4)').trim(), '(2 >= 3 >= 4);');
   });
 
 });

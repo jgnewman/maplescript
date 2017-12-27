@@ -132,67 +132,83 @@ describe('Library', () => {
         return this + x;
       }
 
-      assert.equal(lib.apply(foo, [2], 2), 4);
+      assert.equal(lib[s("apply")](foo, [2], 2), 4);
     });
 
     it('attempt/handle', () => {
       let result = false;
       lib.channels_ = {};
 
-      assert.throws(function () { lib.attempt('foo', noop) });
+      assert.throws(function () { lib[s("attempt")]('foo', noop) });
 
-      lib.handle(s('foo'), err => {
+      lib[s("handle")](s('foo'), err => {
         result = err;
       });
 
-      lib.attempt(s('foo'), () => {
+      lib[s("attempt")](s('foo'), () => {
         JSON.parse('foo');
       });
 
       assert.ok(result);
     });
 
+    it('copy', () => {
+      const toCopy = {
+        foo: 'foo',
+        bar: 0,
+        baz: {
+          qux: [1, 2, {
+            foo2: 'hello'
+          }]
+        }
+      };
+
+      const copied = lib[s("copy")](toCopy);
+
+      assert.deepEqual(toCopy, copied, 'copy is identical to original');
+    });
+
     it('dangerouslyMutate', () => {
       const foo = {bar: 'baz'};
-      lib.dangerouslyMutate('bar', 'quux', foo);
+      lib[s("dangerouslyMutate")]('bar', 'quux', foo);
       assert.equal(foo.bar, 'quux');
     });
 
-    it('dataType', () => {
-      assert.equal(lib.dataType('foo'), s('string'), 'detects a string');
-      assert.equal(lib.dataType(s('foo')), s('symbol'), 'detects a symbol');
-      assert.equal(lib.dataType(4), s('number'), 'detects a number');
-      assert.equal(lib.dataType(NaN), s('nan'), 'detects NaN');
-      assert.equal(lib.dataType(null), s('null'), 'detects null');
-      assert.equal(lib.dataType([]), s('array'), 'detects an array');
-      assert.equal(lib.dataType(new Date()), s('date'), 'detects a date');
-      assert.equal(lib.dataType(/foo/), s('regexp'), 'detects a string');
-      assert.equal(lib.dataType({}), s('object'), 'detects other objects');
-      assert.equal(lib.dataType(lib.vdom[s('create')]('div')), s('vnode'), 'detects a virtual dom node')
+    it('typeof', () => {
+      assert.equal(lib[s("typeof")]('foo'), s('string'), 'detects a string');
+      assert.equal(lib[s("typeof")](s('foo')), s('symbol'), 'detects a symbol');
+      assert.equal(lib[s("typeof")](4), s('number'), 'detects a number');
+      assert.equal(lib[s("typeof")](NaN), s('nan'), 'detects NaN');
+      assert.equal(lib[s("typeof")](null), s('null'), 'detects null');
+      assert.equal(lib[s("typeof")]([]), s('array'), 'detects an array');
+      assert.equal(lib[s("typeof")](new Date()), s('date'), 'detects a date');
+      assert.equal(lib[s("typeof")](/foo/), s('regexp'), 'detects a string');
+      assert.equal(lib[s("typeof")]({}), s('object'), 'detects other objects');
+      assert.equal(lib[s("typeof")](lib[s("vdom")][s('create')]('div')), s('vnode'), 'detects a virtual dom node')
     });
 
     it('die', () => {
-      assert.throws(function() { lib.die('message') });
+      assert.throws(function() { lib[s("die")]('message') });
     });
 
     it('dom', () => {
       global.document = global.document || mockDocument;
-      assert.equal(lib.dom('foo'), true, 'returns selected node');
-      assert.equal(lib.dom('bar'), false, 'passes through the result of querySelector');
+      assert.equal(lib[s("dom")]('foo'), true, 'returns selected node');
+      assert.equal(lib[s("dom")]('bar'), false, 'passes through the result of querySelector');
     });
 
     it('domArray', () => {
       global.document = global.document || mockDocument;
-      assert.deepEqual(lib.domArray('foo'), [true], 'returns selected array of nodes');
+      assert.deepEqual(lib[s("domArray")]('foo'), [true], 'returns selected array of nodes');
     });
 
     it('eql', () => {
-      assert.equal(lib.eql({
+      assert.equal(lib[s("eql")]({
         foo: [1, 2, 3]
       }, {
         foo: [1, 2, 3]
       }), true, 'detects identical objects');
-      assert.equal(lib.eql({
+      assert.equal(lib[s("eql")]({
         foo: [1, 2, 3]
       }, {
         foo: [4, 5, 6]
@@ -201,46 +217,35 @@ describe('Library', () => {
 
     it('get', () => {
       const foo = {bar: 'baz'};
-      assert.equal(lib.get(foo, 'bar'), 'baz');
-    });
-
-    it('gt', () => {
-      assert.equal(lib.gt(3, 2), true);
-      assert.equal(lib.gt(2, 3), false);
-    });
-
-    it('gte', () => {
-      assert.equal(lib.gte(3, 2), true);
-      assert.equal(lib.gte(2, 3), false);
-      assert.equal(lib.gte(3, 3), true);
+      assert.equal(lib[s("get")](foo, 'bar'), 'baz');
     });
 
     it('handle', () => {
       lib.channels_ = {};
-      lib.handle(s('foo'), noop);
+      lib[s("handle")](s('foo'), noop);
       assert.equal(lib.channels_[s('foo')][0], noop);
-      assert.throws(function () { lib.handle('foo', noop) });
+      assert.throws(function () { lib[s("handle")]('foo', noop) });
     });
 
     it('head', () => {
-      assert.equal(lib.head([1, 2, 3]), 1);
+      assert.equal(lib[s("head")]([1, 2, 3]), 1);
     });
 
     it('instance', () => {
       const now = +new Date;
-      const date = lib.instance(Date, now);
+      const date = lib[s("instance")](Date, now);
 
       assert.ok(date);
       assert.equal(date.getTime(), now);
     });
 
     it('instanceof', () => {
-      assert.equal(lib.instanceof(noop, Function), true);
+      assert.equal(lib[s("instanceof")](noop, Function), true);
     });
 
     it('keys', () => {
       const foo = {[s('bar')]: 1, baz: 2};
-      assert.deepEqual(lib.keys(foo).sort((a, b) => {
+      assert.deepEqual(lib[s("keys")](foo).sort((a, b) => {
         if (typeof a !== 'string') {
           return -1;
         } else {
@@ -250,22 +255,11 @@ describe('Library', () => {
     });
 
     it('last', () => {
-      assert.equal(lib.last([1, 2, 3]), 3);
+      assert.equal(lib[s("last")]([1, 2, 3]), 3);
     });
 
     it('lead', () => {
-      assert.deepEqual(lib.lead([1, 2, 3]), [1, 2]);
-    });
-
-    it('lt', () => {
-      assert.equal(lib.lt(3, 2), false);
-      assert.equal(lib.lt(2, 3), true);
-    });
-
-    it('lte', () => {
-      assert.equal(lib.lte(3, 2), false);
-      assert.equal(lib.lte(2, 3), true);
-      assert.equal(lib.lte(3, 3), true);
+      assert.deepEqual(lib[s("lead")]([1, 2, 3]), [1, 2]);
     });
 
     it('merge', () => {
@@ -279,26 +273,22 @@ describe('Library', () => {
       const arr3 = [3];
       const combinedArr = [1, 2, 3];
 
-      assert.deepEqual(lib.merge(obj1, obj2, obj3), combinedObj, 'merges objects');
-      assert.deepEqual(lib.merge(arr1, arr2, arr3), combinedArr, 'merges arrays');
+      assert.deepEqual(lib[s("merge")](obj1, obj2, obj3), combinedObj, 'merges objects');
+      assert.deepEqual(lib[s("merge")](arr1, arr2, arr3), combinedArr, 'merges arrays');
     });
 
     it('noop', () => {
-      assert.equal(typeof lib.noop, 'function');
-      assert.equal(lib.noop(), undefined);
-    });
-
-    it('not', () => {
-      assert.equal(lib.not(true), false);
+      assert.equal(typeof lib[s("noop")], 'function');
+      assert.equal(lib[s("noop")](), undefined);
     });
 
     it('random', () => {
       const foo = [1, 2, 3];
-      assert.ok(foo.indexOf(lib.random(foo)) > -1);
+      assert.ok(foo.indexOf(lib[s("random")](foo)) > -1);
     });
 
     it('range', () => {
-      const range = lib.range(1, 10);
+      const range = lib[s("range")](1, 10);
       assert.equal(range.length, 10, 'contains correct number of items');
       assert.equal(range[0], 1, 'first item is correct');
       assert.equal(range[range.length - 1], 10, 'last item is correct');
@@ -307,11 +297,11 @@ describe('Library', () => {
     it('remove', () => {
       const foo = {bar: 1, baz: 2};
       const fooAfter = {bar: 1};
-      const fooRemove = lib.remove('baz', foo);
+      const fooRemove = lib[s("remove")]('baz', foo);
 
       const bar = [1, 2, 3];
       const barAfter = [1, 3];
-      const barRemove = lib.remove(1, bar);
+      const barRemove = lib[s("remove")](1, bar);
 
       assert.ok(foo !== fooRemove, 'generates new object');
       assert.ok(bar !== barRemove, 'generates new array');
@@ -324,43 +314,43 @@ describe('Library', () => {
       let result = false;
       lib.channels_ = {};
 
-      lib.handle(s('foo'), sig => {
+      lib[s("handle")](s('foo'), sig => {
         result = sig;
       });
 
-      lib.signal(s('foo'), true);
+      lib[s("signal")](s('foo'), true);
 
       assert.equal(result, true, 'signal was sent and received');
-      assert.throws(function () { lib.signal('foo', noop) });
+      assert.throws(function () { lib[s("signal")]('foo', noop) });
     });
 
     it('tail', () => {
-      assert.deepEqual(lib.tail([1, 2, 3]), [2, 3]);
+      assert.deepEqual(lib[s("tail")]([1, 2, 3]), [2, 3]);
     });
 
     it('throw', () => {
       const err = new Error();
-      assert.throws(function () { lib.throw(err) });
+      assert.throws(function () { lib[s("throw")](err) });
     });
 
     it('unhandle', () => {
       lib.channels_ = {};
 
-      lib.handle(s('foo'), noop);
+      lib[s("handle")](s('foo'), noop);
       assert.equal(lib.channels_[s('foo')][0], noop, 'function was added');
 
-      lib.unhandle(s('foo'), noop);
+      lib[s("unhandle")](s('foo'), noop);
       assert.equal(lib.channels_[s('foo')].length, 0, 'function was removed');
     });
 
     it('update', () => {
       const foo = {bar: 1, baz: 2};
       const fooAfter = {bar: 1, baz: 3};
-      const fooRemove = lib.update('baz', 3, foo);
+      const fooRemove = lib[s("update")]('baz', 3, foo);
 
       const bar = [1, 2, 3];
       const barAfter = [1, 4, 3];
-      const barRemove = lib.update(1, 4, bar);
+      const barRemove = lib[s("update")](1, 4, bar);
 
       assert.ok(foo !== fooRemove, 'generates new object');
       assert.ok(bar !== barRemove, 'generates new array');
@@ -370,11 +360,11 @@ describe('Library', () => {
     });
 
     it('vdom:create', () => {
-      const vdom = lib.vdom[s('create')]('div', {
+      const vdom = lib[s("vdom")][s('create')]('div', {
         [s('class')]: 'foo',
         [s('data-foo')]: 'bar'
       }, [
-        lib.vdom[s('create')]('span'),
+        lib[s("vdom")][s('create')]('span'),
         null
       ]);
 

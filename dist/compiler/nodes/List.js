@@ -70,7 +70,7 @@ function compileSpecial(form, items) {
       return _destructure2.default.call(this, items);
     case 'do':
       return _immediateBlock2.default.call(this, items);
-    case 'elem':
+    case 'element':
       return _html2.default.call(this, items);
     case 'export':
       return _export2.default.call(this, items);
@@ -83,6 +83,8 @@ function compileSpecial(form, items) {
     case 'make':
       return _assignment2.default.call(this, items);
     case 'none':
+      return _operator2.default.call(this, '&& !', items, "true");
+    case 'not':
       return _operator2.default.call(this, '&& !', items, "true");
   }
 }
@@ -99,12 +101,12 @@ function compileSpecial(form, items) {
   var operatorForms = (0, _utils.getOperatorForms)();
   var specialForms = (0, _utils.getSpecialForms)();
 
-  var compiledHead = head.compile(true);
-
   // Translate things like (+ 1 2 3) into (1 + 2 + 3)
-  if (operatorForms.indexOf(compiledHead) >= 0) {
-    return (0, _operator2.default)(compiledHead, tail);
+  if (operatorForms.indexOf(head.text) >= 0) {
+    return (0, _operator2.default)(head.text, tail);
   }
+
+  var compiledHead = head.compile(true);
 
   // Translate things like (allof 1 2 3) into (1 && 2 && 3)
   // Also things like (if a 1 2) into (function() { if (a) { return 1 } else { return 2 }})()

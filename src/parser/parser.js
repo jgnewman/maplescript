@@ -854,42 +854,50 @@ case 9:return "IDENTIFIER";
 break;
 case 10:return "IDENTIFIER";
 break;
-case 11:return "CLOSER";
+case 11:return "IDENTIFIER";
 break;
-case 12:return "</";
+case 12:return "IDENTIFIER";
 break;
-case 13:return "<";
+case 13:return "IDENTIFIER";
 break;
-case 14:return "/>";
+case 14:return "IDENTIFIER";
 break;
-case 15:return ">";
+case 15:return "CLOSER";
 break;
-case 16:/* skip other whitespace */
+case 16:return "</";
 break;
-case 17:return "NUMBER";
+case 17:return "<";
 break;
-case 18:return "NUMBER";
+case 18:return "/>";
 break;
-case 19:return "REGEXP";
+case 19:return ">";
 break;
-case 20:return "STRING";       /* " fix syntax highlighting */
+case 20:/* skip other whitespace */
 break;
-case 21:return "STRING";       /* ' fix syntax highlighting */
+case 21:return "NUMBER";
 break;
-case 22:return "STRING";       /* ` fix syntax highlighting */
+case 22:return "NUMBER";
 break;
-case 23:return "IDENTIFIER";
+case 23:return "REGEXP";
 break;
-case 24:return "SYMBOL";
+case 24:return "STRING";       /* " fix syntax highlighting */
 break;
-case 25:return "IDENTIFIER";
+case 25:return "STRING";       /* ' fix syntax highlighting */
 break;
-case 26:return "EOF";
+case 26:return "STRING";       /* ` fix syntax highlighting */
+break;
+case 27:return "IDENTIFIER";
+break;
+case 28:return "SYMBOL";
+break;
+case 29:return "IDENTIFIER";
+break;
+case 30:return "EOF";
 break;
 }
 },
-rules: [/^(?:###(.|\r|\n)*?###)/,/^(?:#.*($|\r\n|\r|\n))/,/^(?:::)/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:\{)/,/^(?:\})/,/^(?:->)/,/^(?:>>=)/,/^(?:<\/[^\>]+>)/,/^(?:<\/\s*)/,/^(?:<\s*)/,/^(?:\/>)/,/^(?:>)/,/^(?:\s+)/,/^(?:0x[A-z0-9]+)/,/^(?:(-)?[0-9]+(\.[0-9]+)?(e-?[0-9]+)?)/,/^(?:\/([^\/\n\r]|\/)+\/[gim]*)/,/^(?:"([^\"]|\\[\"])*")/,/^(?:'([^\']|\\[\'])*')/,/^(?:`([^\`]|\\[\`])*`)/,/^(?:(\+|-|\*|\/|%|!=|=))/,/^(?::[A-Za-z_\$][A-Za-z0-9_\$\-\.]*)/,/^(?:[A-Za-z\_\$\@][A-Za-z0-9_\$\.\:\|\?\-]*(\/\d+)?)/,/^(?:$)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26],"inclusive":true}}
+rules: [/^(?:###(.|\r|\n)*?###)/,/^(?:#.*($|\r\n|\r|\n))/,/^(?:::)/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:\{)/,/^(?:\})/,/^(?:->)/,/^(?:>>=)/,/^(?:\?<)/,/^(?:\?>)/,/^(?:<=)/,/^(?:>=)/,/^(?:<\/[^\>]+>)/,/^(?:<\/\s*)/,/^(?:<\s*)/,/^(?:\/>)/,/^(?:>)/,/^(?:\s+)/,/^(?:0x[A-z0-9]+)/,/^(?:(-)?[0-9]+(\.[0-9]+)?(e-?[0-9]+)?)/,/^(?:\/([^\/\n\r]|\/)+\/[gim]*)/,/^(?:"([^\"]|\\[\"])*")/,/^(?:'([^\']|\\[\'])*')/,/^(?:`([^\`]|\\[\`])*`)/,/^(?:(\+|-|\*|\/|%|!=|=))/,/^(?::[A-Za-z_\$][A-Za-z0-9_\$\-\.]*)/,/^(?:[A-Za-z\_\$\@][A-Za-z0-9_\$\.\:\|\?\-]*(\/\d+)?)/,/^(?:$)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30],"inclusive":true}}
 });
 return lexer;
 })();

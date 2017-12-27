@@ -5,10 +5,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 function compileOperator(op, items, prepend) {
 
-  if (op === '=') {
-    op = '===';
-  } else if (op === '!=') {
-    op = '!==';
+  switch (op) {
+    case '=':
+      op = '===';break;
+    case '!=':
+      op = '!==';break;
+    case '?<':
+      op = '<';break;
+    case '?>':
+      op = '>';break;
   }
 
   return "(" + (prepend ? prepend + ' ' + op + ' ' : '') + items.map(function (item) {

@@ -1,0 +1,19 @@
+(make state [props handlers]
+  (make handlerList (any handlers []))
+  (fn
+
+    # Get the current state values
+    (of []
+      (m:copy props))
+
+    # Add a new handler
+    (of [_ newHandler]
+      (state props (handlerList.concat newHandler)))
+
+    # Update the state and alert all the handlers
+    (of [newprops]
+      (make newStateFn (state newprops handlerList))
+      (handlerList.map (fn [handler] (handler newStateFn)))
+      newStateFn)))
+
+(export [state])

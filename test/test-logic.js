@@ -19,4 +19,9 @@ describe('Logic', () => {
     assert.equal(compileCode(toCompile).trim(), '(true && ! foo && ! bar && ! baz);');
   });
 
+  it('should compile a not expression', () => {
+    const toCompile = '(not foo)';
+    assert.equal(compileCode(toCompile).trim(), '(true && ! foo);');
+  });
+
 });

@@ -17,6 +17,6 @@ function prepend(str, withStr) {
 
 function finalize(tree, isMapleProjectDirectory) {
   var libLocation = isMapleProjectDirectory ? _path2.default.resolve(__dirname, '../', '../', 'library') : 'maplescript/library';
-  tree.shared.output = prepend(tree.shared.output, 'var MAPLE_ = require("' + libLocation + '");\n');
+  tree.shared.output = prepend(tree.shared.output, 'var MAPLE_ = m = require("' + libLocation + '");\n');
   return tree;
 }

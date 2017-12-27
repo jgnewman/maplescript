@@ -1,9 +1,10 @@
 function compileOperator(op, items, prepend) {
 
-  if (op === '=') {
-    op = '===';
-  } else if (op === '!=') {
-    op = '!==';
+  switch (op) {
+    case '='  : op = '==='; break;
+    case '!=' : op = '!=='; break;
+    case '?<' : op = '<';   break;
+    case '?>' : op = '>';   break;
   }
 
   return "("

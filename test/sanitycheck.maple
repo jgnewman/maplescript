@@ -6,9 +6,10 @@
 # SOURCEMAPS
 # cleaner readme
 
-(make beforeUnmount [comp fun]
-  (fn [attrs children]
-    (make instance (fun attrs children))))
+<div></div>
+
+(?< 1 2)
+
 ###
 true
 null
@@ -85,16 +86,16 @@ foo:bar?.baz?.0.qux?
 (import 'path/to/file' {:foo bar :baz quux})
 
 # events
-(signal :channel "message")
-(handle :channel (fn [message] (read message)))
+(m:signal :channel "message")
+(m:handle :channel (fn [message] (read message)))
 
 # error handling
-(attempt :foozle-poozle
+(m:attempt :foozle-poozle
   (do
     (lots o stuff)
     (even more stuff)))
 
-(handle :foozle-poozle
+(m:handle :foozle-poozle
   (fn [err]
     (tryagain now)
     (right now)))

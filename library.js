@@ -114,7 +114,7 @@ var MAPLE_ = {
           if (value === "[]") return arg.length === 0;
           return true;
 
-        default: MAPLE_.die('Can not pattern match against type ' + type);
+        default: MAPLE_[s_("die")]('Can not pattern match against type ' + type);
       }
       // return (matches = false);
     });
@@ -143,27 +143,190 @@ var MAPLE_ = {
 
   /* Public functions */
 
-  apply: function (fn, list, ctx) {
+  [s_("apply")]: function (fn, list, ctx) {
     return fn.apply(ctx || null, list);
   },
 
-  attempt: function (channel, fun) {
-    if (MAPLE_.dataType(channel) !== s_('symbol')) {
+  [s_("attempt")]: function (channel, fun) {
+    if (MAPLE_[s_("typeof")](channel) !== s_('symbol')) {
       throw new Error('Signal channels must be identified with symbols.');
     }
     try {
       return fun();
     } catch (err) {
-      MAPLE_.signal(channel, err);
+      MAPLE_[s_("signal")](channel, err);
     }
   },
 
-  dangerouslyMutate: function (keyOrIndex, val, collection) {
+  [s_("copy")]: function (collection) {
+    var type = MAPLE_[s_("typeof")](collection);
+    if (type !== s_('object') && type !== s_('array')) {
+      return MAPLE_[s_("die")]('The copy function can only be called on objects and arrays.');
+    }
+    if (type === s_('array')) {
+      var copy = [];
+      collection.forEach(function (item) {
+        var toPush = typeof item === 'object' ? MAPLE_[s_("copy")](item) : item;
+        copy.push(toPush);
+      });
+      return copy;
+    } else {
+      var copy = {};
+      MAPLE_[s_("keys")](collection).forEach(function (key) {
+        var val = collection[key];
+        var toAdd = typeof val === 'object' ? MAPLE_[s_("copy")](val) : val;
+        copy[key] = toAdd;
+      });
+      return copy;
+    }
+  },
+
+  [s_("dangerouslyMutate")]: function (keyOrIndex, val, collection) {
     collection[keyOrIndex] = val;
     return collection;
   },
 
-  dataType: function (val) {
+  [s_("die")]: function (msg) {
+    throw new Error(msg);
+  },
+
+  [s_("dom")]: function (selector) {
+    return document.querySelector(selector);
+  },
+
+  [s_("domArray")]: function (selector) {
+    return Array.prototype.slice.call(document.querySelectorAll(selector));
+  },
+
+  [s_("eql")]: function (a, b) {
+    if (a === MAPLE_ || b === MAPLE_) return true; // <- Hack to force a match
+    if (a === b || (typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b))) return true;
+    if (typeof a !== typeof b) return false;
+    if (typeof a === 'object') {
+      if (Array.isArray(a)) return a.every(function(item, index) { return MAPLE_[s_("eql")](item, b[index]) }.bind(this));
+      const ks = Object.keys, ak = ks(a), bk = ks(b);
+      if (!MAPLE_[s_("eql")](ak, bk)) return false;
+      return ak.every(function (key) { return MAPLE_[s_("eql")](a[key], b[key]) }.bind(this));
+    }
+    return false;
+  },
+
+  [s_("get")]: function (collection, identifier) {
+    return collection[identifier];
+  },
+
+  [s_("handle")]: function (channel, fun) {
+    if (MAPLE_[s_("typeof")](channel) !== s_('symbol')) {
+      throw new Error('Signal channels must be identified with symbols.');
+    }
+    const handlers = MAPLE_.channels_[channel] = MAPLE_.channels_[channel] || [];
+    handlers.push(fun);
+  },
+
+  [s_("head")]: function (list) {
+    return list[0];
+  },
+
+  [s_("instance")]: function(cls) {
+    return new (Function.prototype.bind.apply(cls, arguments));
+  },
+
+  [s_("instanceof")]: function (val, type) {
+    return val instanceof type;
+  },
+
+  [s_("keys")]: function (object) {
+    return Object.keys(object).concat(Object.getOwnPropertySymbols(object));
+  },
+
+  [s_("last")]: function (list) {
+    return list[list.length - 1];
+  },
+
+  [s_("lead")]: function (list) {
+    return list.slice(0, list.length - 1);
+  },
+
+  [s_("log")]: function () {
+    if (typeof console !== 'undefined' && typeof console.log === 'function') {
+      return console.log.apply(console, arguments);
+    }
+  },
+
+  [s_("merge")]: function () {
+    var args = Array.prototype.slice.call(arguments || []);
+    var type = MAPLE_[s_("typeof")](arguments[0]);
+    var out;
+    switch (type) {
+      case s_('array'):
+        out = [];
+        args.forEach(function (arg) {
+          arg.forEach(function (item) {
+            out.push(item);
+          });
+        });
+        return out;
+      case s_('object'):
+        out = {};
+        args.forEach(function (arg) {
+          MAPLE_[s_("keys")](arg).forEach(function (key) {
+            out[key] = arg[key];
+          });
+        });
+        return out;
+      default: throw new Error('Can only merge objects or arrays.');
+    }
+  },
+
+  [s_("noop")]: function(){},
+
+  [s_("random")]: function (list) {
+    return list[Math.floor(Math.random()*list.length)];
+  },
+
+  [s_("range")]: function (from, through) {
+    const out = [];
+    for (var i = from; i <= through; i += 1) out.push(i);
+    return out;
+  },
+
+  [s_("remove")]: function (keyOrIndex, collection) {
+    MAPLE_.isReserved_(keyOrIndex);
+    if (Array.isArray(collection)) {
+      var splicer = collection.slice();
+      splicer.splice(keyOrIndex, 1);
+      return splicer;
+    } else {
+      var newObj = {};
+      var keys = Object.keys(collection).concat(
+        Object.getOwnPropertySymbols ? Object.getOwnPropertySymbols(collection) : []
+      );
+      keys.forEach(function (key) {
+        keyOrIndex !== key && (newObj[key] = collection[key]);
+      });
+      return newObj;
+    }
+  },
+
+  [s_("signal")]: function (channel, message) {
+    if (MAPLE_[s_("typeof")](channel) !== s_('symbol')) {
+      throw new Error('Signal channels must be identified with symbols.');
+    }
+    const handlers = MAPLE_.channels_[channel];
+    if (handlers && handlers.length) {
+      handlers.forEach(handler => handler(message));
+    }
+  },
+
+  [s_("tail")]: function (list) {
+    return list.slice(1);
+  },
+
+  [s_("throw")]: function (err) {
+    throw err;
+  },
+
+  [s_("typeof")]: function (val) {
     var type = typeof val;
     switch (type) {
       case 'symbol': return s_('symbol');
@@ -182,174 +345,14 @@ var MAPLE_ = {
     }
   },
 
-  die: function (msg) {
-    throw new Error(msg);
-  },
-
-  dom: function (selector) {
-    return document.querySelector(selector);
-  },
-
-  domArray: function (selector) {
-    return Array.prototype.slice.call(document.querySelectorAll(selector));
-  },
-
-  eql: function (a, b) {
-    if (a === MAPLE_ || b === MAPLE_) return true; // <- Hack to force a match
-    if (a === b || (typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b))) return true;
-    if (typeof a !== typeof b) return false;
-    if (typeof a === 'object') {
-      if (Array.isArray(a)) return a.every(function(item, index) { return MAPLE_.eql(item, b[index]) }.bind(this));
-      const ks = Object.keys, ak = ks(a), bk = ks(b);
-      if (!MAPLE_.eql(ak, bk)) return false;
-      return ak.every(function (key) { return MAPLE_.eql(a[key], b[key]) }.bind(this));
-    }
-    return false;
-  },
-
-  get: function (collection, identifier) {
-    return collection[identifier];
-  },
-
-  gt: function (x, y) {
-    return x > y;
-  },
-
-  gte: function (x, y) {
-    return x >= y;
-  },
-
-  handle: function (channel, fun) {
-    if (MAPLE_.dataType(channel) !== s_('symbol')) {
-      throw new Error('Signal channels must be identified with symbols.');
-    }
-    const handlers = MAPLE_.channels_[channel] = MAPLE_.channels_[channel] || [];
-    handlers.push(fun);
-  },
-
-  head: function (list) {
-    return list[0];
-  },
-
-  instance: function(cls) {
-    return new (Function.prototype.bind.apply(cls, arguments));
-  },
-
-  instanceof: function (val, type) {
-    return val instanceof type;
-  },
-
-  keys: function (object) {
-    return Object.keys(object).concat(Object.getOwnPropertySymbols(object));
-  },
-
-  last: function (list) {
-    return list[list.length - 1];
-  },
-
-  lead: function (list) {
-    return list.slice(0, list.length - 1);
-  },
-
-  log: function () {
-    if (typeof console !== 'undefined' && typeof console.log === 'function') {
-      return console.log.apply(console, arguments);
-    }
-  },
-
-  lt: function (x, y) {
-    return x < y;
-  },
-
-  lte: function (x, y) {
-    return x <= y;
-  },
-
-  merge: function () {
-    var args = Array.prototype.slice.call(arguments || []);
-    var type = MAPLE_.dataType(arguments[0]);
-    var out;
-    switch (type) {
-      case s_('array'):
-        out = [];
-        args.forEach(function (arg) {
-          arg.forEach(function (item) {
-            out.push(item);
-          });
-        });
-        return out;
-      case s_('object'):
-        out = {};
-        args.forEach(function (arg) {
-          MAPLE_.keys(arg).forEach(function (key) {
-            out[key] = arg[key];
-          });
-        });
-        return out;
-      default: throw new Error('Can only merge objects or arrays.');
-    }
-  },
-
-  noop: function(){},
-
-  not: function (val) {
-    return !val;
-  },
-
-  random: function (list) {
-    return list[Math.floor(Math.random()*list.length)];
-  },
-
-  range: function (from, through) {
-    const out = [];
-    for (var i = from; i <= through; i += 1) out.push(i);
-    return out;
-  },
-
-  remove: function (keyOrIndex, collection) {
-    MAPLE_.isReserved_(keyOrIndex);
-    if (Array.isArray(collection)) {
-      var splicer = collection.slice();
-      splicer.splice(keyOrIndex, 1);
-      return splicer;
-    } else {
-      var newObj = {};
-      var keys = Object.keys(collection).concat(
-        Object.getOwnPropertySymbols ? Object.getOwnPropertySymbols(collection) : []
-      );
-      keys.forEach(function (key) {
-        keyOrIndex !== key && (newObj[key] = collection[key]);
-      });
-      return newObj;
-    }
-  },
-
-  signal: function (channel, message) {
-    if (MAPLE_.dataType(channel) !== s_('symbol')) {
-      throw new Error('Signal channels must be identified with symbols.');
-    }
-    const handlers = MAPLE_.channels_[channel];
-    if (handlers && handlers.length) {
-      handlers.forEach(handler => handler(message));
-    }
-  },
-
-  tail: function (list) {
-    return list.slice(1);
-  },
-
-  throw: function (err) {
-    throw err;
-  },
-
-  unhandle: function (channel, fun) {
+  [s_("unhandle")]: function (channel, fun) {
     const handlers = MAPLE_.channels_[channel];
     if (handlers) {
       handlers.splice(handlers.indexOf(fun), 1);
     }
   },
 
-  update: function (keyOrIndex, val, collection) {
+  [s_("update")]: function (keyOrIndex, val, collection) {
     MAPLE_.isReserved_(keyOrIndex);
     if (Array.isArray(collection)) {
       var newSlice = collection.slice();
@@ -372,7 +375,7 @@ var MAPLE_ = {
     }
   },
 
-  vdom: {
+  [s_("vdom")]: {
 
     [s_('create')]: function (type, attrs, children) {
       var attributes = MAPLE_.mapAttrsToVirtualAttrs_(attrs);
@@ -393,11 +396,11 @@ var MAPLE_ = {
     [s_('injectNodes')]: function (renderedTree, selector) {
 
       renderedTree = renderedTree instanceof MAPLE_.vmanip_.Vnode
-        ? MAPLE_.vdom[s_('render')](renderedTree)
+        ? MAPLE_[s_("vdom")][s_('render')](renderedTree)
         : renderedTree;
 
       selector = typeof selector === 'string'
-        ? MAPLE_.dom(selector)
+        ? MAPLE_[s_("dom")](selector)
         : selector;
 
       selector.innerHTML = '';
@@ -414,11 +417,11 @@ var MAPLE_ = {
     }
   },
 
-  warn: function () {
+  [s_("warn")]: function () {
     if (typeof console !== 'undefined' && typeof console.warn === 'function') {
       return console.warn.apply(console, arguments);
     }
-    return MAPLE_.log.apply(null, arguments);
+    return MAPLE_[s_("log")].apply(null, arguments);
   }
 
 

@@ -96,7 +96,7 @@ function compileFunction(body, async) {
 
   // Put the pieces together
   if (async && attemptChannel) {
-    return 'async function () {\n      try {\n        ' + argsLine + '\n        ' + varsLine + '\n        ' + cleanBody + '\n      } catch (err_) {\n        return MAPLE_.signal(' + attemptChannel + ', err_);\n      }\n    }';
+    return 'async function () {\n      try {\n        ' + argsLine + '\n        ' + varsLine + '\n        ' + cleanBody + '\n      } catch (err_) {\n        return MAPLE_[Symbol.for("signal")](' + attemptChannel + ', err_);\n      }\n    }';
   } else {
     return (async ? "async " : "") + "function () {\n" + argsLine + varsLine + cleanBody + "\n}";
   }

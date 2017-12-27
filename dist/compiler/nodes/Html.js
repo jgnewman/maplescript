@@ -21,5 +21,5 @@ function compileAttrs(attrs) {
   if (!/^[A-Z]/.test(name)) {
     name = '"' + name + '"';
   }
-  return 'MAPLE_.vdom[Symbol.for("create")](' + name + ', ' + attrs + ', [' + (body ? '\n' + body + '\n' : '') + '])';
+  return 'MAPLE_[Symbol.for("vdom")][Symbol.for("create")](' + name + ', ' + attrs + ', [' + (body ? '\n' + body + '\n' : '') + '])';
 });

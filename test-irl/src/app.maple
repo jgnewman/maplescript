@@ -1,43 +1,21 @@
-# (make names ['john' 'patrick' 'mary' 'esther' 'zac' 'becca' 'tadpole' 'kiley' 'bryn' 'gavin'])
-# (make ages [25 19 68 12 94 35 132 678 345 567 34 14 11 88 43 22])
-#
-# (make buildDOM []
-#   <h1>
-#     <span>`Hello, my name is ${(random names)} `</span>
-#     <span>`and I am ${(random ages)} years old`</span>
-#   </h1>
-# )
-#
-# (if
-#   (= :string (dataType 'foo'))
-#     (log 'it was a string')
-#   (log 'it was not a string'))
-#
-# (make repeater
-#   (of []
-#     (make initialDOM (buildDOM))
-#     (make initialNodes (vdom:injectNodes initialDOM '#app'))
-#     (setTimeout (fn [] (repeater initialDOM initialNodes)) 2000))
-#   (of [prevDOM prevNodes]
-#     (make newDOM (buildDOM))
-#     (make changes (vdom:diff prevDOM newDOM))
-#     (log changes)
-#     (vdom:patchNodes prevNodes changes)
-#     (setTimeout (fn [] (repeater newDOM prevNodes)) 2000)))
-#
-# (repeater)
-
+(import './extrafile')
 (import '../../syrup/syrup' syrup)
 
+# Create a standard maplescript custom element
 (element TitleElem [attrs children]
   <h1>
     'work!'
   </h1>
 )
 
+# Convert our element into a component and add
+# lifecycle hooks
 (make TitleComponent
   (-> (syrup:component TitleElem)
-      (syrup:afterMount @ (fn [attrs] (log 'aftermount' attrs)))
-      (syrup:beforeUnmount @ (fn [attrs] (log 'beforemount' attrs)))))
+      (syrup:afterMount @ (fn [attrs] (m:log 'aftermount' attrs)))
+      (syrup:beforeUnmount @ (fn [attrs] (m:log 'beforemount' attrs)))))
 
-(syrup:render TitleComponent '#app')
+(make initialState (syrup:state {:stateVal 'foo'}))
+
+# Render our component into the DOM
+(syrup:render TitleComponent initialState '#app')

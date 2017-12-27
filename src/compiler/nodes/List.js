@@ -31,6 +31,7 @@ function compileSpecial(form, items) {
     case 'import': return compileImport.call(this, items);
     case 'make': return compileAssignment.call(this, items);
     case 'none': return compileOperator.call(this, '&& !', items, "true");
+    case 'not': return compileOperator.call(this, '&& !', items, "true");
   }
 }
 
@@ -46,12 +47,12 @@ compile(nodes.ListNode, function () {
   const operatorForms = getOperatorForms();
   const specialForms = getSpecialForms();
 
-  const compiledHead = head.compile(true);
-
   // Translate things like (+ 1 2 3) into (1 + 2 + 3)
-  if (operatorForms.indexOf(compiledHead) >= 0) {
-    return compileOperator(compiledHead, tail);
+  if (operatorForms.indexOf(head.text) >= 0) {
+    return compileOperator(head.text, tail);
   }
+
+  const compiledHead = head.compile(true);
 
   // Translate things like (allof 1 2 3) into (1 && 2 && 3)
   // Also things like (if a 1 2) into (function() { if (a) { return 1 } else { return 2 }})()
