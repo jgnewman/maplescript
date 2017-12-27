@@ -159,7 +159,7 @@ function getSpecialForms() {
     'await',
     'destr',
     'do',
-    'elem',
+    'element',
     'export',
     'fn',
     'if',

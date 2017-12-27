@@ -1,31 +1,106 @@
+(make isRemoval [patch]
+  (all
+    (= patch.patch undefined)
+    (= patch.type 7)))
 
+(make isAddition [patch]
+  (all
+    (= (dataType patch.patch) :object)
+    (= patch.type 6)
+    (= patch.vNode null)))
+
+(make flattenHooks
+  (of [patches] (flattenHooks patches [] []))
+  (of [[] removals additions] { :removals removals :additions additions })
+  (of [[first|rest] removals additions]
+    (make childHooks
+      (if
+        patch.patch?.children
+          (do
+            (make children (Array.prototype.slice.call patch.patch.children))
+            (children.map (fn [child] (flattenHooks child))))
+        { :removals [] :additions [] }))
+    (if
+      (isRemoval first)
+        (flattenHooks
+          rest
+          (removals.concat childHooks:removals first)
+          (additions.concat childHooks:additions))
+      (isAddition patch)
+        (flattenHooks
+          rest
+          (removals.concat childHooks:removals)
+          (additions.concat childHooks:additions first))
+      (flattenHooks rest removals additions))))
+
+(make applyPatches [prev next nodes]
+  (make changes (vdom:diff prev next))
+  (make hooks (flattenHooks changes))
+  (hooks:removals.forEach
+    (fn [patch]
+      (if patch:lifecycle?:beforeunmount
+        (patch:lifecycle:beforeunmount))))
+  (vdom:patch nodes changes)
+  (hooks:additions.forEach
+    (fn [patch]
+      (if
+        patch:lifecycle?:aftermount
+          (patch:lifecycle:aftermount))))
+  { :newdom next :nodes nodes })
+
+(make runInitialHooks [vtree]
+  (if vtree.children
+    (do
+      (make children (Array.prototype.slice.call vtree.children))
+      (children.forEach
+        (fn [child]
+          (renderAllHooks child)))))
+  (if
+    vtree:lifecycle?:aftermount
+      (vtree:lifecycle:aftermount)))
+
+###
+Public Functions
+###
 
 (make render [vtree target]
-  (vdom:injectNodes vtree target))
+  (make nodes (vdom:injectNodes (vtree) target))
+  (runInitialHooks nodes))
 
-# Run a function before a node is rendered
-(make beforeRender [customElem fun]
+# Attach a lifecycle to the vnodes returned by an element
+# We have to use dangerouslyMutate only because vdom is dependency tech
+(make component [element]
   (fn [attrs children]
-    (fun attrs children)
-    (customElem attrs children)))
+    (make inst (element attrs children))
+    (dangerouslyMutate :lifecycle {} inst)
+    inst))
 
-# Run a function after a node is rendered
-(make afterRender [customElem fun]
+(make afterMount [comp fun]
   (fn [attrs children]
-    (customElem attrs children)
-    (fun attrs children)))
+    (make inst (comp attrs children))
+    (make hook (fn [] (fun attrs)))
+    (dangerouslyMutate :aftermount hook inst:lifecycle)
+    inst))
+
+(make beforeUnmount [comp fun]
+  (fn [attrs children]
+    (make inst (comp attrs children))
+    (make hook (fn [] (fun attrs)))
+    (dangerouslyMutate :beforeunmount fun inst:lifecycle)
+    inst))
 
 (export [
   render
-  beforeRender
-  afterRender
+  component
+  afterMount
+  beforeUnmount
 ])
 
 ###
 
 (import 'maplescript/syrup' syrup)
 
-(elem TitleElem [attrs children]
+(element TitleElem [attrs children]
   <h1 { class: attrs:class }>
     children
   </h1>
@@ -33,8 +108,8 @@
 
 (make TitleComponent
   (-> (syrup:component TitleElem)
-      (syrup:beforeRender @ (fn [] ...))
-      (syrup:afterRender @ (fn [] ...))))
+      (syrup:afterMount @ (fn [] ...))
+      (syrup:beforeUnmount @ (fn [] ...))))
 
 (syrup:render TitleComponent state '#app')
 

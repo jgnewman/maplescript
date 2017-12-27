@@ -180,7 +180,7 @@ The syntax for this is inspired by React's JSX dialect, but you don't need any e
 # MapleScript
 
 # Create a custom dom node called Title
-(elem Title [attrs]
+(element Title [attrs]
   <h1 {:class attrs:class}>
     attrs:text
   </h1>

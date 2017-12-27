@@ -24,7 +24,7 @@ function compileSpecial(form, items) {
     case 'await': return compileAwait.call(this, items);
     case 'destr': return compileDestructure.call(this, items);
     case 'do': return compileDoBlock.call(this, items);
-    case 'elem': return compileHtmlDefinition.call(this, items);
+    case 'element': return compileHtmlDefinition.call(this, items);
     case 'export': return compileExport.call(this, items);
     case 'fn': return compileFunction.call(this, items);
     case 'if': return compileCondition.call(this, items);

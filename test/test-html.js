@@ -40,7 +40,7 @@ describe('Html', () => {
 
   it('should allow creating new elements', () => {
     const toCompile = `
-      (elem Foo [attrs children]
+      (element Foo [attrs children]
         <h1>children</h1>
       )
     `;
