@@ -14,4 +14,9 @@ describe('Objects', () => {
     assert.equal(shrink(compileCode(toCompile)), '{[Symbol.for("a")]:1,[Symbol.for("b")]:2};');
   });
 
+  it('should all key types correctly', () => {
+    const toCompile = '{:a 1 b 2 "c" 3}';
+    assert.equal(shrink(compileCode(toCompile)), '{[Symbol.for("a")]:1,"b":2,"c":3};');
+  });
+
 });

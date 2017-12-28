@@ -6,9 +6,7 @@
 # SOURCEMAPS
 # cleaner readme
 
-<div></div>
-
-(?< 1 2)
+{ foo 1 "bar" 2}
 
 ###
 true

@@ -221,6 +221,7 @@ var MAPLE_ = {
     }
     const handlers = MAPLE_.channels_[channel] = MAPLE_.channels_[channel] || [];
     handlers.push(fun);
+    return fun;
   },
 
   [s_("head")]: function (list) {
@@ -266,9 +267,7 @@ var MAPLE_ = {
       case s_('array'):
         out = [];
         args.forEach(function (arg) {
-          arg.forEach(function (item) {
-            out.push(item);
-          });
+          out = out.concat(arg);
         });
         return out;
       case s_('object'):
@@ -299,7 +298,7 @@ var MAPLE_ = {
     return out;
   },
 
-  [s_("remove")]: function (keyOrIndex, collection) {
+  [s_("remove")]: function (collection, keyOrIndex) {
     MAPLE_.isReserved_(keyOrIndex);
     if (Array.isArray(collection)) {
       var splicer = collection.slice();
@@ -307,9 +306,7 @@ var MAPLE_ = {
       return splicer;
     } else {
       var newObj = {};
-      var keys = Object.keys(collection).concat(
-        Object.getOwnPropertySymbols ? Object.getOwnPropertySymbols(collection) : []
-      );
+      var keys = MAPLE_[s_('keys')](collection);
       keys.forEach(function (key) {
         keyOrIndex !== key && (newObj[key] = collection[key]);
       });
@@ -361,7 +358,7 @@ var MAPLE_ = {
     }
   },
 
-  [s_("update")]: function (keyOrIndex, val, collection) {
+  [s_("update")]: function (collection, keyOrIndex, val) {
     MAPLE_.isReserved_(keyOrIndex);
     if (Array.isArray(collection)) {
       var newSlice = collection.slice();

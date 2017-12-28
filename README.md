@@ -18,6 +18,26 @@ MapleScript is different from ClojureScript (another Lisp over JavaScript) in th
 
 The purpose behind MapleScript is to allow you to trade out 100kb+ libraries for a much smaller language that gives you the same core power natively. To illustrate, the MapleScript repository includes an ~8k framework called Syrup that leverages this power to help you build reactive, component-based applications with a redux-like state and lifecycle events.
 
+## Table of contents
+
+- [How it works](#how-it-works)
+- [Declarations](#declarations)
+- [Objects](#objects)
+- [Operators](#operators)
+- [Conditions](#conditions)
+- [Iteration](#iteration)
+- [Functions](#functions)
+- [Data types](#data-types)
+- [Events](#events)
+- [Error handling](#error-handling)
+- [Imports & exports](#imports--exports)
+- [Async/Await](#asyncawait)
+- [Chains](#chains)
+- [Virtual DOM](#virtual-dom)
+- [Core Library](#core-library)
+- [Syrup](#syrup)
+- [How to use it](#how-to-use-it)
+
 ## How it works
 
 In MapleScript, all expressions return values and, aside from raw data, just about everything is syntactically structured like a function call. Function calls are just lists of values enclosed in parentheses (s-expressions). Here are a few JavaScript expressions and their MapleScript equivalents:
@@ -51,6 +71,8 @@ if (x === y) {
   baz)
 ```
 
+[top](#table-of-contents)
+
 ## Declarations
 
 In MapleScript, all named values (variables, functions, etc) are translated to `const` declarations and all of these are created with the `make` function.
@@ -63,6 +85,8 @@ In MapleScript, all named values (variables, functions, etc) are translated to `
 # It returns the result of adding x to x.
 (make baz [x] (+ x x))
 ```
+
+[top](#table-of-contents)
 
 ## Objects
 
@@ -102,6 +126,8 @@ Regarding `m:get`, `m` is a reference to the MapleScript core library (which is 
 
 MapleScript also takes a tip from CoffeeScript and allows you to perform "unconfident retrievals". For example, the expression `foo?:bar?.baz` will only return the value for `baz` if all the values along the chain exist. So if `foo` doesn't exist or if `foo:bar` doesn't exist, it will return undefined rather than throwing an error.
 
+[top](#table-of-contents)
+
 ## Operators
 
 Most of the MapleScript operators are the same as in JavaScript except that they're written in prefix notation as function calls. There are only a couple of differences as outlined below:
@@ -130,6 +156,8 @@ To help with some of this, there are a few built-in special forms for performing
 ```
 
 Notice that these are called "special forms" because even though they are structured like function calls, each argument is not eagerly evaluated. This works by transpiling to infix JavaScript operators rather than to function calls.
+
+[top](#table-of-contents)
 
 ## Conditions
 
@@ -164,6 +192,8 @@ Sometimes you will need to execute more than one expression if a condition is tr
       (m:log 'yum!')))
 ```
 
+[top](#table-of-contents)
+
 ## Iteration
 
 Although MapleScript is loosely functional, it encourages you to write functional code. To that end, it doesn't include any new iteration syntax. You can use native methods like `Array.map` or any other iterative function, or you can use recursion.
@@ -181,6 +211,8 @@ Although MapleScript is loosely functional, it encourages you to write functiona
 (manyLogs 3)
 #=> logs "running" 3 times
 ```
+
+[top](#table-of-contents)
 
 ## Functions
 
@@ -258,6 +290,8 @@ Additional argument destructuring will not happen within the argument pattern. Y
 #=> 6
 ```
 
+[top](#table-of-contents)
+
 ## Data types
 
 MapleScript sticks with JavaScript's native data types for the most part. However, it removes your ability to use the `typeof` operator and instead provides a function called `m:typeof` that will give you much better accuracy. The result of calling this function is always a symbol.
@@ -287,6 +321,8 @@ MapleScript sticks with JavaScript's native data types for the most part. Howeve
 
 The `instanceof` operator has also been re-purposed as `m:instanceof`, however this is just a pass-through. It doesn't do anything different or special.
 
+[top](#table-of-contents)
+
 ## Events
 
 MapleScript has a built-in system for subscribing to and triggering events. The most important thing to keep in mind here is that all events are named by symbols.
@@ -308,6 +344,8 @@ MapleScript has a built-in system for subscribing to and triggering events. The 
 #=> Nothing happens
 ```
 
+[top](#table-of-contents)
+
 ## Error handling
 
 MapleScript's technique for error handling is built on the event system and allows you to decouple your "trys" from your "catches".
@@ -324,6 +362,8 @@ The `m:attempt` function takes an event channel and a function to execute. If th
 (failer)
 #=> Logs the error
 ```
+
+[top](#table-of-contents)
 
 ## Imports & Exports
 
@@ -384,6 +424,8 @@ When we export this function, we can lock it down to one allowed arity (number o
 (export [doubleEach/1])
 ```
 
+[top](#table-of-contents)
+
 ## Async/Await
 
 First and foremost, because async/await is not universal yet, you'll need to make sure you pass your compiled code through Babel or some such before trying to use it. MapleScript will translate async/await into raw ES2017 code.
@@ -399,7 +441,9 @@ Because async functions need to implement try/catch in order to properly handle 
 (handle :foo-error (fn [err] (m:log err)))
 ```
 
-## Context & call chains
+[top](#table-of-contents)
+
+## Chains
 
 Sometimes Lisp-y syntax can make JavaScript-y things gross.
 
@@ -437,6 +481,8 @@ Less frequently, you may find yourself in need of a "call chain" which is actual
 
 Without the call chain, you might be left having to do something like `(((foo 2) 3) 4)` and nobody likes extra parentheses on the left.
 
+[top](#table-of-contents)
+
 ## Virtual DOM
 
 MapleScript provides a very nice way to create virtual DOM nodes (meaning an object tree _representing_ the DOM). Virtual nodes can be rendered into real nodes or diffed against other virtual nodes to find the differences between the two virtual trees. With those differences, you can quickly make changes to an existing real DOM.
@@ -469,6 +515,598 @@ The syntax for this is inspired by React's JSX dialect, but you don't need any e
 # will automatically update.
 (m:vdom:patchNodes realTitle changes)
 ```
+
+[top](#table-of-contents)
+
+## Core library
+
+MapleScript comes with a collection of built-in functions that make life a lot easier. They are all available under the global `m` namespace, which is always available to you without having to import anything.
+
+### `(m:apply fun args [ctx])`
+
+Calls a provided function (`fun`) with argument list `args`, optionally with provided context `ctx`. Returns the result of the applied function.
+
+- `fun` - A function to call.
+- `args` - Array. Contains all arguments to pass to the function.
+- `ctx` - Optional. A context in which to call the function.
+
+```
+(make logger [text] (m:log text))
+
+(m:apply logger ['hello, world!'])
+#=> logs 'hello, world!'
+```
+
+[top](#table-of-contents)
+
+### `(m:attempt channel fun)`
+
+Calls a provided function (`fun`) and checks to see if it produced any errors. If it did, catches the error and broadcasts it on a global event channel (`channel`). If no errors are produced, returns the result of calling `fun`.
+
+- `channel` - Symbol. An event channel name.
+- `fun` - Function. Will be executed and checked for errors.
+
+```
+(m:handle :bad-json (fn [err]
+  (m:log err)))
+
+(m:attempt :bad-json (fn []
+  (JSON.parse 'asdfasdf')))
+```
+
+[top](#table-of-contents)
+
+### `(m:copy collection)`
+
+Generates a deep copy of a provided value (`collection`) as long as that value is an object or an array. If any other data type is provided, will return the provided value.
+
+- `collection` - Object or Array. The collection to be copied.
+
+```
+(make obj {:foo 'bar'})
+
+(make copy (m:copy obj))
+
+obj:foo   #=>  'bar'
+copy:foo  #=>  'bar'
+
+(= foo copy)  #=>  false
+```
+
+[top](#table-of-contents)
+
+### `(m:dangerouslyMutate key val object)`
+
+Allows you to mutate the value of a key in an existing object. This is necessary to perform certain JavaScript actions such as setting `location.href`.
+
+- `key` - String or Symbol. The name of the key to mutate.
+- `val` - The new value for the key.
+- `object` - The object receiving the change.
+
+```
+# dangerously mutate href to foo in location
+(m:dangerouslyMutate 'href' '/foo' location)
+```
+
+[top](#table-of-contents)
+
+### `(m:die msg)`
+
+Creates and throws an error built from a provided message (`msg`).
+
+- `msg` - String. The error message.
+
+```
+(m:die 'Application broke!')
+```
+
+[top](#table-of-contents)
+
+### `(m:dom selector)`
+
+Selects a single element from the real DOM by the provided selector.
+
+- `selector` - String. A standard, CSS selector string.
+
+```
+(m:dom '.my-class')
+#=> <div class="my-class">
+```
+
+[top](#table-of-contents)
+
+### `(m:domArray selector)`
+
+Selects an array of elements from the real DOM by the provided selector.
+
+- `selector` - String. A standard, CSS selector string.
+
+```
+(m:domArray '.my-class')
+#=> [<div class="my-class">, <div class="my-class">]
+```
+
+[top](#table-of-contents)
+
+### `(m:eql obj1 obj2)`
+
+Determines whether two provided objects are deep equal. Returns a boolean.
+
+- `obj1` - One of two objects to compare.
+- `obj2` - Another of two objects to compare.
+
+```
+(m:eql
+  {:foo 'bar'}
+  {:foo 'bar'})
+#=> true
+
+(m:eql
+  [1 2 3]
+  [1 2 3 4])
+#=> false
+```
+
+[top](#table-of-contents)
+
+### `(m:get collection key)`
+
+Retrieves a value from a collection.
+
+- `collection` - Any kind of object with retrievable values.
+- `key` - Number, String, or Symbol. Identifies the key of the value to be retrieved.
+
+```
+(make person {:name 'John'})
+
+(make key :name)
+
+(m:get person key)
+#=> 'John'
+```
+
+[top](#table-of-contents)
+
+### `(m:handle channel fun)`
+
+Registers a handler function (`fun`) for events broadcast on a global event channel (`channel`). Returns the handler.
+
+- `channel` - Symbol. The name of an event channel.
+- `fun` - The handler function. Takes the data sent over the channel.
+
+```
+(m:handle :my-event (fn [data] (m:log data)))
+
+(m:signal :my-event 'foo')
+#=> logs 'foo'
+```
+
+[top](#table-of-contents)
+
+### `(m:head array)`
+
+Retrieves the first item in an array.
+
+- `array` - Any array.
+
+```
+(m:head [1 2 3])
+#=> 1
+```
+
+[top](#table-of-contents)
+
+### `(m:instanceof val type)`
+
+Determines whether a value (`val`) was built from a constructor (`type`). Returns a boolean.
+
+- `val` - Any value.
+- `type` - A constructor function.
+
+```
+(make date (m:new Date))
+
+(m:instanceof date Date)
+#=> true
+```
+
+[top](#table-of-contents)
+
+### `(m:dom selector)`
+
+Selects a single element from the real DOM by the provided selector.
+
+- `selector` - String. A standard, CSS selector string.
+
+```
+(m:dom '.my-class')
+#=> <div class="my-class">
+```
+
+[top](#table-of-contents)
+
+### `(m:keys object)`
+
+Returns an array of all string and symbol keys in a provided object.
+
+- `object` - The object whose keys we want to retrieve.
+
+```
+(make obj {
+  foo   1
+  "bar" 2
+  :baz  3
+})
+
+(m:keys obj)
+#=> ["foo", "bar", Symbol.for("baz")]
+```
+
+[top](#table-of-contents)
+
+### `(m:last array)`
+
+Retrieves the last item in an array.
+
+- `array` - Any array.
+
+```
+(m:last [1 2 3])
+#=> 3
+```
+
+[top](#table-of-contents)
+
+### `(m:lead array)`
+
+Creates a slice of all array items except the last one.
+
+- `array` - Any array.
+
+```
+(m:lead [1 2 3])
+#=> [1, 2]
+```
+
+[top](#table-of-contents)
+
+### `(m:log ...msgs)`
+
+A pass-through to console.log. If `console` does not exist in the current environment, fails silently.
+
+- `...msgs` - Items to log to the console.
+
+```
+(m:log 'hello' 'world')
+#=> logs 'hello' 'world'
+```
+
+[top](#table-of-contents)
+
+### `(m:map collection fun)`
+
+Iterates over all items in an array or object and returns a new shallow copy of that object as the result of calling a function (`fun`) on each item.
+
+- `collection` - Any array or plain object.
+- `fun` - A function to call for each item. Takes arguments `item` and `index/key`.
+
+```
+(m:map [1 2 3] (fn [item index]
+  (if
+    (= 0 (% index 2))
+      (* item 10))
+    item))
+#=> [1, 20, 3]
+
+(m:map {:foo 1 :bar 2} (fn [item key]
+  (if
+    (= key :foo)
+      (* item 10))
+    item))
+#=> { [Symbol.for("foo")]: 10, [Symbol.for("bar")]: 2 }
+```
+
+[top](#table-of-contents)
+
+### `(m:merge ...objects)`
+
+Takes a series of objects or arrays and merges them into a new object/array containing shallow-ly copied items from each argument.
+
+- `...objects` - Arrays or objects.
+
+```
+(m:merge {:foo 1} {:bar 2})
+#=> {:foo 1 :bar 2}
+
+(m:merge [1 2] [3 4])
+#=> [1 2 3 4]
+```
+
+[top](#table-of-contents)
+
+### `(m:new constructor [...args])`
+
+Instantiates a constructor.
+
+- `constructor` - A function for constructing an object.
+- `...args` - Optional arguments to pass to the constructor.
+
+```
+(m:new Date '10/21/1985')
+#=> Mon Oct 21 1985 00:00:00 GMT-0400 (EDT)
+```
+
+[top](#table-of-contents)
+
+### `m:noop`
+
+You will sometimes need a function that does nothing. Here's one for you.
+
+```
+(m:noop)
+#=> nothing happens
+```
+
+[top](#table-of-contents)
+
+### `(m:random array)`
+
+Selects a random item from an array.
+
+- `array` - Any array.
+
+```
+(m:random [1 2 3 4 5])
+#=> 2
+
+(m:random [1 2 3 4 5])
+#=> 5
+```
+
+[top](#table-of-contents)
+
+### `(m:range from through)`
+
+Creates an array populated by all numbers from `from` through `through`.
+
+- `from` - Number. The first item in the range.
+- `through` - Number. The last item in the range.
+
+```
+(m:range 1 10)
+[1 2 3 4 5 6 7 8 9 10]
+```
+
+[top](#table-of-contents)
+
+### `(m:remove collection key)`
+
+Returns a new, shallow copy of a collection with a provided key removed.
+
+- `collection` - Object or Array. Contains an item to be removed.
+- `key` - Identifies the object key or array index to be removed.
+
+```
+(make obj {:foo 1 :bar 2})
+(make arr ['a' 'b' 'c'])
+
+(m:remove obj :foo)
+#=> {:bar 2}
+
+(m:remove arr 1)
+#=> ['a' 'c']
+```
+
+[top](#table-of-contents)
+
+### `(m:signal channel [data])`
+
+Broadcasts data on a global event channel. Returns undefined.
+
+- `channel` - Symbol. The name of the event.
+- `data` - Optional. Data to send along with the event.
+
+```
+(m:handle :my-event (fn [data] (m:log data)))
+
+(m:signal :my-event 'foo')
+#=> logs 'foo'
+```
+
+[top](#table-of-contents)
+
+### `(m:tail array)`
+
+Creates a slice of all array items except the first one.
+
+- `array` - Any array.
+
+```
+(m:tail [1 2 3])
+#=> [2, 3]
+```
+
+[top](#table-of-contents)
+
+### `(m:throw err)`
+
+Throws an error object.
+
+- `err` - Any error object.
+
+```
+(m:throw (n:new Error))
+#=> ERROR!
+```
+
+[top](#table-of-contents)
+
+### `(m:typeof data)`
+
+Determines the type of `data` and returns one of the following symbols:
+`:array, :boolean, :date, :function, :htmlelement, :nan, :null, :number, :object, :process, :regexp, :string, :symbol, :undefined, :vnode`. Provides more accurate output than JavaScript's native `typeof` operator.
+
+- `data` - Any value.
+
+```
+(m:typeof [])                    #=>  :array
+(m:typeof true)                  #=>  :boolean
+(m:typeof (m:new Date))          #=>  :date
+(m:typeof (fn [] null))          #=>  :function
+(m:typeof (m:dom 'div'))         #=>  :htmlelement
+(m:typeof NaN)                   #=>  :nan
+(m:typeof null)                  #=>  :null
+(m:typeof 4)                     #=>  :number
+(m:typeof {})                    #=>  :object
+(m:typeof (m:new Worker 'url'))  #=>  :process
+(m:typeof /foo/g)                #=>  :regexp
+(m:typeof 'foo')                 #=>  :string
+(m:typeof :foo)                  #=>  :symbol
+(m:typeof undefined)             #=>  :undefined
+(m:typeof <div></div>)           #=>  :vnode
+```
+
+[top](#table-of-contents)
+
+### `(m:unhandle channel fun)`
+
+Removes a handler function from a global event channel. Returns undefined.
+
+- `channel` - Symbol. The name of the event.
+- `fun` - The function to remove.
+
+```
+(make handler (fun [data] (m:log data)))
+
+(m:handle :my-event handler)
+
+(m:signal :my-event 'foo')
+#=> logs 'foo'
+
+(m:unhandle :my-event handler)
+
+(m:signal :my-event 'foo')
+#=> nothing happens
+```
+
+[top](#table-of-contents)
+
+### `(m:update collection key val)`
+
+Returns a new, shallow copy of a collection with a provided key updated with a new value.
+
+- `collection` - Object or Array. Contains an item to be updated.
+- `key` - Identifies the object key or array index to be updated.
+- `val` - The new value for the key.
+
+```
+(make obj {:foo 1 :bar 2})
+(make arr ['a' 'b' 'c'])
+
+(m:update obj :foo 3)
+#=> {:foo 3 :bar 2}
+
+(m:update arr 1 'd')
+#=> ['a' 'd' 'c']
+```
+
+[top](#table-of-contents)
+
+### `(m:vdom:create type [attrs] [children])`
+
+Creates a new virtual DOM node. MapleML syntax is a shortcut for this function.
+
+- `type` - String. The type of node to create.
+- `attrs` - Optional. An object specifying all attributes. Each should be named with a symbol.
+- `children` - Optional. An array of child virtual DOM nodes.
+
+```
+(m:vdom:create 'div' {:class 'my-class'} [
+  (m:vdom:create 'span' {} ['Hello, world!'])
+])
+
+#...produces the same thing as...
+
+<div {:class 'my-class'}>
+  <span>
+    'Hello, world!'
+  </span>
+</div>
+
+#...which is a virtual tree
+```
+
+[top](#table-of-contents)
+
+### `(m:vdom:diff vtree1 vtree2)`
+
+Compares two virtual trees and outputs the differences between them.
+
+- `vtree1` - VNode. The result of calling `m:vdom:create`.
+- `vtree2` - Another VNode.
+
+```
+(make tree1 <div>'hello'</div>)
+(make tree2 <div>'goodbye'</div>)
+
+(m:vdom:diff tree1 tree2)
+#=> Object of differences
+```
+
+[top](#table-of-contents)
+
+### `(m:vdom:render vtree)`
+
+Converts a virtual DOM tree into a tree of real DOM nodes.
+
+- `vtree` - VNode. The result of calling `m:vdom:create`.
+
+```
+(make tree1 <div>'hello'</div>)
+(make tree2 <div>'goodbye'</div>)
+
+(m:vdom:render <div {:class 'foo'}>'hello'</div>)
+#=> <div class="foo">hello</div>
+```
+
+[top](#table-of-contents)
+
+### `(m:vdom:injectNodes nodes target)`
+
+Injects a tree of nodes into the real DOM. Returns the tree of real nodes.
+
+- `nodes` - VNode or HtmlElement.
+- `target` - String or HtmlElement.
+
+```
+(m:vdom:injectNodes <div {:class 'foo'}>'hello'</div> '#app')
+#=> Injects real nodes into the selement identified by '#app'.
+#=> Returns <div class="foo">hello</div>
+```
+
+[top](#table-of-contents)
+
+### `(m:vdom:patchNodes realNodes changes)`
+
+Updates a tree of real DOM nodes according to an object of virtual DOM changes.
+
+- `realNodes` - HtmlElement.
+- `changes` - Object. The result of calling `m:vdom:diff` on two virtual trees.
+
+[top](#table-of-contents)
+
+### `(m:warn ...msgs)`
+
+A pass-through to console.warn. If `console` does not exist in the current environment, fails silently.
+
+- `...msgs` - Items to log to the console.
+
+```
+(m:warn 'Scary warning!')
+#=> logs 'Scary warning!'
+```
+
+[top](#table-of-contents)
 
 ## Syrup
 
@@ -519,7 +1157,21 @@ Syrup is a simple framework built using MapleScript's virtual DOM technology to 
 # The app automatically re-renders using the new text.
 ```
 
-## How to Use It
+[top](#table-of-contents)
+
+## How to use it
+
+### Install it
+
+You can install MapleScript via npm or yarn.
+
+```
+npm install --save-dev maplescript
+
+# or
+
+yarn add maplescript --dev
+```
 
 ### Directly
 
@@ -582,3 +1234,5 @@ gulp.task('maple', function () {
          .pipe(gulp.dest('path/to/output_directory'));
 });
 ```
+
+[top](#table-of-contents)

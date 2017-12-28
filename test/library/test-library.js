@@ -308,11 +308,11 @@ describe('Library', () => {
     it('remove', () => {
       const foo = {bar: 1, baz: 2};
       const fooAfter = {bar: 1};
-      const fooRemove = lib[s("remove")]('baz', foo);
+      const fooRemove = lib[s("remove")](foo, 'baz');
 
       const bar = [1, 2, 3];
       const barAfter = [1, 3];
-      const barRemove = lib[s("remove")](1, bar);
+      const barRemove = lib[s("remove")](bar, 1);
 
       assert.ok(foo !== fooRemove, 'generates new object');
       assert.ok(bar !== barRemove, 'generates new array');
@@ -357,11 +357,11 @@ describe('Library', () => {
     it('update', () => {
       const foo = {bar: 1, baz: 2};
       const fooAfter = {bar: 1, baz: 3};
-      const fooRemove = lib[s("update")]('baz', 3, foo);
+      const fooRemove = lib[s("update")](foo, 'baz', 3);
 
       const bar = [1, 2, 3];
       const barAfter = [1, 4, 3];
-      const barRemove = lib[s("update")](1, 4, bar);
+      const barRemove = lib[s("update")](bar, 1, 4);
 
       assert.ok(foo !== fooRemove, 'generates new object');
       assert.ok(bar !== barRemove, 'generates new array');
