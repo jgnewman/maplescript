@@ -9,10 +9,20 @@ var _utils = require('../utils');
   var _this = this;
 
   return '{ ' + this.items.map(function (item, index) {
+
     if (index % 2 === 0) {
       // key
-      var symbol = item.type === 'Symbol';
-      return (symbol ? '[' : '"') + item.compile(true) + (symbol ? ']' : '"') + ':';
+      var isSymbol = item.type === 'Symbol';
+      var isString = item.type === 'String';
+      var compiled = item.compile(true);
+
+      if (isSymbol) {
+        return '[' + compiled + ']:';
+      } else if (isString) {
+        return compiled + ':';
+      } else {
+        return '"' + compiled + '":';
+      }
     } else {
       // value
       return item.compile(true) + (index === _this.length - 1 ? '' : ',');

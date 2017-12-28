@@ -68,6 +68,7 @@ function compileFunction(body, async) {
   if (!async && body[0].type !== 'Arr') return compilePolymorph.call(this, body);
 
   // Die if the user accidentally put a top-level param list into a polymorph
+  // i.e. (make foo [x y] (of ... ))
   if (!async && body[1].type === 'List' && body[1].items[0] && body[1].items[0].text === 'of') (0, _utils.die)(this, '\n    Polymorphic functions can not contain a parameter list outside of an `of`\n    statement. Give each of these statements its own parameter list instead.\n  '.trim().replace(/\s+/g, ' '));
 
   // Tweak the body to fit async functions
