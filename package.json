@@ -1,11 +1,10 @@
 {
   "name": "maplescript",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A friendlier Lisp over JavaScript",
   "author": "John Newman",
   "license": "MIT",
   "dependencies": {
-    "cns-lib": "^0.5.0",
     "gulp-util": "^3.0.8",
     "loader-utils": "^1.1.0",
     "merge": "^1.2.0",
@@ -37,7 +36,8 @@
     "url": "git://github.com/jgnewman/maplescript.git"
   },
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp test",
+    "test-irl": "gulp test-irl"
   },
   "devDependencies": {
     "assert": "^1.4.1",

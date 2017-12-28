@@ -1,4 +1,4 @@
-![MapleScript](./logo.svg)
+![MapleScript](https://github.com/jgnewman/maplescript/raw/master/logo.svg?sanitize=true)
 > A friendlier Lisp over JavaScript.
 
 [![Build Status](https://travis-ci.org/jgnewman/maplescript.svg?branch=master)](https://travis-ci.org/jgnewman/maplescript)

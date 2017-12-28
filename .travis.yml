@@ -6,4 +6,4 @@ before_script:
 install:
   - yarn
 script:
-  - gulp test
+  - yarn test
