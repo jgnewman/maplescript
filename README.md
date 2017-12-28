@@ -96,7 +96,7 @@ foo.0
 
 If you need to reference `this`, you can still use the keyword `this`, or you can use `@`. For example, `@foo`, and `@:foo`.
 
-Regarding `m:get`, `m` is a reference to the MapleScript core library and `get` retrieves values from objects and arrays.
+Regarding `m:get`, `m` is a reference to the MapleScript core library (which is always available) and `get` retrieves values from objects and arrays.
 
 MapleScript also takes a tip from CoffeeScript and allows you to perform "unconfident retrievals". For example, the expression `foo?:bar?.baz` will only return the value for `baz` if all the values along the chain exist. So if `foo` doesn't exist or if `foo:bar` doesn't exist, it will return undefined rather than throwing an error.
 
@@ -105,33 +105,33 @@ MapleScript also takes a tip from CoffeeScript and allows you to perform "unconf
 Most of the MapleScript operators are the same as in JavaScript except that they're written in prefix notation as function calls. There are only a couple of differences as outlined below:
 
 ```
-(+ x y z)  #=> x + y + z
-(- x y z)  #=> x - y - z
-(* x y z)  #=> x * y * z
-(/ x y z)  #=> x / y / z
-(= x y z)  #=> x === y === z
-(!= x y z) #=> x !== y !== z
-(% x y)    #=> x % y
-(?< x y)   #=> x < y
-(?> x y)   #=> x > y
-(<= x y)   #=> x <= y
-(>= x y)   #=> x >= y
-(not x)    #=> !x
+(+ x y z)   #=>  x + y + z
+(- x y z)   #=>  x - y - z
+(* x y z)   #=>  x * y * z
+(/ x y z)   #=>  x / y / z
+(= x y z)   #=>  x === y === z
+(!= x y z)  #=>  x !== y !== z
+(% x y)     #=>  x % y
+(?< x y)    #=>  x < y
+(?> x y)    #=>  x > y
+(<= x y)    #=>  x <= y
+(>= x y)    #=>  x >= y
+(not x)     #=>  !x
 ```
 
 To help with some of this, there are a few built-in special forms for performing logic:
 
 ```
-(all (= x y) (= a b))  #=> x === y && a === b
-(any (= x y) (= a b))  #=> x === y || a === b
-(none (= x y) (= a b)) #=> !(x === y) && !(a === b)
+(all (= x y) (= a b))   #=>  x === y && a === b
+(any (= x y) (= a b))   #=>  x === y || a === b
+(none (= x y) (= a b))  #=>  !(x === y) && !(a === b)
 ```
 
 Notice that these are called "special forms" because even though they are structured like function calls, each argument is not eagerly evaluated. This works by transpiling to infix JavaScript operators rather than to function calls.
 
 ## Conditions
 
-MapleScript conditions are another special form. The `if` expression looks like a function call but it can only work if we don't eagerly evaluate all of its arguments. They're conditional, after all. But thinking of it like a function call, arguments are divided into pairs where the first member of the pair is a condition and the second member is an expression to evaluate if the condition was truthy. If the last argument does not have a second pair member, it is used as an else case.
+The MapleScript condition is another special form. The `if` expression looks like a function call but it can only work if we don't eagerly evaluate all of its arguments. They're conditional, after all. But if we think of it like a function call, arguments are divided into pairs where the first member of the pair is a condition and the second member is an expression to evaluate if the condition was truthy. If the last argument does not have a second pair member, it is used as an else case.
 
 ```
 (make food 'pizza')
@@ -174,9 +174,7 @@ Although MapleScript is loosely functional, it encourages you to write functiona
 
 (make manyLogs [num]
   (m:log 'running')
-  (if
-    (?> num 0)
-      (manyLogs (- num 1))))
+  (if (?> num 0) (manyLogs (- num 1))))
 
 (manyLogs 3)
 #=> logs "running" 3 times
@@ -196,18 +194,20 @@ Because all MapleScript expressions return a value, functions don't have a `retu
   (+ x y))
 
 # A polymorphic function
+# When there is 1 argument that equals 0, return 1
+# When there is 1 argument that equals anything, recurse
 (make factorial
-  # when there is 1 argument that equals 0
   (of [0] 1)
-  # when there is 1 argument that equals anything
   (of [n] (* n (factorial (- n 1)))))
 ```
 
 Within polymorphic functions, you can add qualifiers to your parameter lists. In other words, if the arguments that come in match the pattern, you can execute an additional test before the match is proved.
 
 ```
+# Factorial of n where n is less than 2, return 1
+# Factorial of n in any other case, recurse
 (make factorial
-  (of [n :: (?< n 2)] 1) # Factorial of n where n is less than 2
+  (of [n :: (?< n 2)] 1)
   (of [n] (* n (factorial (- n 1)))))
 ```
 
@@ -239,16 +239,16 @@ When one of your arguments is expected to be an array, you have a few extra opti
 Additional argument destructuring will not happen within the argument pattern. You'll use the `destr` function for it.
 
 ```
+# Turn object properties into variables with the same names
 (make addProps [obj]
-  # Turn these props into variables with the same name
   (destr obj [:foo :bar])
   (+ foo bar))
 
 (addProps {:foo 2 :bar 3})
 #=> 5
 
+# Turn object properties into variables with different names
 (make mltProps [obj]
-  # Turn these props into variables with different names
   (destr obj {:foo x :bar y})
   (* x y))
 
@@ -261,26 +261,26 @@ Additional argument destructuring will not happen within the argument pattern. Y
 MapleScript sticks with JavaScript's native data types for the most part. However, it removes your ability to use the `typeof` operator and instead provides a function called `m:typeof` that will give you much better accuracy. The result of calling this function is always a symbol.
 
 ```
-(m:typeof 'foo')        #=> :string
-(m:typeof 100)          #=> :number
-(m:typeof (fn [x] x))   #=> :function
-(m:typeof [1 2 3])      #=> :array
-(m:typeof {:x 'y'})     #=> :object
-(m:typeof null)         #=> :null
-(m:typeof undefined)    #=> :undefined
-(m:typeof NaN)          #=> :nan
-(m:typeof :foo)         #=> :symbol
-(m:typeof /foo/g)       #=> :regexp
-(m:typeof (m:new Date)) #=> :date
+(m:typeof 'foo')         #=>  :string
+(m:typeof 100)           #=>  :number
+(m:typeof (fn [x] x))    #=>  :function
+(m:typeof [1 2 3])       #=>  :array
+(m:typeof {:x 'y'})      #=>  :object
+(m:typeof null)          #=>  :null
+(m:typeof undefined)     #=>  :undefined
+(m:typeof NaN)           #=>  :nan
+(m:typeof :foo)          #=>  :symbol
+(m:typeof /foo/g)        #=>  :regexp
+(m:typeof (m:new Date))  #=>  :date
 
 (make div (m:dom '#my-div'))
-(m:typeof div) #=> 'htmlelement'
+(m:typeof div)           #=>  :htmlelement
 
 (make worker (m:new Worker 'url'))
-(m:typeof worker) #=> 'process'
+(m:typeof worker)        #=>  :process
 
 (make span <span>'hello!'</span>)
-(m:typeof span) #=> 'vnode'
+(m:typeof span)          #=>  :vnode
 ```
 
 The `instanceof` operator has also been re-purposed as `m:instanceof`, however this is just a pass-through. It doesn't do anything different or special.
@@ -295,6 +295,7 @@ MapleScript has a built-in system for subscribing to and triggering events. The 
 # Subscribe to an event
 (m:handle :my-event handler)
 
+# Trigger the event
 (m:signal :my-event 'foo')
 #=> logs "I got foo!"
 
@@ -308,6 +309,8 @@ MapleScript has a built-in system for subscribing to and triggering events. The 
 ## Error handling
 
 MapleScript's technique for error handling is built on the event system and allows you to decouple your "trys" from your "catches".
+
+The `m:attempt` function takes an event channel and a function to execute. If that function throws an error, the error will be caught and signaled along the event channel.
 
 ```
 (make failer []
@@ -348,11 +351,11 @@ When it comes to exports, it is important to remember that **all MapleScript mod
 (export foo)
 
 # Export an object with keys `:foo` and `:bar` as references
-# to `foo` and `bar`.
+# to values `foo` and `bar`.
 (export [foo bar])
 
 # Export an object with keys `:foo` and `:bar` as references
-# to `foo` and `bar`.
+# to values `foo` and `bar`.
 (export {
   :foo foo
   :bar bar
