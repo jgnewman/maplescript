@@ -42,6 +42,11 @@ gulp.task('test', next => {
     }));
 });
 
+gulp.task('private:copy-test-irl', next => {
+  return gulp.src('./test-irl/src/index.html')
+             .pipe(gulp.dest('./test-irl/output/'))
+});
+
 gulp.task('private:build-test-irl', next => {
   return browserify({entries: ['./test-irl/src/app.maple'], extensions: ['.maple']})
          .transform(mapleify, {isMapleProjectDirectory: true})
@@ -60,7 +65,7 @@ gulp.task('private:serve', () => {
 });
 
 gulp.task('test-irl', () => {
-  sequence('private:build-test-irl', 'private:serve', () => {
+  sequence('private:copy-test-irl', 'private:build-test-irl', 'private:serve', () => {
     gulp.watch('./test-irl/src/app.maple', () => sequence('private:build-test-irl'));
   });
 });

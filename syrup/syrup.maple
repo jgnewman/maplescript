@@ -1,58 +1,80 @@
+###
+Syrup.maple: ~8kb min
+
+A framework utilizing MapleScript and its virtual-dom capabilities to
+provide a somewhat React.js-like experience.
+###
+
 (import './lib/lifecycle' [:runInitialHooks :applyPatches])
-(import './lib/state' [:state])
+(import './lib/state' [:state :reduce])
 
-(make treeTracker { :prev null })
+###
+@public render
 
-(make subscribeToState [stateFn treeBuilder initialTree nodes]
-  (m:dangerouslyMutate :prev initialTree treeTracker)
-  (stateFn null (fn [newStateFn]
-    (make nextTree (treeBuilder (newStateFn)))
-    (applyPatches treeTracker:prev nextTree nodes)
-    (m:dangerouslyMutate :prev nextTree treeTracker))))
+Injects a virtual tree into the actual dom and associates it with
+a state object such that when the state changes, the tree is
+re-rendered, diffed, and patched.
 
-(make render [treeBuilder stateFn target]
+@param {Function}    treeBuilder  A function returning the entire virtual tree.
+@param {Object}      state        A state object as returned by `(state)`.
+@param {String|Node} target       Represents a dom node in which to render the tree.
+###
+(make render [treeBuilder state target]
+  (make dom { :current-tree null :current-nodes null })
+  (make initialState (state:get))
+  (m:dangerouslyMutate :current-tree (treeBuilder { :state initialState }) dom)
+  (m:dangerouslyMutate :current-nodes (m:vdom:render dom:current-tree) dom)
+  (m:vdom:injectNodes dom:current-nodes target)
+  (state:sub
+    (fn [newState]
+      (make newTree (treeBuilder { :state newState }))
+      (applyPatches dom:current-tree newTree dom:current-nodes)
+      (m:dangerouslyMutate :current-tree newTree dom)))
+  (runInitialHooks dom:current-tree initialState))
 
-  # Pass state values into the tree and render it
-  (make vrender (treeBuilder (stateFn)))
-  (make nodes (m:vdom:render vrender))
+###
+@public afterMount
 
-  # Drop nodes into the dom
-  (m:vdom:injectNodes nodes target)
+Takes a component function and a hook function; returns a new component
+function that executes the hook after being mounted into the actual dom.
 
-  # Subscribe to state changes so we can auto-re-render
-  # when the state changes
-  (subscribeToState stateFn treeBuilder vrender nodes)
-
-  # Run our initial hooks
-  (runInitialHooks vrender stateFn))
-
-
-# Attach a lifecycle to the vnodes returned by an element
-# We have to use dangerouslyMutate only because vdom is dependency tech
-(make component [elem]
-  (fn [attrs children]
-    (make inst (elem attrs children))
-    (m:dangerouslyMutate :lifecycle {} inst)
-    inst))
-
+@param {Function} comp  A function that produces a vnode tree.
+@param {Function} fun   A hook to run after mount. Called with attributes.
+###
 (make afterMount [comp fun]
   (fn [attrs children]
     (make inst (comp attrs children))
     (make hook (fn [] (fun attrs)))
-    (m:dangerouslyMutate :aftermount hook inst:lifecycle)
+    (if inst (do
+      (m:dangerouslyMutate :lifecycle (any inst:lifecycle {}) inst)
+      (m:dangerouslyMutate :after-mount hook inst:lifecycle)))
     inst))
 
+###
+@public beforeUnmount
+
+Takes a component function and a hook function; returns a new component
+function that executes the hook beforeremoved from the actual dom.
+
+@param {Function} comp  A function that produces a vnode tree.
+@param {Function} fun   A hook to run before ummount. Called with attributes.
+###
 (make beforeUnmount [comp fun]
   (fn [attrs children]
     (make inst (comp attrs children))
     (make hook (fn [] (fun attrs)))
-    (m:dangerouslyMutate :beforeunmount fun inst:lifecycle)
+    (if inst (do
+      (m:dangerouslyMutate :lifecycle (any inst:lifecycle {}) inst)
+      (m:dangerouslyMutate :before-unmount hook inst:lifecycle)))
     inst))
 
+###
+Export all of our public functions.
+###
 (export [
   state
+  reduce
   render
-  component
   afterMount
   beforeUnmount
 ])

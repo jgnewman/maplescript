@@ -161,7 +161,7 @@ var MAPLE_ = {
   [s_("copy")]: function (collection) {
     var type = MAPLE_[s_("typeof")](collection);
     if (type !== s_('object') && type !== s_('array')) {
-      return MAPLE_[s_("die")]('The copy function can only be called on objects and arrays.');
+      return collection;
     }
     if (type === s_('array')) {
       var copy = [];
@@ -227,10 +227,6 @@ var MAPLE_ = {
     return list[0];
   },
 
-  [s_("instance")]: function(cls) {
-    return new (Function.prototype.bind.apply(cls, arguments));
-  },
-
   [s_("instanceof")]: function (val, type) {
     return val instanceof type;
   },
@@ -251,6 +247,15 @@ var MAPLE_ = {
     if (typeof console !== 'undefined' && typeof console.log === 'function') {
       return console.log.apply(console, arguments);
     }
+  },
+
+  [s_("map")]: function (collection, action) {
+    if (Array.isArray(collection)) return collection.map(action);
+    var newObj = {};
+    MAPLE_[s_("keys")](collection).forEach(function (key) {
+      newObj[key] = action(collection[key], key);
+    });
+    return newObj;
   },
 
   [s_("merge")]: function () {
@@ -276,6 +281,10 @@ var MAPLE_ = {
         return out;
       default: throw new Error('Can only merge objects or arrays.');
     }
+  },
+
+  [s_("new")]: function(cls) {
+    return new (Function.prototype.bind.apply(cls, arguments));
   },
 
   [s_("noop")]: function(){},

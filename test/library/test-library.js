@@ -231,14 +231,6 @@ describe('Library', () => {
       assert.equal(lib[s("head")]([1, 2, 3]), 1);
     });
 
-    it('instance', () => {
-      const now = +new Date;
-      const date = lib[s("instance")](Date, now);
-
-      assert.ok(date);
-      assert.equal(date.getTime(), now);
-    });
-
     it('instanceof', () => {
       assert.equal(lib[s("instanceof")](noop, Function), true);
     });
@@ -262,6 +254,17 @@ describe('Library', () => {
       assert.deepEqual(lib[s("lead")]([1, 2, 3]), [1, 2]);
     });
 
+    it('map', () => {
+      const obj = {[Symbol.for('foo')]: 1, bar: 2};
+      const arr = [1, 2, 3];
+
+      const mappedObj = lib[Symbol.for('map')](obj, function (item) { return item });
+      const mappedArr = lib[Symbol.for('map')](arr, function (item) { return item + 1 });
+
+      assert.deepEqual(obj, mappedObj);
+      assert.deepEqual(mappedArr, [2, 3, 4]);
+    });
+
     it('merge', () => {
       const obj1 = {a: 1};
       const obj2 = {b: 2};
@@ -275,6 +278,14 @@ describe('Library', () => {
 
       assert.deepEqual(lib[s("merge")](obj1, obj2, obj3), combinedObj, 'merges objects');
       assert.deepEqual(lib[s("merge")](arr1, arr2, arr3), combinedArr, 'merges arrays');
+    });
+
+    it('new', () => {
+      const now = +new Date;
+      const date = lib[s("new")](Date, now);
+
+      assert.ok(date);
+      assert.equal(date.getTime(), now);
     });
 
     it('noop', () => {

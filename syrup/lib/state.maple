@@ -1,19 +1,60 @@
-(make state [props handlers]
-  (make handlerList (any handlers []))
-  (fn
+###
+@public state
 
-    # Get the current state values
-    (of []
-      (m:copy props))
+Creates an object allowing you to get a copy of the current state,
+update to a new state, view the state's event channel, and sub/unsubscribe
+to state changes.
+###
+(make state
+  (of [channel] (state channel {}))
+  (of [channel initialProps]
+    (make stateRef { :props initialProps :handlers [] })
+    {
+      :channel
+        (fn []
+          channel)
+      :get
+        (fn []
+          (m:copy stateRef:props))
+      :set
+        (fn [nextProps]
+          (m:dangerouslyMutate :props nextProps stateRef)
+          (stateRef:handlers.forEach (fn [handler] (handler nextProps)))
+          nextProps)
+      :sub
+        (fn [handler]
+          (make nextHandlers (stateRef:handlers.concat handler))
+          (m:dangerouslyMutate :handlers nextHandlers stateRef)
+          handler)
+      :unsub
+        (fn [handler]
+          (make nextHandlers (stateRef:handlers.slice))
+          (nextHandlers.splice (nextHandlers.indexOf handler) 1)
+          (m:dangerouslyMutate :handlers nextHandlers stateRef)
+          handler)
+    }))
 
-    # Add a new handler
-    (of [_ newHandler]
-      (state props (handlerList.concat newHandler)))
+###
+@public reduce
 
-    # Update the state and alert all the handlers
-    (of [newprops]
-      (make newStateFn (state newprops handlerList))
-      (handlerList.map (fn [handler] (handler newStateFn)))
-      newStateFn)))
+Takes a state object and a function for creating a new collection of
+state values. Sets up a listener on the state's event channel that
+runs the reducer function and sets the new state to its result.
 
-(export [state])
+To subsequently trigger the reducer, we can just sent a maple event
+on the state's event channel.
+
+@param {Object}   state    A state object.
+@param {Function} reducer  Produces a new state object.
+###
+(make reduce [state reducer]
+  (m:handle (state:channel)
+    (fn [action]
+      (make nextProps (reducer (state:get) action))
+      (state:set nextProps)))
+  state)
+
+###
+Export the state creator and the reducer creator.
+###
+(export [state reduce])

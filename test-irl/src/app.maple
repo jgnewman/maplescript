@@ -1,21 +1,52 @@
-(import './extrafile')
 (import '../../syrup/syrup' syrup)
 
 # Create a standard maplescript custom element
-(element TitleElem [attrs children]
-  <h1>
-    'work!'
-  </h1>
+(element TitleBase [attrs children]
+  <h1>attrs:title-text</h1>
 )
 
 # Convert our element into a component and add
 # lifecycle hooks
-(make TitleComponent
-  (-> (syrup:component TitleElem)
-      (syrup:afterMount @ (fn [attrs] (m:log 'aftermount' attrs)))
-      (syrup:beforeUnmount @ (fn [attrs] (m:log 'beforemount' attrs)))))
+(make Title
+  (-> TitleBase
+      (syrup:afterMount @ (fn [attrs] (m:log 'aftermount running with' attrs)))
+      (syrup:beforeUnmount @ (fn [attrs] (m:log 'beforeunmount running with' attrs)))))
 
-(make initialState (syrup:state {:stateVal 'foo'}))
+(element App [attrs children]
+  <div {:class 'app'}>
+    (if
+      (= :string (m:typeof attrs:state:title-text))
+        <Title {:title-text attrs:state:title-text} />
+      null)
+  </div>
+)
 
-# Render our component into the DOM
-(syrup:render TitleComponent initialState '#app')
+# Create a reducer
+(make reducer [state action]
+  (m:merge state {:title-text action:title-text}))
+
+# Set up the state we'll use for this app
+(make initialState
+  (-> (syrup:state :test-app {:title-text 'App is alive!'})
+      (syrup:reduce @ reducer)))
+
+# Render our app (with state!) into the DOM
+(syrup:render App initialState '#app')
+
+# Make sure our app works with changes over time by
+# causing changes on a recurring interval. Correct behavior
+# looks like text appearing and disappearing every 2 seconds.
+(make repeater [index]
+  (make realIndex (any index 0))
+  (if
+    (= 0 (% realIndex 2))
+      (setTimeout (fn []
+        (m:signal :test-app { :title-text null })
+        (repeater (+ realIndex 1))
+      ) 2000)
+    (setTimeout (fn []
+      (m:signal :test-app { :title-text `App is reactive! ${realIndex}` })
+      (repeater (+ realIndex 1))
+    ) 2000)))
+
+(repeater)
