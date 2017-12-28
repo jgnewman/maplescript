@@ -1,4 +1,4 @@
-# MapleScript
+![MapleScript](./logo.svg)
 > A friendlier Lisp over JavaScript.
 
 ```
