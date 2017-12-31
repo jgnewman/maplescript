@@ -6,7 +6,7 @@
 # SOURCEMAPS
 # cleaner readme
 
-{ foo 1 "bar" 2}
+/reg \/exp\r\n'/gim '/str'
 
 ###
 true

@@ -158,6 +158,10 @@ var MAPLE_ = {
     }
   },
 
+  [s_("bind")]: function (fn, ctx) {
+    return fn.bind(ctx);
+  },
+
   [s_("copy")]: function (collection) {
     var type = MAPLE_[s_("typeof")](collection);
     if (type !== s_('object') && type !== s_('array')) {

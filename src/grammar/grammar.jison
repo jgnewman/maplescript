@@ -59,7 +59,7 @@
 
 0x[A-z0-9]+                           return "NUMBER";
 (\-)?[0-9]+(\.[0-9]+)?(e\-?[0-9]+)?   return "NUMBER";
-\/([^\/\n\r]|\/)+\/[gim]*             return "REGEXP";
+\/(\\\/|[^\r\n\/])+\/[gim]*           return "REGEXP";
 \"([^\"]|\\[\"])*\"                   return "STRING";       /* " fix syntax highlighting */
 \'([^\']|\\[\'])*\'                   return "STRING";       /* ' fix syntax highlighting */
 \`([^\`]|\\[\`])*\`                   return "STRING";       /* ` fix syntax highlighting */

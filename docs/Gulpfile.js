@@ -9,7 +9,7 @@ var gulp = require('gulp'),
     source = require('vinyl-source-stream'),
     buffer = require('vinyl-buffer'),
     sequence = require('run-sequence'),
-    mapleify = require('../plugins/browserify'),
+    mapleify = require('maplescript/plugins/browserify'),
     panini = require('panini'),
     rename = require('gulp-rename'),
     reload = browserSync.reload;
@@ -18,7 +18,7 @@ var gulp = require('gulp'),
  * Cleaning dist/ folder
  */
 gulp.task('clean', function(cb) {
-  del(['css/**', 'js/**', 'reference/**']).then(function () {
+  del(['css/**', 'js/**']).then(function () {
     cb();
   });
 })
@@ -79,11 +79,12 @@ gulp.task('clean', function(cb) {
     helpers: 'helpers/'
   }))
   .pipe(rename(function (path) {
-    path.dirname += ('/' + path.basename);
+    // path.dirname += ('/' + path.basename);
+    path.dirname = './';
     path.basename = 'index';
     path.extname = '.html';
   }))
-  .pipe(gulp.dest('reference'));
+  .pipe(gulp.dest('./'));
 })
 
 /**
@@ -95,8 +96,7 @@ gulp.task('clean', function(cb) {
       'maple/**/*.maple',
       'scss/**/*.scss',
       'markdown/**/*.md',
-      'layouts/**/*.html',
-      'index.html'
+      'layouts/**/*.html'
     ],
     function () {
       return sequence('sass', 'js', 'docs', browserSync.reload);

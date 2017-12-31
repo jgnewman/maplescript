@@ -152,6 +152,19 @@ describe('Library', () => {
       assert.ok(result);
     });
 
+    it('bind', () => {
+      const desiredCtx = {};
+      let actualCtx = null;
+
+      function setCtx() {
+        actualCtx = this;
+      }
+
+      lib[s('bind')](setCtx, desiredCtx)();
+
+      assert.equal(actualCtx, desiredCtx);
+    });
+
     it('copy', () => {
       const toCopy = {
         foo: 'foo',

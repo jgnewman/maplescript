@@ -10,12 +10,12 @@ describe('Regex', () => {
   });
 
   it('should compile a complex regular expression', () => {
-    const toCompile = '/^abc([^xyz]|0-9|a-z_\\-)$/gim';
+    const toCompile = '/^ab c([^xyz]|0-9|a-z_\\-)$/gim';
     assert.equal(compileCode(toCompile).trim(), toCompile + ';');
   });
 
   it('should compile a regular expression with escaped "/" symbols', () => {
-    const toCompile = '/\/\//';
+    const toCompile = '/\\/\\//';
     assert.equal(compileCode(toCompile).trim(), toCompile + ';');
   });
 
