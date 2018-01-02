@@ -1,40 +1,42 @@
-###
+---
 @public state
 
 Creates an object allowing you to get a copy of the current state,
 update to a new state, view the state's event channel, and sub/unsubscribe
 to state changes.
-###
-(make state
-  (of [channel] (state channel {}))
-  (of [channel initialProps]
-    (make stateRef { :props initialProps :handlers [] })
-    {
-      :channel
-        (fn []
-          channel)
-      :get
-        (fn []
-          (m:copy stateRef:props))
-      :set
-        (fn [nextProps]
-          (m:dangerouslyMutate :props nextProps stateRef)
-          (stateRef:handlers.forEach (fn [handler] (handler nextProps)))
-          nextProps)
-      :sub
-        (fn [handler]
-          (make nextHandlers (stateRef:handlers.concat handler))
-          (m:dangerouslyMutate :handlers nextHandlers stateRef)
-          handler)
-      :unsub
-        (fn [handler]
-          (make nextHandlers (stateRef:handlers.slice))
-          (nextHandlers.splice (nextHandlers.indexOf handler) 1)
-          (m:dangerouslyMutate :handlers nextHandlers stateRef)
-          handler)
-    }))
+---
+(make
 
-###
+  -- With just channel, recurse and add an empty initial props object
+  (state channel)
+    (state channel {})
+
+  -- With channel and initial props, return functions for managing state
+  (state channel initialProps)
+    (do (make stateRef { :props initialProps :handlers [] })
+        {
+          :channel (@ channel)
+
+          :get     (@ (m:copy stateRef:props))
+
+          :set     (@ [nextProps]
+                      (m:dangerouslyMutate :props nextProps stateRef)
+                      (stateRef:handlers.forEach (@ [handler] (handler nextProps)))
+                      nextProps)
+
+          :sub     (@ [handler]
+                      (make nextHandlers (stateRef:handlers.concat handler))
+                      (m:dangerouslyMutate :handlers nextHandlers stateRef)
+                      handler)
+
+          :unsub   (@ [handler]
+                      (make nextHandlers (stateRef:handlers.slice))
+                      (nextHandlers.splice (nextHandlers.indexOf handler) 1)
+                      (m:dangerouslyMutate :handlers nextHandlers stateRef)
+                      handler)
+        }))
+
+---
 @public reduce
 
 Takes a state object and a function for creating a new collection of
@@ -46,15 +48,14 @@ on the state's event channel.
 
 @param {Object}   state    A state object.
 @param {Function} reducer  Produces a new state object.
-###
-(make reduce [state reducer]
-  (m:handle (state:channel)
-    (fn [action]
-      (make nextProps (reducer (state:get) action))
-      (state:set nextProps)))
-  state)
+---
+(make (reduce state reducer)
+  (do (m:handle (state:channel) (@ [action]
+        (make nextProps (reducer (state:get) action))
+        (state:set nextProps)))
+      state))
 
-###
+---
 Export the state creator and the reducer creator.
-###
+---
 (export [state reduce])

@@ -17,6 +17,12 @@ h1, h2, h3, h4, h5, h6,
   font-size: 16px;
   font-weight: 400;
   line-height: 1.6; }
+  .docs .warning {
+    background: #ffeecc;
+    padding: 15px 25px;
+    border-radius: 4px;
+    font-size: 85%;
+    margin: 35px auto; }
   .docs p:nth-of-type(2) {
     margin: 60px 0 40px;
     font-size: 42px;
@@ -54,6 +60,11 @@ h1, h2, h3, h4, h5, h6,
     font-size: 95%;
     background: #efe9e9;
     padding: 3px 5px 2px; }
+  .docs p a, .docs li a {
+    transition: all .3s ease;
+    color: #911841; }
+    .docs p a:hover, .docs li a:hover {
+      color: #EF5A66; }
   .docs pre {
     border-left: 3px solid #EF5A66;
     padding: 15px 25px;

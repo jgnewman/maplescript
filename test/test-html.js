@@ -38,21 +38,4 @@ describe('Html', () => {
     assert.equal(nlToSpace(compileCode(toCompile)), expected);
   });
 
-  it('should allow creating new elements', () => {
-    const toCompile = `
-      (element Foo [attrs children]
-        <h1>children</h1>
-      )
-    `;
-    const expected = nlToSpace(`
-      const Foo = function (attrs, children) {
-        const out_ = (function(){
-          return MAPLE_[Symbol.for("vdom")][Symbol.for("create")]("h1", null, [ children ]);
-        }).call(this);
-        return out_ || null;
-      };
-    `);
-    assert.equal(nlToSpace(compileCode(toCompile)), expected);
-  });
-
 });

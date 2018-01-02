@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/jgnewman/maplescript.svg?branch=master)](https://travis-ci.org/jgnewman/maplescript)
 
 ```
-(make delicious [code]
+(make (delicious code)
   (maplescript:compile code))
 ```
 
@@ -25,17 +25,16 @@ Here are a few examples of things you can do in MapleScript:
 ```
 # Create a factorial calculator
 
-(make factorial [n]
+(make (factorial n)
   (if
     (?< n 2)
       1
     (* n (factorial (- n 1)))))
 
-# Create a factorial with pattern matching!
+# Create a factorial calculator with pattern matching!
 
-(make factorial
-  (of [0] 1)
-  (of [n] (* n (factorial (- n 1)))))
+(make (factorial 0) 1
+      (factorial n) (* n (factorial (- n 1))))
 
 # More easily use Symbols, especially as object keys
 
@@ -57,17 +56,17 @@ person:age?:birthday #=> undefined
 # Chain context between function calls
 
 (-> (jquery '#my-div')
-    (@addClass 'my-class')
-    (@hide))
+    (&.addClass 'my-class')
+    (&.hide))
 
 (-> (returnPromise)
-    (@then (fn [result] (returnPromise result)))
-    (@then (fn [result] (returnPromise result)))
-    (@then (fn [result] result)))
+    (&.then (@ [result] (returnPromise result)))
+    (&.then (@ [result] (returnPromise result)))
+    (&.then (@ [result] result)))
 
 # Use the built-in event system
 
-(m:handle :my-event (fn [data] (m:log data)))
+(m:handle :my-event (@ [data] (m:log data)))
 (m:signal :my-event 'foo')
 
 # Generate nodes in a virtual DOM!

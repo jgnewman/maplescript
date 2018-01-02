@@ -3,36 +3,37 @@ var MAPLE_ = m = require("maplescript/library");
 
 const highlight = require('custom-syntax-highlighter');
 const dedentBlocks = function () {
-const args = Array.prototype.slice.call(arguments || []);
-return m[Symbol.for("map")](m[Symbol.for("domArray")]('pre code'), function () {
-const args = Array.prototype.slice.call(arguments || []);
-var block = args[0];
-const newText = (function(){
+          const args = Array.prototype.slice.call(arguments || []);
+          return m[Symbol.for("map")](m[Symbol.for("domArray")]('pre code'), function (block) {
+      
+      const args = Array.prototype.slice.call(arguments || []);
+      const newText = (function(){
     var ref_ = this;
     (function(){ ref_ = block["innerText"]["split"](/\n/g) }).call(ref_);
-(function(){ ref_ = m[Symbol.for("map")](this, function () {
-const args = Array.prototype.slice.call(arguments || []);
-var line = args[0];
-return line["replace"](/^\s{8}/, '');
-}) }).call(ref_);
+(function(){ ref_ = m[Symbol.for("map")](this, function (line) {
+      
+      const args = Array.prototype.slice.call(arguments || []);
+      return line["replace"](/^\s{8}/, '');
+      
+    }) }).call(ref_);
 (function(){ ref_ = this["join"]('\n') }).call(ref_);
     return ref_;
   }).call(this);
 return m[Symbol.for("dangerouslyMutate")]('innerHTML', newText, block);
-});
-};
+      
+    });
+        };
 dedentBlocks();
-highlight({ "patterns": { 'string single': /^(\'[^\'\n]*\')/, 'string double': /^(\"[^\'\n]*\")/, 'string tick': /^(\`[^\'\n]*\`)/, 'number': /^(\d+(\.\d+)?)/, 'keyword sym': /^(\:\:)/, 'keyword ref': /^(\@|async|await|const|do|element|fn|from|if|import|make|NaN|null|of|return|undefined)\b/, 'keyword call': [/^\((=\>\>|\-\>|\@|async|await|do|element|fn|if|make|of)\b/, '('], 'normal call': [/^\(([^\s\,\)\;]+)/, '('], 'symbol': [/^ (\:[A-Za-z0-9_\-\$]+)/, ' '], 'comment single': /^((\#|\/\/)[^\r\n]+)/, 'comment multi': /^(\#\#\#.*\#\#\#)/, 'html close': [/^\<\\\/([A-Za-z0-9\-]+)/, '<&#47;'], 'html open': [/^\<\\([A-Za-z0-9\-]+)/, '<'] } });
-const buildNode = function () {
-const args = Array.prototype.slice.call(arguments || []);
-var type = args[0];
-var id = args[1];
-var text = args[2];
+highlight({ "patterns": { 'string single': /^(\'[^\'\n]*\')/, 'string double': /^(\"[^\'\n]*\")/, 'string tick': /^(\`[^\'\n]*\`)/, 'number': /^(\d+(\.\d+)?)/, 'keyword sym': /^(\:\:|\@|\-\>)/, 'keyword ref': /^(\-\>|\@|\&|async|await|const|do|from|if|import|make|NaN|null|of|return|undefined)\b/, 'keyword call': [/^\((=\>\>|\-\>|\@|\&|async|await|do|if|make|where)\b/, '('], 'normal call': [/^\(([^\s\,\)\;\@]+)/, '('], 'symbol': [/^ (\:[A-Za-z0-9_\-\$]+)/, ' '], 'comment single': /^((\-\-|\/\/)[^\r\n]+)/, 'comment arrow': /^((\=\>|\/\/)[^\r\n]+)/, 'comment multi': /^(\-\-\-[.\r\n]*\-\-\-)/, 'html close': [/^\<\\\/([A-Za-z0-9\-]+)/, '<&#47;'], 'html open': [/^\<\\([A-Za-z0-9\-]+)/, '<'] } });
+const buildNode = function (type, id, text) {
+          const args = Array.prototype.slice.call(arguments || []);
+          return (function(){
 const cleanText = text["replace"](/\(([^\s]+)(\s+[^\s]+)*\)/, '$1');
 return m[Symbol.for("vdom")][Symbol.for("render")](MAPLE_[Symbol.for("vdom")][Symbol.for("create")]("a", { [Symbol.for("href")]: ("#" + (id)), [Symbol.for("class")]: type["toLowerCase"]() }, [
 cleanText
 ]));
-};
+}).call(this);
+        };
 const buildNav = function () {
 const args = Array.prototype.slice.call(arguments || []);
 if (MAPLE_.match_(args, [])) {
@@ -49,13 +50,13 @@ var nav = args[1];
 const node = buildNode(title["nodeName"], title["getAttribute"]('id'), title["innerText"]);
 nav["appendChild"](node);
 return setTimeout(function () {
-const args = Array.prototype.slice.call(arguments || []);
-node["setAttribute"]('class', ("show " + (node["getAttribute"]('class'))));
+      
+      const args = Array.prototype.slice.call(arguments || []);
+      node["setAttribute"]('class', ("show " + (node["getAttribute"]('class'))));
 return buildNav(rest, nav);
-}, 10);
-}
-throw new Error('Could not find an argument match.');
-
+      
+    }, 10);
+} throw new Error('Could not find an argument match.');
 };
 buildNav();
 

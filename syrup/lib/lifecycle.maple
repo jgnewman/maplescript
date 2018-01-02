@@ -1,77 +1,94 @@
-###
+---
 @private isRemoval
 
 Determines whether a patch object created by virtual-dom indicates
 a node will be removed from the dom.
-###
-(make isRemoval [patch]
+---
+(make (isRemoval patch)
   (all
     (= patch.patch undefined)
     (= patch.type 7)))
 
-###
+---
 @privare isAddition
 
 Determines whether a patch object created by virtual-dom indicates
 a node will be added to the dom
-###
-(make isAddition [patch]
+---
+(make (isAddition patch)
   (all
     (= :vnode (m:typeof patch.patch))
     (= patch.type 6)
     (= patch.vNode null)))
 
-###
+---
 @private collectChildHooks
 
 Loops over an array of objects where each contains :removals and :additions.
 Flattens this array into a single object with the same properties.
-###
-(make collectChildHooks
-  (of [childPatches]
-    (collectChildHooks childPatches { :removals [] :additions [] }))
-  (of [[] accum] accum)
-  (of [[first|rest] accum]
-    (collectChildHooks rest { :removals (accum:removals.concat first:removals)
-                              :additions (accum:additions.concat first:additions) })))
+---
+(make
 
-###
+  (collectChildHooks childPatches)
+    (collectChildHooks childPatches { :removals [] :additions [] })
+
+  (collectChildHooks [] accum)
+    accum
+
+  (collectChildHooks [first|rest] accum)
+    (collectChildHooks rest { :removals (accum:removals.concat first:removals)
+                              :additions (accum:additions.concat first:additions) }))
+
+---
+@private getChildHooks
+
+A function for looping over child nodes and returning their hook-ready nodes.
+---
+(make (getChildHooks patch)
+  (if
+    patch.patch?.children
+      (do (make children (Array.prototype.slice.call patch.patch.children))
+          (make childPatches (children.map (@ [child] (flattenHooks child))))
+          (collectChildHooks childPatches))
+    :else
+      { :removals [] :additions [] }))
+
+---
 @private flattenHooks
 
 Takes an array of patch objects where each might have nested children.
 Recursively iterates over this array and all existing children, and produces
 a single object containing two flattened arrays. These arrays contain all of
 the patches with hooks for aftermount hooks and beforeunmount hooks.
-###
-(make flattenHooks
-  (of [patches] (flattenHooks patches (m:keys patches) [] []))
-  (of [patches [] removals additions] { :removals removals :additions additions })
-  (of [patches [first|rest] removals additions]
-    (make patch (m:get patches first))
-    (make childHooks
-      (if
-        patch.patch?.children
-          (do
-            (make children (Array.prototype.slice.call patch.patch.children))
-            (make childPatches (children.map (fn [child] (flattenHooks child))))
-            (collectChildHooks childPatches))
-        { :removals [] :additions [] }))
-    (if
-      (isRemoval patch)
-        (flattenHooks
-          patches
-          rest
-          (removals.concat childHooks:removals patch)
-          (additions.concat childHooks:additions))
-      (isAddition patch)
-        (flattenHooks
-          patches
-          rest
-          (removals.concat childHooks:removals)
-          (additions.concat childHooks:additions patch))
-      (flattenHooks patches rest removals additions))))
+---
 
-###
+(make
+
+  (flattenHooks patches)
+    (flattenHooks patches (m:keys patches) [] [])
+
+  (flattenHooks patches [] removals additions)
+    { :removals removals :additions additions }
+
+  (flattenHooks patches [first|rest] removals additions)
+    (do
+      (make patch (m:get patches first))
+      (make childHooks (getChildHooks patch))
+      (if
+        (isRemoval patch)
+          (flattenHooks patches
+                        rest
+                        (removals.concat childHooks:removals patch)
+                        (additions.concat childHooks:additions))
+        (isAddition patch)
+          (flattenHooks patches
+                        rest
+                        (removals.concat childHooks:removals)
+                        (additions.concat childHooks:additions patch))
+        :else
+          (flattenHooks patches rest removals additions))))
+
+---
 @public applyPatches
 
 Compares two virtual trees, finds differences, and then applies those
@@ -82,42 +99,47 @@ aftermount hooks.
 @param {VNode}   prevTree  The virtual dom as existing prior to updating.
 @param {VNode}   nextTree  The virtual dom we want to move to.
 @param {Element} nodes     The actual dom nodes to be updated.
-###
-(make applyPatches [prevTree nextTree nodes]
-  (make changes (m:vdom:diff prevTree nextTree))
-  (make hooks (flattenHooks changes))
-  (hooks:removals.forEach
-    (fn [patch]
-      (if patch.vNode?:lifecycle?:before-unmount
-        (patch.vNode:lifecycle:before-unmount))))
-  (m:vdom:patchNodes nodes changes)
-  (hooks:additions.forEach
-    (fn [patch]
-      (if
-        patch.patch?:lifecycle?:after-mount
-          (patch.patch:lifecycle:after-mount))))
-  { :newdom nextTree :nodes nodes })
+---
+(make (applyPatches prevTree nextTree nodes)
+  (do (make changes (m:vdom:diff prevTree nextTree))
+      (make hooks (flattenHooks changes))
 
-###
+      (hooks:removals.forEach
+        (@ [patch]
+          (if
+            patch.vNode?:lifecycle?:before-unmount
+              (patch.vNode:lifecycle:before-unmount))))
+
+      (m:vdom:patchNodes nodes changes)
+
+      (hooks:additions.forEach
+        (@ [patch]
+          (if
+            patch.patch?:lifecycle?:after-mount
+              (patch.patch:lifecycle:after-mount))))
+
+      { :newdom nextTree :nodes nodes }))
+
+
+---
 @public runInitialHooks
 
 When mounting the virtual dom into the real dom for the first time,
 recursively iterates through the virtual dom and calls all aftermount
 hooks.
-###
-(make runInitialHooks [vtree]
-  (if vtree.children
-    (do
-      (make children (Array.prototype.slice.call vtree.children))
-      (children.forEach
-        (fn [child]
-          (runInitialHooks child)))))
-  (if
-    vtree:lifecycle?:after-mount
-      (vtree:lifecycle:after-mount)))
+---
+(make (runInitialHooks vtree)
+  (do
+    (if vtree.children
+      (do (make children (Array.prototype.slice.call vtree.children))
+          (children.forEach (@ [child] (runInitialHooks child)))))
+    (if
+      vtree:lifecycle?:after-mount
+        (vtree:lifecycle:after-mount))))
 
-###
+
+---
 Export functions for running initial hooks upon render and for
 applying patches to the dom after re-rendering a vnode tree.
-###
+---
 (export [runInitialHooks applyPatches])

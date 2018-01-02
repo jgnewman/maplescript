@@ -117,7 +117,7 @@ function getMsgPassingFns() {
 }
 
 function getSpecialForms() {
-  return ['->', 'all', 'any', 'async', 'await', 'destr', 'do', 'element', 'export', 'fn', 'if', 'import', 'make', 'none', 'not'];
+  return ['->', 'all', 'any', 'async', 'await', 'destr', 'do', 'export', 'if', 'import', 'make', 'none', 'not'];
 }
 
 // Official list of reserved words

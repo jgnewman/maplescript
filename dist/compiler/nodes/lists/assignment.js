@@ -6,23 +6,102 @@ Object.defineProperty(exports, "__esModule", {
 
 var _utils = require('../../utils');
 
-var _function = require('./function');
+function allArgsIdentifiers(args) {
+  return args.every(function (arg) {
+    return arg.type === 'Identifier';
+  });
+}
 
-var _function2 = _interopRequireDefault(_function);
+// We assume arguments are paired where the first of each
+// pair is a pattern and the second is what to execute.
+function getBodies(fnName, items) {
+  var bodies = [];
+  var body = void 0;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  items.forEach(function (item, index) {
+    // pattern
+    if (index % 2 === 0) {
+      var pattern = item.items.slice(1);
+      if (item.items[0].text !== fnName) return (0, _utils.die)(item, 'All patterns must use the same function name.');
+      body = { pattern: pattern, allArgsIdentifiers: allArgsIdentifiers(pattern), action: null };
 
-function listIsPolymorph(listNode) {
-  if (listNode.type !== 'List') return false;
-  return listNode && listNode.items[0] && listNode.items[0].type === 'Identifier' && listNode.items[0].text === 'of';
+      // result
+    } else {
+      body.action = item;
+      bodies.push(body);
+    }
+  });
+  return bodies;
+}
+
+function getVars(patterns) {
+  var args = [];
+  patterns.forEach(function (pattern, index) {
+    if (pattern.type === 'Identifier' && pattern.text !== '_') {
+      args.push({ name: pattern.compile(true), index: "[" + index + "]" });
+    }
+    if (pattern.type === 'Arr' && pattern.items.length === 1 && pattern.items[0].text.indexOf('|') >= 0) {
+      var pieces = pattern.items[0].text.split('|');
+      args.push({ name: pieces[0], index: "[" + index + "][0]" });
+      args.push({ name: pieces[1], index: "[" + index + "].slice(1)" });
+    }
+  });
+  return args;
+}
+
+function compilePolymorph(bodies) {
+  return 'function () {\n' + 'const args = Array.prototype.slice.call(arguments || []);\n' + bodies.map(function (body) {
+
+    var qualifier = null;
+
+    var params = "[" + body.pattern.map(function (param) {
+      if (param.type === 'List' && param.items[0].text === 'where') {
+        qualifier = param.items[1];
+        return '';
+      }
+      return '{type:"' + param.type + '", value: "' + param.compile(true).replace(/(\'|\"|\`)/g, "\\$1") + '" }';
+    }).join(', ').replace(/, $/, '') + "]";
+
+    var vars = getVars(body.pattern);
+    var compiledVars = vars.map(function (varObj) {
+      return 'var ' + varObj.name + ' = args' + varObj.index;
+    }).join(';\n') + ';\n';
+
+    var actions = [body.action];
+    if (body.action.type === 'List' && body.action.items[0].text === 'do') {
+      actions = body.action.items.slice(1);
+    }
+
+    return 'if (MAPLE_.match_(args, ' + params + ')) {\n' + (vars.length ? compiledVars : '') + (!qualifier ? '' : 'if (' + qualifier.compile(true) + ') {\n') + actions.map(function (action, index) {
+      return (index === actions.length - 1 ? 'return ' : '') + action.compile(true);
+    }).join(';\n') + ';\n' + (!qualifier ? '' : '}\n') + '}';
+  }).join('\n') + " throw new Error('Could not find an argument match.');\n" + '}';
 }
 
 function compileAssignment(items) {
   if (items.length < 2) (0, _utils.die)(this, 'No unbound variables allowed.');
-  // Not a function
-  if (items.length < 3 && !listIsPolymorph(items[1])) return "const " + items[0].compile(true) + " = " + items[1].compile(true);
-  // Function
-  return "const " + items[0].compile(true) + " = " + _function2.default.call(this, items.slice(1));
+
+  // The pattern (make (foo x y) ...) denotes a named function.
+  if (items[0].type === 'List') {
+    var name = items[0].items[0].text;
+    var bodies = getBodies(name, items);
+
+    // not a polymorph
+    if (bodies.length === 1 && bodies[0].allArgsIdentifiers) {
+      var body = bodies[0];
+      return ('\n        const ' + items[0].items[0].compile(true) + ' = function (' + body.pattern.map(function (arg) {
+        return arg.compile(true);
+      }).join(', ') + ') {\n          const args = Array.prototype.slice.call(arguments || []);\n          return ' + body.action.compile(true) + ';\n        }\n      ').trim();
+
+      // polymorph!
+    } else {
+      return "const " + items[0].items[0].compile(true) + " = " + compilePolymorph(bodies);
+    }
+
+    // Not a named function
+  } else {
+    return "const " + items[0].compile(true) + " = " + items[1].compile(true);
+  }
 }
 
 exports.default = compileAssignment;

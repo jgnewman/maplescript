@@ -8,8 +8,8 @@ describe('Context Chain', () => {
   it('should compile a context chain', () => {
     const toCompile = `
       (-> ($ foo)
-          (@addClass bar)
-          (@addClass baz))
+          (&addClass bar)
+          (&addClass baz))
     `;
     const expected = nlToSpace(`(function(){
       var ref_ = this;

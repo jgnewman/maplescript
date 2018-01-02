@@ -8,7 +8,7 @@
 %%
 
 /* Comments */
-"###"(.|\r|\n)*?"###"                 %{
+"---"(.|\r|\n)*?"---"                 %{
                                          if (yytext.match(/\r|\n/)) {
                                              parser.newLine = true;
                                          }
@@ -19,7 +19,7 @@
                                              return ";";
                                          }
                                       %}
-"#".*($|\r\n|\r|\n)                   %{
+"--".*($|\r\n|\r|\n)                  %{
                                          if (yytext.match(/\r|\n/)) {
                                              parser.newLine = true;
                                          }
@@ -30,8 +30,6 @@
                                              return ";";
                                          }
                                       %}
-
-"::"                                  return "::";
 
 "("                                   return "(";
 ")"                                   return ")";
@@ -64,14 +62,10 @@
 \'([^\']|\\[\'])*\'                   return "STRING";       /* ' fix syntax highlighting */
 \`([^\`]|\\[\`])*\`                   return "STRING";       /* ` fix syntax highlighting */
 
-/*
-\:[A-Za-z][^\s\(\)\[\]\{\}\<\>]*      return "SYMBOL";
-[^\s\(\)\[\]\{\}\<\>\/]+(\/\d+)?      return "IDENTIFIER";
-*/
-
-(\+|\-|\*|\/|\%|\!\=|\=)                         return "IDENTIFIER";
+"@async"                                         return "IDENTIFIER";
+(\+|\-|\*|\/|\%|\!\=|\=|\@)                      return "IDENTIFIER";
 \:[A-Za-z_\$][A-Za-z0-9_\$\-\.]*                 return "SYMBOL";
-[A-Za-z\_\$\@][A-Za-z0-9_\$\.\:\|\?\-]*(\/\d+)?  return "IDENTIFIER";
+[A-Za-z\_\$\&][A-Za-z0-9_\$\.\:\|\?\-]*(\/\d+)?  return "IDENTIFIER";
 
 <<EOF>>                               return "EOF";
 
@@ -133,20 +127,9 @@ ArrSequence
     {
       $$ = $1.concat($2);
     }
-  | ArrSequence Qualifier
-    {
-      $$ = $1.concat($2);
-    }
   | /* empty */
     {
       $$ = [];
-    }
-  ;
-
-Qualifier
-  : "::" List
-    {
-      $$ = new QualifierNode($2, createSourceLocation(null, @1, @2));
     }
   ;
 
@@ -216,7 +199,7 @@ Sym
 Identifier
   : IDENTIFIER
     {
-      $$ = new IdentifierNode($1, createSourceLocation(null, @1, @1));
+      $$ = new IdentifierNode($1, ($1 === '::'), createSourceLocation(null, @1, @1));
     }
   ;
 
@@ -301,9 +284,10 @@ function RegexpNode(text, loc) {
   this.shared = shared;
 }
 
-function IdentifierNode(text, loc) {
+function IdentifierNode(text, argSep, loc) {
   this.src = text;
   this.type = 'Identifier';
+  this.isArgSeparator = argSep;
   this.text = text;
   this.loc = loc;
   this.shared = shared;
@@ -334,7 +318,7 @@ function NumberNode(num, loc) {
 }
 
 function ListNode(items, loc) {
-  this.src = '(' + items.map(function (item) { return item.src }).join(', ') + ')';
+  this.src = '(' + items.map(function (item) { return item.src }).join(' ') + ')';
   this.type = 'List';
   this.length = items.length;
   this.items = items;

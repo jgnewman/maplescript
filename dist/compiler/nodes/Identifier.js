@@ -93,10 +93,10 @@ function unconfidentLookup(precompiled) {
 (0, _utils.compile)(_utils.nodes.IdentifierNode, function () {
   var word = this.text;
 
-  if (word === '@') {
+  if (word === '&') {
     word = 'this';
   } else {
-    word = word.replace(/^\@(\:|\.)/, 'this$1').replace(/^\@/, 'this.');
+    word = word.replace(/^\&(\:|\.)/, 'this$1').replace(/^\&/, 'this.');
   }
 
   var maybeReserved = word.replace(/(\?|\.|\:).*$/, '');

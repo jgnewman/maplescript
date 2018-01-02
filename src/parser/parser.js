@@ -72,12 +72,12 @@
   }
 */
 var parser = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[5,20,22,24,26,27,28,29,30,31],$V1=[1,14],$V2=[1,15],$V3=[1,16],$V4=[1,17],$V5=[1,18],$V6=[1,19],$V7=[1,20],$V8=[1,21],$V9=[1,22],$Va=[5,19,20,21,22,23,24,25,26,27,28,29,30,31,34],$Vb=[20,22,24,26,27,28,29,30,31],$Vc=[2,14],$Vd=[5,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34],$Ve=[19,20,22,23,24,26,27,28,29,30,31];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[5,18,20,22,24,25,26,27,28,29],$V1=[1,14],$V2=[1,15],$V3=[1,16],$V4=[1,17],$V5=[1,18],$V6=[1,19],$V7=[1,20],$V8=[1,21],$V9=[1,22],$Va=[5,18,19,20,21,22,23,24,25,26,27,28,29,32],$Vb=[18,20,22,24,25,26,27,28,29],$Vc=[2,14],$Vd=[5,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32];
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"Program":3,"ProgramBody":4,"EOF":5,"SourceElement":6,"List":7,"Arr":8,"Obj":9,"Str":10,"Regexp":11,"Sym":12,"Identifier":13,"Num":14,"Html":15,"NodeSequence":16,"ArrSequence":17,"Qualifier":18,"::":19,"(":20,")":21,"[":22,"]":23,"{":24,"}":25,"STRING":26,"REGEXP":27,"SYMBOL":28,"IDENTIFIER":29,"NUMBER":30,"<":31,"/>":32,">":33,"CLOSER":34,"$accept":0,"$end":1},
-terminals_: {2:"error",5:"EOF",19:"::",20:"(",21:")",22:"[",23:"]",24:"{",25:"}",26:"STRING",27:"REGEXP",28:"SYMBOL",29:"IDENTIFIER",30:"NUMBER",31:"<",32:"/>",33:">",34:"CLOSER"},
-productions_: [0,[3,2],[4,2],[4,0],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[16,2],[16,0],[17,2],[17,2],[17,0],[18,2],[7,3],[7,2],[8,3],[8,2],[9,3],[9,2],[10,1],[11,1],[12,1],[13,1],[14,1],[15,3],[15,4],[15,4],[15,5],[15,5],[15,6]],
+symbols_: {"error":2,"Program":3,"ProgramBody":4,"EOF":5,"SourceElement":6,"List":7,"Arr":8,"Obj":9,"Str":10,"Regexp":11,"Sym":12,"Identifier":13,"Num":14,"Html":15,"NodeSequence":16,"ArrSequence":17,"(":18,")":19,"[":20,"]":21,"{":22,"}":23,"STRING":24,"REGEXP":25,"SYMBOL":26,"IDENTIFIER":27,"NUMBER":28,"<":29,"/>":30,">":31,"CLOSER":32,"$accept":0,"$end":1},
+terminals_: {2:"error",5:"EOF",18:"(",19:")",20:"[",21:"]",22:"{",23:"}",24:"STRING",25:"REGEXP",26:"SYMBOL",27:"IDENTIFIER",28:"NUMBER",29:"<",30:"/>",31:">",32:"CLOSER"},
+productions_: [0,[3,2],[4,2],[4,0],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[16,2],[16,0],[17,2],[17,0],[7,3],[7,2],[8,3],[8,2],[9,3],[9,2],[10,1],[11,1],[12,1],[13,1],[14,1],[15,3],[15,4],[15,4],[15,5],[15,5],[15,6]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -89,32 +89,27 @@ case 1:
       return this.$;
     
 break;
-case 2: case 13: case 15: case 16:
+case 2: case 13: case 15:
 
       this.$ = $$[$0-1].concat($$[$0]);
     
 break;
-case 3: case 14: case 17:
+case 3: case 14: case 16:
 
       this.$ = [];
     
 break;
-case 18:
-
-      this.$ = new QualifierNode($$[$0], createSourceLocation(null, _$[$0-1], _$[$0]));
-    
-break;
-case 19:
+case 17:
 
       this.$ = new ListNode($$[$0-1], createSourceLocation(null, _$[$0-2], _$[$0]));
     
 break;
-case 20:
+case 18:
 
       this.$ = new ListNode([], createSourceLocation(null, _$[$0-1], _$[$0]));
     
 break;
-case 21:
+case 19:
 
       var lastItem = $$[$0-1][$$[$0-1].length - 1];
       var sequence = $$[$0-1];
@@ -128,79 +123,79 @@ case 21:
       this.$ = new ArrNode(sequence, qualifier, createSourceLocation(null, _$[$0-2], _$[$0]));
     
 break;
-case 22:
+case 20:
 
       this.$ = new ArrNode([], null, createSourceLocation(null, _$[$0-1], _$[$0]));
     
 break;
-case 23:
+case 21:
 
       this.$ = new ObjNode($$[$0-1], createSourceLocation(null, _$[$0-2], _$[$0]));
     
 break;
-case 24:
+case 22:
 
       this.$ = new ObjNode([], createSourceLocation(null, _$[$0-1], _$[$0]));
     
 break;
-case 25:
+case 23:
 
       this.$ = new StringNode($$[$0], createSourceLocation(null, _$[$0], _$[$0]));
     
 break;
-case 26:
+case 24:
 
       this.$ = new RegexpNode($$[$0], createSourceLocation(null, _$[$0], _$[$0]));
     
 break;
-case 27:
+case 25:
 
       this.$ = new SymbolNode($$[$0], createSourceLocation(null, _$[$0], _$[$0]));
     
 break;
-case 28:
+case 26:
 
-      this.$ = new IdentifierNode($$[$0], createSourceLocation(null, _$[$0], _$[$0]));
+      this.$ = new IdentifierNode($$[$0], ($$[$0] === '::'), createSourceLocation(null, _$[$0], _$[$0]));
     
 break;
-case 29:
+case 27:
 
       this.$ = new NumberNode($$[$0], createSourceLocation(null, _$[$0], _$[$0]));
     
 break;
-case 30:
+case 28:
 
       this.$ = new HtmlNode(true, $$[$0-1], null, null, null, createSourceLocation(null, _$[$0-2], _$[$0]));
     
 break;
-case 31:
+case 29:
 
       this.$ = new HtmlNode(true, $$[$0-2], $$[$0-1], null, null, createSourceLocation(null, _$[$0-3], _$[$0]));
     
 break;
-case 32:
+case 30:
 
       this.$ = new HtmlNode(false, $$[$0-2], null, [], $$[$0], createSourceLocation(null, _$[$0-3], _$[$0]));
     
 break;
-case 33:
+case 31:
 
       this.$ = new HtmlNode(false, $$[$0-3], null, $$[$0-1], $$[$0], createSourceLocation(null, _$[$0-4], _$[$0]));
     
 break;
-case 34:
+case 32:
 
       this.$ = new HtmlNode(false, $$[$0-3], $$[$0-2], [], $$[$0], createSourceLocation(null, _$[$0-4], _$[$0]));
     
 break;
-case 35:
+case 33:
 
       this.$ = new HtmlNode(false, $$[$0-4], $$[$0-3], $$[$0-1], $$[$0], createSourceLocation(null, _$[$0-5], _$[$0]));
     
 break;
 }
 },
-table: [o($V0,[2,3],{3:1,4:2}),{1:[3]},{5:[1,3],6:4,7:5,8:6,9:7,10:8,11:9,12:10,13:11,14:12,15:13,20:$V1,22:$V2,24:$V3,26:$V4,27:$V5,28:$V6,29:$V7,30:$V8,31:$V9},{1:[2,1]},o($V0,[2,2]),o($Va,[2,4]),o($Va,[2,5]),o($Va,[2,6]),o($Va,[2,7]),o($Va,[2,8]),o($Va,[2,9]),o($Va,[2,10]),o($Va,[2,11]),o($Va,[2,12]),o($Vb,$Vc,{16:23,21:[1,24]}),o([19,20,22,24,26,27,28,29,30,31],[2,17],{17:25,23:[1,26]}),o($Vb,$Vc,{16:27,25:[1,28]}),o($Va,[2,25]),o($Va,[2,26]),o($Va,[2,27]),o($Vd,[2,28]),o($Va,[2,29]),{13:29,29:$V7},{6:31,7:5,8:6,9:7,10:8,11:9,12:10,13:11,14:12,15:13,20:$V1,21:[1,30],22:$V2,24:$V3,26:$V4,27:$V5,28:$V6,29:$V7,30:$V8,31:$V9},o($Va,[2,20]),{6:33,7:5,8:6,9:7,10:8,11:9,12:10,13:11,14:12,15:13,18:34,19:[1,35],20:$V1,22:$V2,23:[1,32],24:$V3,26:$V4,27:$V5,28:$V6,29:$V7,30:$V8,31:$V9},o($Va,[2,22]),{6:31,7:5,8:6,9:7,10:8,11:9,12:10,13:11,14:12,15:13,20:$V1,22:$V2,24:$V3,25:[1,36],26:$V4,27:$V5,28:$V6,29:$V7,30:$V8,31:$V9},o($Vd,[2,24]),{9:38,24:$V3,32:[1,37],33:[1,39]},o($Va,[2,19]),o([20,21,22,24,25,26,27,28,29,30,31,34],[2,13]),o($Va,[2,21]),o($Ve,[2,15]),o($Ve,[2,16]),{7:40,20:$V1},o($Vd,[2,23]),o($Va,[2,30]),{32:[1,41],33:[1,42]},o($Vb,$Vc,{16:44,34:[1,43]}),o($Ve,[2,18]),o($Va,[2,31]),o($Vb,$Vc,{16:46,34:[1,45]}),o($Va,[2,32]),{6:31,7:5,8:6,9:7,10:8,11:9,12:10,13:11,14:12,15:13,20:$V1,22:$V2,24:$V3,26:$V4,27:$V5,28:$V6,29:$V7,30:$V8,31:$V9,34:[1,47]},o($Va,[2,34]),{6:31,7:5,8:6,9:7,10:8,11:9,12:10,13:11,14:12,15:13,20:$V1,22:$V2,24:$V3,26:$V4,27:$V5,28:$V6,29:$V7,30:$V8,31:$V9,34:[1,48]},o($Va,[2,33]),o($Va,[2,35])],
+table: [o($V0,[2,3],{3:1,4:2}),{1:[3]},{5:[1,3],6:4,7:5,8:6,9:7,10:8,11:9,12:10,13:11,14:12,15:13,18:$V1,20:$V2,22:$V3,24:$V4,25:$V5,26:$V6,27:$V7,28:$V8,29:$V9},{1:[2,1]},o($V0,[2,2]),o($Va,[2,4]),o($Va,[2,5]),o($Va,[2,6]),o($Va,[2,7]),o($Va,[2,8]),o($Va,[2,9]),o($Va,[2,10]),o($Va,[2,11]),o($Va,[2,12]),o($Vb,$Vc,{16:23,19:[1,24]}),o($Vb,[2,16],{17:25,21:[1,26]}),o($Vb,$Vc,{16:27,23:[1,28]}),o($Va,[2,23]),o($Va,[2,24]),o($Va,[2,25]),o($Vd,[2,26]),o($Va,[2,27]),{13:29,27:$V7},{6:31,7:5,8:6,9:7,10:8,11:9,12:10,13:11,14:12,15:13,18:$V1,19:[1,30],20:$V2,22:$V3,24:$V4,25:$V5,26:$V6,27:$V7,28:$V8,29:$V9},o($Va,[2,18]),{6:33,7:5,8:6,9:7,10:8,11:9,12:10,13:11,14:12,15:13,18:$V1,20:$V2,21:[1,32],22:$V3,24:$V4,25:$V5,26:$V6,27:$V7,28:$V8,29:$V9},o($Va,[2,20]),{6:31,7:5,8:6,9:7,10:8,11:9,12:10,13:11,14:12,15:13,18:$V1,20:$V2,22:$V3,23:[1,34],24:$V4,25:$V5,26:$V6,27:$V7,28:$V8,29:$V9},o($Vd,[2,22]),{9:36,22:$V3,30:[1,35],31:[1,37]},o($Va,[2,17]),o([18,19,20,22,23,24,25,26,27,28,29,32],[2,13]),o($Va,[2,19]),o([18,20,21,22,24,25,26,27,28,29],[2,15]),o($Vd,[2,21]),o($Va,[2,28]),{30:[1,38],31:[1,39]},o($Vb,$Vc,{16:41,32:[1,40]}),o($Va,[2,29]),o($Vb,$Vc,{16:43,32:[1,42]}),o($Va,[2,30]),{6:31,7:5,8:6,9:7,10:8,11:9,12:10,13:11,14:12,15:13,18:$V1,20:$V2,22:$V3,24:$V4,25:$V5,26:$V6,27:$V7,28:$V8,29:$V9,32:[1,44]},o($Va,[2,32]),{6:31,7:5,8:6,9:7,10:8,11:9,12:10,13:11,14:12,15:13,18:$V1,20:$V2,22:$V3,24:$V4,25:$V5,26:$V6,27:$V7,28:$V8,29:$V9,32:[1,45]},o($Va,[2,31]),o($Va,[2,33])],
 defaultActions: {3:[2,1]},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
@@ -393,9 +388,10 @@ function RegexpNode(text, loc) {
   this.shared = shared;
 }
 
-function IdentifierNode(text, loc) {
+function IdentifierNode(text, argSep, loc) {
   this.src = text;
   this.type = 'Identifier';
+  this.isArgSeparator = argSep;
   this.text = text;
   this.loc = loc;
   this.shared = shared;
@@ -426,7 +422,7 @@ function NumberNode(num, loc) {
 }
 
 function ListNode(items, loc) {
-  this.src = '(' + items.map(function (item) { return item.src }).join(', ') + ')';
+  this.src = '(' + items.map(function (item) { return item.src }).join(' ') + ')';
   this.type = 'List';
   this.length = items.length;
   this.items = items;
@@ -836,19 +832,19 @@ case 1:
                                          }
                                       
 break;
-case 2:return "::";
+case 2:return "(";
 break;
-case 3:return "(";
+case 3:return ")";
 break;
-case 4:return ")";
+case 4:return "[";
 break;
-case 5:return "[";
+case 5:return "]";
 break;
-case 6:return "]";
+case 6:return "{";
 break;
-case 7:return "{";
+case 7:return "}";
 break;
-case 8:return "}";
+case 8:return "IDENTIFIER";
 break;
 case 9:return "IDENTIFIER";
 break;
@@ -860,31 +856,31 @@ case 12:return "IDENTIFIER";
 break;
 case 13:return "IDENTIFIER";
 break;
-case 14:return "IDENTIFIER";
+case 14:return "CLOSER";
 break;
-case 15:return "CLOSER";
+case 15:return "</";
 break;
-case 16:return "</";
+case 16:return "<";
 break;
-case 17:return "<";
+case 17:return "/>";
 break;
-case 18:return "/>";
+case 18:return ">";
 break;
-case 19:return ">";
+case 19:/* skip other whitespace */
 break;
-case 20:/* skip other whitespace */
+case 20:return "NUMBER";
 break;
 case 21:return "NUMBER";
 break;
-case 22:return "NUMBER";
+case 22:return "REGEXP";
 break;
-case 23:return "REGEXP";
+case 23:return "STRING";       /* " fix syntax highlighting */
 break;
-case 24:return "STRING";       /* " fix syntax highlighting */
+case 24:return "STRING";       /* ' fix syntax highlighting */
 break;
-case 25:return "STRING";       /* ' fix syntax highlighting */
+case 25:return "STRING";       /* ` fix syntax highlighting */
 break;
-case 26:return "STRING";       /* ` fix syntax highlighting */
+case 26:return "IDENTIFIER";
 break;
 case 27:return "IDENTIFIER";
 break;
@@ -896,7 +892,7 @@ case 30:return "EOF";
 break;
 }
 },
-rules: [/^(?:###(.|\r|\n)*?###)/,/^(?:#.*($|\r\n|\r|\n))/,/^(?:::)/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:\{)/,/^(?:\})/,/^(?:->)/,/^(?:>>=)/,/^(?:\?<)/,/^(?:\?>)/,/^(?:<=)/,/^(?:>=)/,/^(?:<\/[^\>]+>)/,/^(?:<\/\s*)/,/^(?:<\s*)/,/^(?:\/>)/,/^(?:>)/,/^(?:\s+)/,/^(?:0x[A-z0-9]+)/,/^(?:(-)?[0-9]+(\.[0-9]+)?(e-?[0-9]+)?)/,/^(?:\/(\\\/|[^\r\n\/])+\/[gim]*)/,/^(?:"([^\"]|\\[\"])*")/,/^(?:'([^\']|\\[\'])*')/,/^(?:`([^\`]|\\[\`])*`)/,/^(?:(\+|-|\*|\/|%|!=|=))/,/^(?::[A-Za-z_\$][A-Za-z0-9_\$\-\.]*)/,/^(?:[A-Za-z\_\$\@][A-Za-z0-9_\$\.\:\|\?\-]*(\/\d+)?)/,/^(?:$)/],
+rules: [/^(?:---(.|\r|\n)*?---)/,/^(?:--.*($|\r\n|\r|\n))/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:\{)/,/^(?:\})/,/^(?:->)/,/^(?:>>=)/,/^(?:\?<)/,/^(?:\?>)/,/^(?:<=)/,/^(?:>=)/,/^(?:<\/[^\>]+>)/,/^(?:<\/\s*)/,/^(?:<\s*)/,/^(?:\/>)/,/^(?:>)/,/^(?:\s+)/,/^(?:0x[A-z0-9]+)/,/^(?:(-)?[0-9]+(\.[0-9]+)?(e-?[0-9]+)?)/,/^(?:\/(\\\/|[^\r\n\/])+\/[gim]*)/,/^(?:"([^\"]|\\[\"])*")/,/^(?:'([^\']|\\[\'])*')/,/^(?:`([^\`]|\\[\`])*`)/,/^(?:@async\b)/,/^(?:(\+|-|\*|\/|%|!=|=|@))/,/^(?::[A-Za-z_\$][A-Za-z0-9_\$\-\.]*)/,/^(?:[A-Za-z\_\$\&][A-Za-z0-9_\$\.\:\|\?\-]*(\/\d+)?)/,/^(?:$)/],
 conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30],"inclusive":true}}
 });
 return lexer;
