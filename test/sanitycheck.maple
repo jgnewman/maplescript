@@ -1,14 +1,60 @@
-# createElement should generate an object tree with a produce method that will actually build dom nodes
-# finish redoing docs site
 
-# hows about a syntax highlighter
-# new docs site
-# SOURCEMAPS
-# cleaner readme
+&
+&foo
+&.foo
+&:foo
 
-/reg \/exp\r\n'/gim '/str'
+-- map xs with a function of x returning x + 4
+(m:map xs (@ [x] (+ x 4)))
 
-###
+-- map xs with a function returning 2 + 4
+(m:map xs (@ (+ 2 4)))
+
+-- create a promise then handle with functions of r
+(-> (genPromise)
+    (&.then (@ [r] (genPromise r)))
+    (&.then (@ [r] (genPromise r))))
+
+-- create a promise then handle with functions without args
+(-> (genPromise)
+    (&.then (@ (genPromise)))
+    (&.then (@ (genPromise))))
+
+-- a named, non-polymorphic function
+(make (add x y) (+ x y))
+
+(make (add x y)
+  (do (m:log 'need a do block for multi actions')
+      (+ x y)))
+
+-- pattern matching factorial function
+-- works with single pattern or multi pattern
+(make
+  (factorial 0)
+    (do 1)
+  (factorial n)
+    (do (* n (factorial (- n 1)))))
+
+-- pattern matching with qualifier
+(make (factorial n (where (?< n 2)))
+        (do 1)
+      (factorial n)
+        (do (* n (factorial (- n 1)))))
+
+-- anonymous function assignment to variable
+(make factorial (@ [n] (if (?< n 2) 1
+                           (* n (factorial (- n 1))))))
+
+-- async function
+(make foo (@async :err [x y] (await (+ x y))))
+
+
+-- pattern matching with qualifier
+(make (factorial n (where (?< n 2)))
+        (do 1)
+      (factorial n)
+        (do (* n (factorial (- n 1)))))
+
 true
 null
 undefined
@@ -21,10 +67,6 @@ foo:bar-baz
 
 `foo ${(and stuff)} bar`
 
-(make factorial
-  (of [n :: (lt n 2)] 1)
-  (of [n] (* n (factorial (- n 1)))))
-
 <br/>
 
 <Title {:class 'foo' :text 'bar'} />
@@ -35,88 +77,57 @@ foo:bar.baz.0.qux
 
 foo:bar?.baz?.0.qux?
 
-@foo
+&foo
 
-@.foo
+&.foo
 
-@:foo
+&:foo
 
-(make factorial [n]
-  (if
-    (lt n 2) 1
-    (* n (factorial (- n 1)))))
-
-(make factorial
-  (of [0] 1)
-  (of [n] (* n (factorial (- n 1)))))
-
-(make factorial
-  (of [n :: (lt n 2)] 1)
-  (of [n] (* n (factorial (- n 1)))))
-
-(make apply [[head|tail]]
-  (head.apply tail))
 
 (make x 4)
 (make y 6)
 
 <div {:fart "shart"}></div>
 
-{:foo (fn [] (bar baz))}
+{:foo (@ (bar baz))}
 
-(make render [props]
+(make (render props)
   <div { :class "foo bar" }>
     "This is my new DOM element"
   </div>
 )
 
-# Will always export an object. Just a matter of
-# how you want that object put together.
+-- Will always export an object. Just a matter of
+-- how you want that object put together.
 (export [foo/2 bar baz])
 (export foo/2)
 (export {:foo foo/2 :bar bar})
 
-# you can either import a single value
-# from a module or execute it
+-- you can either import a single value
+-- from a module or execute it
 (import "module/location" mod)
 (import "module/location")
 (import 'path/to/file' [:foo :bar])
 (import 'path/to/file' {:foo bar :baz quux})
 
-# events
+-- events
 (m:signal :channel "message")
-(m:handle :channel (fn [message] (read message)))
+(m:handle :channel (@ [message] (read message)))
 
-# error handling
+-- error handling
 (m:attempt :foozle-poozle
   (do
     (lots o stuff)
     (even more stuff)))
 
 (m:handle :foozle-poozle
-  (fn [err]
+  (@ [err]
     (tryagain now)
     (right now)))
 
-(destr @props [:foo bar])
-(destr @props {:foo bar baz quux})
+(destr &.props [:foo bar])
+(destr &.props {:foo bar baz quux})
 
-# async/await
-# pass in an error channel and handle as necessary
-(make foo (async :foozle-poozle []
-  (await (something cool))
-  (await (more cool stuff))
-  (await (thats it))))
 
-# promises and other chaining
-(-> ($ "#dom")
-    (@addClass "foo")
-    (@addClass "bar"))
-
-(-> (build promise)
-    (@then (fn [] (get promise)))
-    (@then (fn [] (get promise))))
-
-# dosomething(1, 2)(3, 4)(5, 6)
+-- dosomething(1, 2)(3, 4)(5, 6)
 (>>= dosomething [1 2] [3 4] [5 6])
-###

@@ -28,12 +28,17 @@
       <div class="content-inner">
         
         <p><img src="https://github.com/jgnewman/maplescript/raw/master/logo.svg?sanitize=true" alt="MapleScript"></p>
-        <pre><code>(make delicious [code]
+        <pre><code class="lang-maplescript">(make (delicious code)
           (maplescript:compile code))
-        </code></pre><p>Say hello to MapleScript, a lightweight and intuitive Lisp over JavaScript.</p>
-        <p>MapleScript may not be Canadian, but it <em>can</em> be used with any JavaScript library. The language compiles to JavaScript and contains a built-in event system, a virtual DOM, and a JSX-like syntax for creating html, all in about 24kb of minified overhead.</p>
-        <h2 id="why-">Why?</h2>
-        <p>The purpose behind MapleScript is to allow you to trade out 100kb+ libraries for a much smaller language that gives you the same core power natively. To illustrate, the MapleScript repository includes an ~8k framework called Syrup that leverages this power to help you build reactive, component-based applications with a redux-like state and lifecycle events.</p>
+        </code></pre>
+        <p>Say hello to MapleScript, a lightweight and intuitive Lisp over JavaScript.</p>
+        <p>MapleScript may not be Canadian, but it <em>does</em> compile to JavaScript. It can be used with any JS library and contains a built-in event system, a virtual DOM, and a JSX-like syntax for creating html, all in about 24kb of minified overhead.</p>
+        <div class="warning">
+        <em><strong>Be warned:</strong> MapleScript is <strong>not</strong> compatible with Internet Explorer. It requires a recent version of Edge (or any other recent browser) to run.</em>
+        </div>
+        
+        <h2 id="why-did-you-make-it-">Why did you make it?</h2>
+        <p>The purpose behind MapleScript is to allow you to trade out 100kb+ libraries for a much smaller language that gives you the same core power natively. To illustrate, the MapleScript repository includes an ~8kb framework called Syrup that leverages this power to help you build reactive, component-based applications with a redux-like state and lifecycle events.</p>
         <h2 id="installing">Installing</h2>
         <p>You can install MapleScript via npm or yarn.</p>
         <pre><code>npm install --save-dev maplescript
@@ -93,334 +98,392 @@
         });
         </code></pre>
         <h2 id="language-reference">Language Reference</h2>
-        <p>In MapleScript, all expressions return values and, aside from raw data, just about everything is syntactically structured like a function call. Function calls are just lists of values enclosed in parentheses (&quot;s-expressions&quot;). Here are a few MapleScript expressions and their JavaScript equivalents:</p>
-        <pre><code>(foo bar baz)
-        # foo(bar, baz);
+        <p>In MapleScript, all expressions return values and, aside from raw data, just about everything is syntactically structured like a function call. Function calls are just lists of values enclosed in parentheses (&quot;s-expressions&quot;). Here are a few MapleScript s-expressions and their JavaScript equivalents:</p>
+        <pre><code class="lang-maplescript">(foo bar baz)
+        -- foo(bar, baz);
         
         (Math.round)
-        # Math.round();
+        -- Math.round();
         
         (if
           (= x y) foo
           (all (?&lt; x y) (?&gt; x z)) bar
           baz)
         
-        # if (x === y) {
-        #   return foo;
-        # } else if (x &lt; y &amp;&amp; x &gt; z) {
-        #   return bar;  
-        # } else {
-        #   return baz;  
-        # }
-        </code></pre><h3 id="declarations">Declarations</h3>
-        <p>In MapleScript, all named values (variables, functions, etc) are translated to <code>const</code> declarations and all of these are created with the <code>make</code> function.</p>
-        <pre><code># A variable `foo` with a value of &#39;bar&#39;.
-        (make foo &#39;bar&#39;)
+        ---
+        if (x === y) {
+          return foo;
+        } else if (x &lt; y &amp;&amp; x &gt; z) {
+          return bar;  
+        } else {
+          return baz;  
+        }
+        ---
+        </code></pre>
+        <h3 id="comments">Comments</h3>
+        <p>As you may have already noticed, single line comments are prefixed with <code>--</code> while multi-line comments are surrounded by two instances of <code>---</code>, just like YAML front matter.</p>
+        <pre><code class="lang-maplescript">-- This is a single line comment.
         
-        # A function `baz` taking 1 parameter `x`.
-        # It returns the result of adding x to x.
-        (make baz [x] (+ x x))
-        </code></pre><h3 id="objects">Objects</h3>
+        ---
+        This is a multi-line
+        comment block.
+        ---
+        </code></pre>
+        <h3 id="declarations">Declarations</h3>
+        <p>In MapleScript, all named values (variables, functions, etc) are translated to <code>const</code> declarations and all of these are created with the <code>make</code> function.</p>
+        <p>Normally, <code>make</code> takes 2 arguments — one for the variable name and one for the value:</p>
+        <pre><code class="lang-maplescript">-- A variable `foo` with a value of &#39;bar&#39;.
+        (make foo &#39;bar&#39;)
+        </code></pre>
+        <p>However, when you&#39;re defining a function, <code>make</code> takes any even number of arguments. You can think of these arguments as occurring in pairs where the first item in the pair is a pattern that describes a way the function can be called and the second item in the pair is what should be returned when that pattern is used:</p>
+        <pre><code class="lang-maplescript">-- Whenever we call `baz` of `x`,
+        -- we&#39;ll return the result of adding x to x.
+        (make (baz x) (+ x x))
+        </code></pre>
+        <p>You can give <code>make</code> additional arguments in order to create more patterns for your function. This is discussed more in the section on <a href="#functions">functions</a>.</p>
+        <h3 id="objects">Objects</h3>
         <p>MapleScript objects are just JavaScript objects. However, they are written a little differently and there is a convention of using JavaScript symbols as keys where possible. In MapleScript, the syntax for referencing a symbol is <code>:symbol-name</code>.</p>
         <p>You are allowed to use dashes in symbol names because of how they compile: <code>Symbol.for(&quot;symbol-name&quot;)</code>.</p>
         <p>Here is an example of a MapleScript object:</p>
-        <pre><code>(make person {
+        <pre><code class="lang-maplescript">(make person {
           :name &#39;John&#39;
           :eyes &#39;hazel&#39;
           :hair &#39;brown&#39;
         })
-        </code></pre><p>Odd numbered items are keys. Even numbered items are associated values. Of course, keys don&#39;t have to be symbols, it&#39;s just convention. When the key is a normal string key, you can access it like this: <code>object.key</code>. When it&#39;s a symbol, you can access it like this: <code>object:key</code>.</p>
+        </code></pre>
+        <p>Odd numbered items are keys. Even numbered items are associated values. Of course, keys don&#39;t have to be symbols, it&#39;s just convention. When the key is a normal string key, you can access it like this: <code>object.key</code>. When it&#39;s a symbol, you can access it like this: <code>object:key</code>.</p>
         <p>In fact, there is no array notation syntax for accessing values inside of objects. Here&#39;s how you&#39;ll do it:</p>
-        <pre><code>foo.0
-        # foo[0];
+        <pre><code class="lang-maplescript">foo.0
+        -- foo[0];
         
         (m:get foo bar)
-        # foo[bar];
-        </code></pre><p>If you need to reference <code>this</code>, you can still use the keyword <code>this</code>, or you can use <code>@</code>. For example, <code>@foo</code>, and <code>@:foo</code>.</p>
+        -- foo[bar];
+        </code></pre>
+        <p>If you need to reference <code>this</code>, you can still use the keyword <code>this</code>, or you can use <code>&amp;</code>. For example, <code>&amp;foo</code>, <code>&amp;.foo</code>, and <code>@:foo</code>.</p>
         <p>Regarding <code>m:get</code>, <code>m</code> is a reference to the MapleScript core library (which is always available) and <code>get</code> retrieves values from objects and arrays.</p>
         <p>MapleScript also takes a tip from CoffeeScript and allows you to perform &quot;unconfident retrievals&quot;. For example, the expression <code>foo?:bar?.baz</code> will only return the value for <code>baz</code> if all the values along the chain exist. So if <code>foo</code> doesn&#39;t exist or if <code>foo:bar</code> doesn&#39;t exist, it will return undefined rather than throwing an error.</p>
         <h3 id="operators">Operators</h3>
         <p>Most of the MapleScript operators are the same as in JavaScript except that they&#39;re written in prefix notation as function calls. There are only a couple of differences as outlined below:</p>
-        <pre><code>(+ x y z)   # x + y + z
-        (- x y z)   # x - y - z
-        (* x y z)   # x * y * z
-        (/ x y z)   # x / y / z
-        (= x y z)   # x === y === z
-        (!= x y z)  # x !== y !== z
-        (% x y)     # x % y
-        (?&lt; x y)    # x &lt; y
-        (?&gt; x y)    # x &gt; y
-        (&lt;= x y)    # x &lt;= y
-        (&gt;= x y)    # x &gt;= y
-        (not x)     # !x
-        </code></pre><p>To help with some of this, there are a few built-in special forms for performing logic:</p>
-        <pre><code>(all (= x y) (= a b))
-        # x === y &amp;&amp; a === b
+        <pre><code class="lang-maplescript">(+ x y z)   =&gt;  x + y + z
+        (- x y z)   =&gt;  x - y - z
+        (* x y z)   =&gt;  x * y * z
+        (/ x y z)   =&gt;  x / y / z
+        (= x y z)   =&gt;  x === y === z
+        (!= x y z)  =&gt;  x !== y !== z
+        (% x y)     =&gt;  x % y
+        (?&lt; x y)    =&gt;  x &lt; y
+        (?&gt; x y)    =&gt;  x &gt; y
+        (&lt;= x y)    =&gt;  x &lt;= y
+        (&gt;= x y)    =&gt;  x &gt;= y
+        (not x)     =&gt;  !x
+        </code></pre>
+        <p>To help with some of this, there are a few built-in special forms for performing logic:</p>
+        <pre><code class="lang-maplescript">(all (= x y) (= a b))
+        =&gt;  x === y &amp;&amp; a === b
         
         (any (= x y) (= a b))
-        # x === y || a === b
+        =&gt;  x === y || a === b
         
         (none (= x y) (= a b))
-        # !(x === y) &amp;&amp; !(a === b)
-        </code></pre><p>Notice that these are called &quot;special forms&quot; because even though they are structured like function calls, each argument is not eagerly evaluated. This works because we transpile to infix JavaScript operators rather than to actual function calls.</p>
+        =&gt;  !(x === y) &amp;&amp; !(a === b)
+        </code></pre>
+        <p>Notice that these are called &quot;special forms&quot; because even though they are structured like function calls, each argument is not eagerly evaluated. This works because we transpile to infix JavaScript operators rather than to actual function calls.</p>
         <h3 id="conditions">Conditions</h3>
         <p>The MapleScript condition is another special form. The <code>if</code> expression looks like a function call but it can only work properly if we don&#39;t eagerly evaluate all of its arguments. They&#39;re conditional, after all.</p>
         <p>But if we think of <code>if</code> like a function call, arguments are divided into pairs where the first member of the pair is a condition and the second member is an expression to evaluate if the condition was truthy. If the last argument does not have a second pair member, it is used as an else case.</p>
-        <pre><code>(make food &#39;pizza&#39;)
+        <pre><code class="lang-maplescript">(make food &#39;pizza&#39;)
         
         (if (= food &#39;pizza&#39;) (eat food))
         
         (if
           (= food &#39;pizza&#39;)
             (eat food)
-          # otherwise...
+          -- otherwise...
           (dontEat food))
         
         (if
           (= food &#39;pizza&#39;) (m:log &#39;yum!&#39;)
           (= food &#39;fish&#39;) (m:log &#39;gross&#39;)
           (m:log &#39;never tried it&#39;))
-        </code></pre><p>Sometimes you will need to execute more than one expression if a condition is true. In that case, you can use the <code>do</code> special form.</p>
+        </code></pre>
+        <p>Sometimes you will need to execute more than one expression if a condition is true. In that case, you can use the <code>do</code> special form.</p>
         <p>All <code>do</code> really does is create a block of many expressions wrapped up in a single expression.</p>
-        <pre><code>(if
+        <pre><code class="lang-maplescript">(if
           (= food &#39;pizza&#39;)
             (do
               (eat &#39;food&#39;)
               (m:log &#39;yum!&#39;)))
-        </code></pre><h3 id="iteration">Iteration</h3>
+        </code></pre>
+        <h3 id="iteration">Iteration</h3>
         <p>Although MapleScript is loosely functional, it encourages you to write functional code. To that end, it doesn&#39;t include any new iteration syntax. You can use native methods like <code>Array.map</code> or any other iterative function, or you can use recursion.</p>
-        <pre><code>(make arr [1 2 3])
+        <pre><code class="lang-maplescript">(make arr [1 2 3])
         
-        (arr.map (fn [num] (* num 10)))
-        #=&gt; [10, 20, 30]
+        (arr.map (@ [num] (* num 10)))
+        =&gt; [10, 20, 30]
         
-        (make manyLogs [num]
-          (m:log &#39;running&#39;)
-          (if (?&gt; num 0) (manyLogs (- num 1))))
+        (make (manyLogs num)
+          (do (m:log &#39;running&#39;)
+              (if (?&gt; num 0) (manyLogs (- num 1)))))
         
         (manyLogs 3)
-        #=&gt; logs &quot;running&quot; 3 times
-        </code></pre><h3 id="functions">Functions</h3>
+        =&gt; logs &quot;running&quot; 3 times
+        </code></pre>
+        <h3 id="functions">Functions</h3>
         <p>Because all MapleScript expressions return a value, functions don&#39;t have <code>return</code> statements. Instead, they will implicitly return the value of the last expression executed.</p>
         <p>Functions can be named or anonymous. Either way, you have the option of making them polymorphic (meaning you can execute different function bodies depending on what your arguments look like).</p>
-        <pre><code># A named function
-        (make add [x y]
-          (+ x y))
+        <p>Functions are created using the <code>make</code> command, which must take an even number of arguments. Those arguments can be thought of as occurring in pairs where the first member of the pair is a function pattern and the second member represents what is returned when that pattern is matched. In order to execute multiple commands within a function body, you&#39;ll wrap them up in a <code>do</code> block.</p>
+        <p>Unnamed (anonymous) functions are created by calling the <code>@</code> function. If the first argument you pass to <code>@</code> is an array, its items will be used as parameters for the function.</p>
+        <pre><code class="lang-maplescript">-- A function `add` taking x and y
+        -- It returns the result of adding x to y.
         
-        # An anonymous function
-        (fn [x y]
-          (+ x y))
+        (make (add x y) (+ x y))
         
-        # A polymorphic function —
-        # When there is 1 argument that equals 0,
-        # return 1.
-        # When there is 1 argument that equals anything,
-        # do some stuff and then recurse.
-        (make factorial
-          (of [0] 1)
-          (of [n] (* n (factorial (- n 1)))))
-        </code></pre><p>Within polymorphic functions, you can add qualifiers to your parameter lists. In other words, if the arguments that come in match the pattern, you can execute an additional test before the match is proved.</p>
-        <pre><code># Factorial of n where n is less than 2, return 1.
-        # Factorial of n in any other case, recurse.
-        (make factorial
-          (of [n :: (?&lt; n 2)] 1)
-          (of [n] (* n (factorial (- n 1)))))
-        </code></pre><p>Keep in mind that your patterns will be tested in the order in which they are defined.</p>
+        -- An anonymous function with the same job.
+        
+        (@ [x y] (+ x y))
+        
+        -- A function with two possible patterns.
+        -- If we call (factorial 0), we&#39;ll return 1.
+        -- If we call (factorial n), we&#39;ll recurse until
+        -- we hit the other pattern.
+        
+        (make (factorial 0) 1
+              (factorial n) (* n (factorial (- n 1))))
+        
+        -- A function where the body executes
+        -- multiple commands
+        
+        (make (foo x)
+          (do (something x)
+              (somethingElse x)))
+        </code></pre>
+        <p>Within polymorphic functions, you can add qualifiers to your parameter lists. In other words, if the arguments that come in match the pattern, you can execute an additional test before the match is proved.</p>
+        <pre><code class="lang-maplescript">-- Factorial of n where n is less than 2, return 1.
+        -- Factorial of n in any other case, recurse.
+        
+        (make (factorial n (where (?&lt; n 2))) 1
+              (factorial n) (* n (factorial (- n 1))))
+        </code></pre>
+        <p>Keep in mind that your patterns will be tested in the order in which they are defined.</p>
         <p>When one of your arguments is expected to be an array, you have a few extra options for pattern matching. In the following example, we&#39;ll test for an empty array as well as destructure a populated array into variables representing the first item and a slice containing all remaining items.</p>
-        <pre><code># A function for doubling each number in an array.
-        (make doubleEach
+        <pre><code class="lang-maplescript">-- A function for doubling each number in an array.
+        (make
         
-          # When user calls function with a single argument,
-          # recurse and add an accumulator.
-          (of [arr] (doubleEach arr []))
+          -- With just one argument, recurse and add an accumulator.
+          (doubleEach arr)
+            (doubleEach arr [])
         
-          # When we get an empty array and an accumulator,
-          # return the accumulator.
-          (of [[] accum] accum)
+          -- With an empty array and accumulator, return the accumulator.
+          (doubleEach [] accum)
+            accum
         
-          # When we get a populated array and an accumulator,
-          # split the array into the first item and all remaining,
-          # recurse with all remaining and add (* first 2) to the accumulator.
-          (of [[first|rest] accum]
-            (doubleEach rest (accum.concat (* 2 first)))))
+          -- Otherwise, destructure our array into the first item and
+          -- a new array of all remaining items. Multiply the first item
+          -- by 2 and add it to the accumulator then recurse with the
+          -- rest of the items so we eventually hit the second pattern.
+          (doubleEach [first|rest] accum)
+            (doubleEach rest (accum.concat (* 2 first))))
         
         (doubleEach [2 3 4])
-        #=&gt; [4, 6, 8]
-        </code></pre><p>Note that in the above function, <code>first|rest</code> must not contain any spaces.</p>
-        <p>Additional argument destructuring will not happen within the argument pattern. You&#39;ll use the <code>destr</code> function for it.</p>
-        <pre><code># Turn object properties into variables with the same names
-        (make addProps [obj]
-          (destr obj [ :foo :bar ])
-          (+ foo bar))
+        =&gt; [4, 6, 8]
+        </code></pre>
+        <p>Note that in the above function, <code>first|rest</code> must not contain any spaces.</p>
+        <p>Additional argument destructuring will not happen within the argument pattern. Instead, you&#39;ll use the <code>destr</code> function for it.</p>
+        <pre><code class="lang-maplescript">-- Turn object properties into variables with the same names
+        (make (addProps obj)
+          (do (destr obj [ :foo :bar ])
+              (+ foo bar)))
         
         (addProps { :foo 2 :bar 3 })
-        #=&gt; 5
+        =&gt; 5
         
-        # Turn object properties into variables with different names
-        (make mltProps [obj]
-          (destr obj { :foo x :bar y })
-          (* x y))
+        -- Turn object properties into variables with different names
+        (make (mltProps obj)
+          (do (destr obj { :foo x :bar y })
+              (* x y)))
         
         (mltProps { :foo 2 :bar 3 })
-        #=&gt; 6
-        </code></pre><h3 id="data-types">Data types</h3>
+        =&gt; 6
+        </code></pre>
+        <h3 id="data-types">Data types</h3>
         <p>MapleScript sticks with JavaScript&#39;s native data types for the most part. However, it removes your ability to use the <code>typeof</code> operator and instead provides a function called <code>m:typeof</code> that will give you much better accuracy. The result of calling this function is always a symbol.</p>
-        <pre><code>(m:typeof &#39;foo&#39;)         #=&gt;  :string
-        (m:typeof 100)           #=&gt;  :number
-        (m:typeof (fn [x] x))    #=&gt;  :function
-        (m:typeof [1 2 3])       #=&gt;  :array
-        (m:typeof { :x &#39;y&#39; })    #=&gt;  :object
-        (m:typeof null)          #=&gt;  :null
-        (m:typeof undefined)     #=&gt;  :undefined
-        (m:typeof NaN)           #=&gt;  :nan
-        (m:typeof :foo)          #=&gt;  :symbol
-        (m:typeof /foo/g)        #=&gt;  :regexp
-        (m:typeof (m:new Date))  #=&gt;  :date
+        <pre><code class="lang-maplescript">(m:typeof &#39;foo&#39;)         =&gt;  :string
+        (m:typeof 100)           =&gt;  :number
+        (m:typeof (@ x))         =&gt;  :function
+        (m:typeof [1 2 3])       =&gt;  :array
+        (m:typeof { :x &#39;y&#39; })    =&gt;  :object
+        (m:typeof null)          =&gt;  :null
+        (m:typeof undefined)     =&gt;  :undefined
+        (m:typeof NaN)           =&gt;  :nan
+        (m:typeof :foo)          =&gt;  :symbol
+        (m:typeof /foo/g)        =&gt;  :regexp
+        (m:typeof (m:new Date))  =&gt;  :date
         
         (make div (m:dom &#39;#my-div&#39;))
-        (m:typeof div)           #=&gt;  :htmlelement
+        (m:typeof div)           =&gt;  :htmlelement
         
         (make worker (m:new Worker &#39;url&#39;))
-        (m:typeof worker)        #=&gt;  :process
+        (m:typeof worker)        =&gt;  :process
         
         (make span &lt;\span&gt;&#39;hello!&#39;&lt;\/span&gt;)
-        (m:typeof span)          #=&gt;  :vnode
-        </code></pre><p>The <code>instanceof</code> operator has also been re-purposed as <code>m:instanceof</code>, however this is just a pass-through. It doesn&#39;t do anything different or special.</p>
+        (m:typeof span)          =&gt;  :vnode
+        </code></pre>
+        <p>The <code>instanceof</code> operator has also been re-purposed as <code>m:instanceof</code>, however this is just a pass-through. It doesn&#39;t do anything different or special.</p>
         <h3 id="events">Events</h3>
         <p>MapleScript has a built-in system for subscribing to and triggering events. The most important thing to keep in mind here is that all events are named by symbols.</p>
-        <pre><code>(make handler [data] (m:log `I got ${data}!`))
+        <pre><code class="lang-maplescript">(make (handler data)
+          (m:log `I got ${data}!`))
         
-        # Subscribe to an event
+        -- Subscribe to an event
         (m:handle :my-event handler)
         
-        # Trigger the event
+        -- Trigger the event
         (m:signal :my-event &#39;foo&#39;)
-        #=&gt; logs &quot;I got foo!&quot;
+        =&gt; logs &quot;I got foo!&quot;
         
-        # Unsubscribe to an event
+        -- Unsubscribe to an event
         (m:unhandle :my-event handler)
         
         (m:signal :my-event &#39;bar&#39;)
-        #=&gt; Nothing happens
-        </code></pre><h3 id="error-handling">Error handling</h3>
+        =&gt; Nothing happens
+        </code></pre>
+        <h3 id="error-handling">Error handling</h3>
         <p>MapleScript&#39;s technique for error handling is built on the event system and allows you to decouple your &quot;trys&quot; from your &quot;catches&quot;.</p>
         <p>The <code>m:attempt</code> function takes an event channel and a function to execute. If that function throws an error, the error will be caught and signaled along the event channel.</p>
-        <pre><code>(make failer []
-          (m:attempt :bad-json (fn []
-            (JSON.parse &#39;asdfasdf&#39;))))
+        <pre><code class="lang-maplescript">(make (failer)
+          (m:attempt :bad-json (@ (JSON.parse &#39;asdfasdf&#39;))))
         
-        (m:handle :bad-json (fn [err] (m:log err)))
+        (m:handle :bad-json (@ [err] (m:log err)))
         
         (failer)
-        #=&gt; Logs the error
-        </code></pre><h3 id="imports-exports">Imports &amp; Exports</h3>
+        =&gt; Logs the error
+        </code></pre>
+        <h3 id="imports-exports">Imports &amp; Exports</h3>
         <p>Importing modules in MapleScript is done with the <code>import</code> function. The first argument is the location of the module. The second argument is optional and represents variables to be generated from the values in that module.</p>
-        <pre><code># Import a module but don&#39;t reference any specific values
+        <pre><code class="lang-maplescript">-- Import a module but don&#39;t reference any specific values
+        
         (import &#39;/path/to/file&#39;)
         
-        # Import a module and create a variable called `foo` as a
-        # reference to the whole thing.
+        -- Import a module and create a variable called `foo` as a
+        -- reference to the whole thing.
+        
         (import &#39;/path/to/file&#39; foo)
         
-        # Assume the module exports an object with keys `foo` and `bar`.
-        # Create variables called `foo` and `bar` as references to these values.
+        -- Assume the module exports an object with keys `foo` and `bar`.
+        -- Create variables called `foo` and `bar` as references to these values.
+        
         (import &#39;/path/to/file&#39; [foo bar])
         
-        # Assume the module exports an object with keys `:foo` and `:bar`.
-        # Create variables called `x` and `y` as references to these values.
+        -- Assume the module exports an object with keys `:foo` and `:bar`.
+        -- Create variables called `x` and `y` as references to these values.
+        
         (import &#39;/path/to/file&#39; { :foo x :bar y })
-        </code></pre><p>When it comes to exports, it is important to remember that <strong>all MapleScript modules export an object</strong>. No matter how you structure your export statement, the result will be an object.</p>
-        <pre><code># Export an object with key `:foo` as a reference to `foo`.
+        </code></pre>
+        <p>When it comes to exports, it is important to remember that <strong>all MapleScript modules export an object</strong>. No matter how you structure your export statement, the result will be an object.</p>
+        <pre><code class="lang-maplescript">-- Export an object with key `:foo` as a reference to `foo`.
+        
         (export foo)
         
-        # Export an object with keys `:foo` and `:bar` as references
-        # to values `foo` and `bar`.
+        -- Export an object with keys `:foo` and `:bar` as references
+        -- to values `foo` and `bar`.
+        
         (export [foo bar])
         
-        # Export an object with keys `:foo` and `:bar` as references
-        # to values `foo` and `bar`.
+        -- Export an object with keys `:foo` and `:bar` as references
+        -- to values `foo` and `bar`.
+        
         (export {
           :foo foo
           :bar bar
         })
-        </code></pre><p>The other useful tool you can apply during export is aritization. Sometimes we may define a polymorphic function where certain &quot;morphs&quot; are intended just for recursive purposes. For example:</p>
-        <pre><code>(make doubleEach
-          (of [arr] (doubleEach arr []))
-          (of [[] accum] accum)
-          (of [[first|rest] accum]
-            (doubleEach rest (accum.concat (* 2 first)))))
+        </code></pre>
+        <p>The other useful tool you can apply during export is aritization. Sometimes we may define a polymorphic function where certain &quot;morphs&quot; are intended just for recursive purposes. For example:</p>
+        <pre><code class="lang-maplescript">(make
+          (doubleEach arr)
+            (doubleEach arr [])
+          (doubleEach [] accum)
+            accum
+          (doubleEach [first|rest] accum)
+            (doubleEach rest (accum.concat (* 2 first))))
         
-        # Here, we only want a user to apply the first function body
+        -- Here, we only want a user to apply the first function body
         (doubleEach [1 2 3])
-        </code></pre><p>When we export this function, we can lock it down to one allowed &quot;arity&quot; (number of arguments) such that, if we try to call the function with a different number of arguments, we&#39;ll get an error. However, internally, that function can recurse with all kinds of arguments to its heart&#39;s content.</p>
-        <pre><code># Use &quot;/1&quot; to denote that only 1 argument is allowed.
+        </code></pre>
+        <p>When we export this function, we can lock it down to one allowed &quot;arity&quot; (number of arguments) such that, if we try to call the function with a different number of arguments, we&#39;ll get an error. However, internally, that function can recurse with all kinds of arguments to its heart&#39;s content.</p>
+        <pre><code class="lang-maplescript">-- Use &quot;/1&quot; to denote that only 1 argument is allowed.
         (export [doubleEach/1])
-        </code></pre><h3 id="async-await">Async/Await</h3>
+        </code></pre>
+        <h3 id="async-await">Async/Await</h3>
         <p>First and foremost, because async/await is not universal yet, you&#39;ll need to make sure you pass your compiled code through Babel or some such before trying to use it. MapleScript will translate async/await into raw ES2017 code.</p>
         <p>Because async functions need to implement try/catch in order to properly handle rejected promises, MapleScript makes you choose an error channel for your async functions when you define them. Having done this, you can handle their errors just like you would with any other function.</p>
-        <pre><code>(make foo
-          (async :foo-error []
+        <pre><code class="lang-maplescript">(make foo
+          (@async :foo-error []
             (await (something cool))
             (await (more cool stuff))
             (done)))
         
-        (handle :foo-error
-          (fn [err]
-            (m:log err)))
-        </code></pre><h3 id="chains">Chains</h3>
+        (handle :foo-error (@ [err] (m:log err)))
+        </code></pre>
+        <h3 id="chains">Chains</h3>
         <p>Sometimes Lisp-y syntax can make JavaScript-y things gross. Consider trying to chain promises:</p>
-        <pre><code>((((createPromise).then (fn [result]
-          (createPromise))).then (fn [result]
-            (createPromise))).then (fn [result]
+        <pre><code class="lang-maplescript">((((createPromise).then (@ [result]
+          (createPromise))).then (@ [result]
+            (createPromise))).then (@ [result]
               (console.log result)))
-        </code></pre><p>Aside from just looking ugly, it doesn&#39;t really make sense to try and chain methods off of an s-expression. So to ease your pain in cases like this, MapleScript includes the &quot;context chain&quot;.</p>
+        </code></pre>
+        <p>Aside from just looking ugly, it doesn&#39;t really make sense to try and chain methods off of an s-expression. So to ease your pain in cases like this, MapleScript includes the &quot;context chain&quot;.</p>
         <p>A context chain is a special form that begins with <code>-&gt;</code> and evaluates each of its arguments in order, passing in the result of the previous one as the <code>this</code> context for the next one.</p>
-        <pre><code>(-&gt; (createPromise)
-            (@then (fn [result] (createPromise)))
-            (@then (fn [result] (createPromise)))
-            (@then (fn [result] (m:log result))))
+        <pre><code class="lang-maplescript">(-&gt; (createPromise)
+            (&amp;then (@ [result] (createPromise)))
+            (&amp;then (@ [result] (createPromise)))
+            (&amp;then (@ [result] (m:log result))))
         
         (-&gt; ($ &#39;#my-div&#39;)
-            (@addClass &#39;foo&#39;)
-            (@hide))
-        </code></pre><p>Any time you start thinking you need to put more parentheses on the left-hand side of an expression, try using a context chain instead.</p>
+            (&amp;addClass &#39;foo&#39;)
+            (&amp;hide))
+        </code></pre>
+        <p>Any time you start thinking you need to put more parentheses on the left-hand side of an expression, try using a context chain instead.</p>
         <p>Less frequently, you may find yourself in need of a &quot;call chain&quot; which is actually a function (not a special form) that allows you to mimic something like <code>foo()()()</code> in JavaScript:</p>
-        <pre><code>(make foo [x]
-          (fn [y]
-            (fn [z]
+        <pre><code class="lang-maplescript">(make (foo x)
+          (@ [y]
+            (@ [z]
               (+ x y z))))
         
-        # Instead of foo(2)(3)(4), we can do...
+        -- Instead of foo(2)(3)(4), we can do...
         (&gt;&gt;= foo [2] [3] [4])
-        </code></pre><p>Without the call chain, you might be left having to do something like <code>(((foo 2) 3) 4)</code> and nobody likes extra parentheses on the left.</p>
+        </code></pre>
+        <p>Without the call chain, you might be left having to do something like <code>(((foo 2) 3) 4)</code> and nobody likes extra parentheses on the left.</p>
         <h3 id="virtual-dom">Virtual DOM</h3>
         <p>MapleScript provides a very nice way to create virtual DOM nodes (meaning an object tree <em>representing</em> the DOM). Virtual nodes can be rendered into real nodes or diffed against other virtual nodes to find the differences between the two virtual trees. With those differences, you can quickly make changes to an existing real DOM.</p>
-        <p>The syntax for this is inspired by React&#39;s JSX dialect, but you don&#39;t need any extra libraries to make it work. It&#39;s built in.</p>
-        <pre><code># Create a custom dom node called Title.
-        # Custom elements must begin with a capital letter.
-        (element Title [attrs children]
-          &lt;\h1 { :class attrs:class }&gt;
-            children
-          &lt;\/h1&gt;
-        )
+        <p>The syntax for this is inspired by React&#39;s JSX dialect, but you don&#39;t need any extra libraries to make it work. It&#39;s built in. We call it MapleML.</p>
+        <pre><code class="lang-maplescript">-- Create a custom dom node called Title.
+        -- Custom element functions must begin with a capital letter
+        -- in order to be compiled correctly when written
+        -- with MapleML.
         
-        # Build a couple virtual instances of Title
+        (make (Title attrs children)
+              &lt;\h1 { :class attrs:class }&gt;
+                children
+              &lt;\/h1&gt;)
+        
+        -- Build a couple virtual instances of Title
         (make vTitle1 &lt;\Title { :class &#39;foo&#39; }&gt;&#39;Hello, world!&#39;&lt;\/Title&gt;)
         (make vTitle2 &lt;\Title { :class &#39;bar&#39; }&gt;&#39;Goodbye, world!&#39;&lt;\/Title&gt;)
         
-        # Generate real dom nodes from one of our virtual titles
+        -- Generate real dom nodes from one of our virtual titles
         (make realTitle (m:vdom:render vTitle))
         
-        # Drop our real dom nodes into the document body
-        (-&gt; (m:dom &#39;body&#39;) (@appendChild realTitle))
+        -- Drop our real dom nodes into the document body
+        (-&gt; (m:dom &#39;body&#39;) (&amp;appendChild realTitle))
         
-        # Get the differences between our 2 virtual dom trees
+        -- Get the differences between our 2 virtual dom trees
         (make changes (m:vdom:diff vTitle1 vTitle2))
         
-        # Use those changes to modify the real DOM which
-        # will automatically update.
+        -- Use those changes to modify the real DOM which
+        -- will automatically update.
         (m:vdom:patchNodes realTitle changes)
-        </code></pre><h2 id="core-library">Core library</h2>
+        </code></pre>
+        <h2 id="core-library">Core library</h2>
         <p>MapleScript comes with a collection of built-in functions that make life a lot easier. They are all available under the global <code>m</code> namespace, which is always available to you without having to import anything.</p>
         <h3 id="-m-apply-fun-args-ctx-"><code>(m:apply fun args [ctx])</code></h3>
         <p>Calls a provided function (<code>fun</code>) with argument list <code>args</code>, optionally with provided context <code>ctx</code>. Returns the result of the applied function.</p>
@@ -429,335 +492,361 @@
         <li><code>args</code> - Array. Contains all arguments to pass to the function.</li>
         <li><code>ctx</code> - Optional. A context in which to call the function.</li>
         </ul>
-        <pre><code>(make logger [text] (m:log text))
+        <pre><code class="lang-maplescript">(make (logger text)
+          (m:log text))
         
         (m:apply logger [&#39;hello, world!&#39;])
-        #=&gt; logs &#39;hello, world!&#39;
-        </code></pre><h3 id="-m-attempt-channel-fun-"><code>(m:attempt channel fun)</code></h3>
+        =&gt; logs &#39;hello, world!&#39;
+        </code></pre>
+        <h3 id="-m-attempt-channel-fun-"><code>(m:attempt channel fun)</code></h3>
         <p>Calls a provided function (<code>fun</code>) and checks to see if it produced any errors. If it did, catches the error and broadcasts it on a global event channel (<code>channel</code>). If no errors are produced, returns the result of calling <code>fun</code>.</p>
         <ul>
         <li><code>channel</code> - Symbol. An event channel name.</li>
         <li><code>fun</code> - Function. Will be executed and checked for errors.</li>
         </ul>
-        <pre><code>(m:handle :bad-json (fn [err]
-          (m:log err)))
+        <pre><code class="lang-maplescript">(m:handle :bad-json
+                  (@ [err] (m:log err)))
         
-        (m:attempt :bad-json (fn []
-          (JSON.parse &#39;asdfasdf&#39;)))
-        </code></pre><h3 id="-m-bind-fun-ctx-"><code>(m:bind fun, ctx)</code></h3>
+        (m:attempt :bad-json
+                   (@ (JSON.parse &#39;asdfasdf&#39;)))
+        </code></pre>
+        <h3 id="-m-bind-fun-ctx-"><code>(m:bind fun, ctx)</code></h3>
         <p>Binds a function to a context and returns the new function.</p>
         <ul>
         <li><code>fun</code> - Any function.</li>
         <li><code>ctx</code> - Any value. Will become the <code>this</code> context of the new function.</li>
         </ul>
-        <pre><code>(make ctx &#39;foo&#39;)
+        <pre><code class="lang-maplescript">(make ctx &#39;foo&#39;)
         
-        (make myfun
-          (m:bind
-            (fn [] (m:log @))
-            ctx))
+        (make (myfun)
+          (m:bind (@ (m:log &amp;)) ctx))
         
         (myfun)
-        # logs &#39;foo&#39;
-        </code></pre><h3 id="-m-copy-collection-"><code>(m:copy collection)</code></h3>
+        -- logs &#39;foo&#39;
+        </code></pre>
+        <h3 id="-m-copy-collection-"><code>(m:copy collection)</code></h3>
         <p>Generates a deep copy of a provided value (<code>collection</code>) as long as that value is an object or an array. If any other data type is provided, will return the provided value.</p>
         <ul>
         <li><code>collection</code> - Object or Array. The collection to be copied.</li>
         </ul>
-        <pre><code>(make obj { :foo &#39;bar&#39; })
+        <pre><code class="lang-maplescript">(make obj { :foo &#39;bar&#39; })
         
         (make copy (m:copy obj))
         
-        obj:foo   #=&gt;  &#39;bar&#39;
-        copy:foo  #=&gt;  &#39;bar&#39;
+        obj:foo   =&gt;  &#39;bar&#39;
+        copy:foo  =&gt;  &#39;bar&#39;
         
-        (= foo copy)  #=&gt;  false
-        </code></pre><h3 id="-m-dangerouslymutate-key-val-object-"><code>(m:dangerouslyMutate key val object)</code></h3>
+        (= foo copy)  =&gt;  false
+        </code></pre>
+        <h3 id="-m-dangerouslymutate-key-val-object-"><code>(m:dangerouslyMutate key val object)</code></h3>
         <p>Allows you to mutate the value of a key in an existing object. This is necessary to perform certain JavaScript actions such as setting <code>location.href</code>.</p>
         <ul>
         <li><code>key</code> - String or Symbol. The name of the key to mutate.</li>
         <li><code>val</code> - The new value for the key.</li>
         <li><code>object</code> - The object receiving the change.</li>
         </ul>
-        <pre><code># dangerously mutate href to foo in location
+        <pre><code class="lang-maplescript">-- dangerously mutate href to foo in location
         (m:dangerouslyMutate &#39;href&#39; &#39;/foo&#39; location)
-        </code></pre><h3 id="-m-die-msg-"><code>(m:die msg)</code></h3>
+        </code></pre>
+        <h3 id="-m-die-msg-"><code>(m:die msg)</code></h3>
         <p>Creates and throws an error built from a provided message (<code>msg</code>).</p>
         <ul>
         <li><code>msg</code> - String. The error message.</li>
         </ul>
-        <pre><code>(m:die &#39;Application broke!&#39;)
-        </code></pre><h3 id="-m-dom-selector-"><code>(m:dom selector)</code></h3>
+        <pre><code class="lang-maplescript">(m:die &#39;Application broke!&#39;)
+        </code></pre>
+        <h3 id="-m-dom-selector-"><code>(m:dom selector)</code></h3>
         <p>Selects a single element from the real DOM by the provided selector.</p>
         <ul>
         <li><code>selector</code> - String. A standard, CSS selector string.</li>
         </ul>
-        <pre><code>(m:dom &#39;.my-class&#39;)
-        #=&gt; &lt;\div class=&quot;my-class&quot;&gt;
-        </code></pre><h3 id="-m-domarray-selector-"><code>(m:domArray selector)</code></h3>
+        <pre><code class="lang-maplescript">(m:dom &#39;.my-class&#39;)
+        =&gt; &lt;\div class=&quot;my-class&quot;&gt;
+        </code></pre>
+        <h3 id="-m-domarray-selector-"><code>(m:domArray selector)</code></h3>
         <p>Selects an array of elements from the real DOM by the provided selector.</p>
         <ul>
         <li><code>selector</code> - String. A standard, CSS selector string.</li>
         </ul>
-        <pre><code>(m:domArray &#39;.my-class&#39;)
-        #=&gt; [&lt;\div class=&quot;my-class&quot;&gt;, &lt;\div class=&quot;my-class&quot;&gt;]
-        </code></pre><h3 id="-m-eql-obj1-obj2-"><code>(m:eql obj1 obj2)</code></h3>
+        <pre><code class="lang-maplescript">(m:domArray &#39;.my-class&#39;)
+        =&gt; [&lt;\div class=&quot;my-class&quot;&gt;, &lt;\div class=&quot;my-class&quot;&gt;]
+        </code></pre>
+        <h3 id="-m-eql-obj1-obj2-"><code>(m:eql obj1 obj2)</code></h3>
         <p>Determines whether two provided objects are deep equal. Returns a boolean.</p>
         <ul>
         <li><code>obj1</code> - One of two objects to compare.</li>
         <li><code>obj2</code> - Another of two objects to compare.</li>
         </ul>
-        <pre><code>(m:eql
-          { :foo &#39;bar&#39; }
-          { :foo &#39;bar&#39; })
-        #=&gt; true
+        <pre><code class="lang-maplescript">(m:eql { :foo &#39;bar&#39; }
+               { :foo &#39;bar&#39; })
+        =&gt; true
         
-        (m:eql
-          [1 2 3]
-          [1 2 3 4])
-        #=&gt; false
-        </code></pre><h3 id="-m-get-collection-key-"><code>(m:get collection key)</code></h3>
+        (m:eql [1 2 3]
+               [1 2 3 4])
+        =&gt; false
+        </code></pre>
+        <h3 id="-m-get-collection-key-"><code>(m:get collection key)</code></h3>
         <p>Retrieves a value from a collection.</p>
         <ul>
         <li><code>collection</code> - Any kind of object with retrievable values.</li>
         <li><code>key</code> - Number, String, or Symbol. Identifies the key of the value to be retrieved.</li>
         </ul>
-        <pre><code>(make person { :name &#39;John&#39; })
+        <pre><code class="lang-maplescript">(make person { :name &#39;John&#39; })
         
         (make key :name)
         
         (m:get person key)
-        #=&gt; &#39;John&#39;
-        </code></pre><h3 id="-m-handle-channel-fun-"><code>(m:handle channel fun)</code></h3>
+        =&gt; &#39;John&#39;
+        </code></pre>
+        <h3 id="-m-handle-channel-fun-"><code>(m:handle channel fun)</code></h3>
         <p>Registers a handler function (<code>fun</code>) for events broadcast on a global event channel (<code>channel</code>). Returns the handler.</p>
         <ul>
         <li><code>channel</code> - Symbol. The name of an event channel.</li>
         <li><code>fun</code> - The handler function. Takes the data sent over the channel.</li>
         </ul>
-        <pre><code>(m:handle :my-event (fn [data] (m:log data)))
+        <pre><code class="lang-maplescript">(m:handle :my-event (@ [data] (m:log data)))
         
         (m:signal :my-event &#39;foo&#39;)
-        #=&gt; logs &#39;foo&#39;
-        </code></pre><h3 id="-m-head-array-"><code>(m:head array)</code></h3>
+        =&gt; logs &#39;foo&#39;
+        </code></pre>
+        <h3 id="-m-head-array-"><code>(m:head array)</code></h3>
         <p>Retrieves the first item in an array.</p>
         <ul>
         <li><code>array</code> - Any array.</li>
         </ul>
-        <pre><code>(m:head [1 2 3])
-        #=&gt; 1
-        </code></pre><h3 id="-m-instanceof-val-type-"><code>(m:instanceof val type)</code></h3>
+        <pre><code class="lang-maplescript">(m:head [1 2 3])
+        =&gt; 1
+        </code></pre>
+        <h3 id="-m-instanceof-val-type-"><code>(m:instanceof val type)</code></h3>
         <p>Determines whether a value (<code>val</code>) was built from a constructor (<code>type</code>). Returns a boolean.</p>
         <ul>
         <li><code>val</code> - Any value.</li>
         <li><code>type</code> - A constructor function.</li>
         </ul>
-        <pre><code>(make date (m:new Date))
+        <pre><code class="lang-maplescript">(make date (m:new Date))
         
         (m:instanceof date Date)
-        #=&gt; true
-        </code></pre><h3 id="-m-dom-selector-"><code>(m:dom selector)</code></h3>
+        =&gt; true
+        </code></pre>
+        <h3 id="-m-dom-selector-"><code>(m:dom selector)</code></h3>
         <p>Selects a single element from the real DOM by the provided selector.</p>
         <ul>
         <li><code>selector</code> - String. A standard, CSS selector string.</li>
         </ul>
-        <pre><code>(m:dom &#39;.my-class&#39;)
+        <pre><code class="lang-maplescript">(m:dom &#39;.my-class&#39;)
         #=&gt; &lt;\div class=&quot;my-class&quot;&gt;
-        </code></pre><h3 id="-m-keys-object-"><code>(m:keys object)</code></h3>
+        </code></pre>
+        <h3 id="-m-keys-object-"><code>(m:keys object)</code></h3>
         <p>Returns an array of all string and symbol keys in a provided object.</p>
         <ul>
         <li><code>object</code> - The object whose keys we want to retrieve.</li>
         </ul>
-        <pre><code>(make obj {
+        <pre><code class="lang-maplescript">(make obj {
           foo   1
           &quot;bar&quot; 2
           :baz  3
         })
         
         (m:keys obj)
-        #=&gt; [&quot;foo&quot;, &quot;bar&quot;, Symbol.for(&quot;baz&quot;)]
-        </code></pre><h3 id="-m-last-array-"><code>(m:last array)</code></h3>
+        =&gt; [&quot;foo&quot;, &quot;bar&quot;, Symbol.for(&quot;baz&quot;)]
+        </code></pre>
+        <h3 id="-m-last-array-"><code>(m:last array)</code></h3>
         <p>Retrieves the last item in an array.</p>
         <ul>
         <li><code>array</code> - Any array.</li>
         </ul>
-        <pre><code>(m:last [1 2 3])
-        #=&gt; 3
-        </code></pre><h3 id="-m-lead-array-"><code>(m:lead array)</code></h3>
+        <pre><code class="lang-maplescript">(m:last [1 2 3])
+        =&gt; 3
+        </code></pre>
+        <h3 id="-m-lead-array-"><code>(m:lead array)</code></h3>
         <p>Creates a slice of all array items except the last one.</p>
         <ul>
         <li><code>array</code> - Any array.</li>
         </ul>
-        <pre><code>(m:lead [1 2 3])
-        #=&gt; [1, 2]
-        </code></pre><h3 id="-m-log-msgs-"><code>(m:log ...msgs)</code></h3>
+        <pre><code class="lang-maplescript">(m:lead [1 2 3])
+        =&gt; [1, 2]
+        </code></pre>
+        <h3 id="-m-log-msgs-"><code>(m:log ...msgs)</code></h3>
         <p>A pass-through to console.log. If <code>console</code> does not exist in the current environment, fails silently.</p>
         <ul>
         <li><code>...msgs</code> - Items to log to the console.</li>
         </ul>
-        <pre><code>(m:log &#39;hello&#39; &#39;world&#39;)
-        #=&gt; logs &#39;hello&#39; &#39;world&#39;
-        </code></pre><h3 id="-m-map-collection-fun-"><code>(m:map collection fun)</code></h3>
+        <pre><code class="lang-maplescript">(m:log &#39;hello&#39; &#39;world&#39;)
+        =&gt; logs &#39;hello&#39; &#39;world&#39;
+        </code></pre>
+        <h3 id="-m-map-collection-fun-"><code>(m:map collection fun)</code></h3>
         <p>Iterates over all items in an array or object and returns a new shallow copy of that object as the result of calling a function (<code>fun</code>) on each item.</p>
         <ul>
         <li><code>collection</code> - Any array or plain object.</li>
         <li><code>fun</code> - A function to call for each item. Takes arguments <code>item</code> and <code>index/key</code>.</li>
         </ul>
-        <pre><code>(m:map [1 2 3] (fn [item index]
-          (if
-            (= 0 (% index 2))
-              (* item 10))
-            item))
-        #=&gt; [1, 20, 3]
+        <pre><code class="lang-maplescript">(m:map [1 2 3] (@ [item index]
+          (if (= 0 (% index 2))
+                (* item 10))
+              item))
+        =&gt; [1, 20, 3]
         
-        (m:map { :foo 1 :bar 2 } (fn [item key]
-          (if
-            (= key :foo)
-              (* item 10))
-            item))
-        #=&gt; { [Symbol.for(&quot;foo&quot;)]: 10, [Symbol.for(&quot;bar&quot;)]: 2 }
-        </code></pre><h3 id="-m-merge-objects-"><code>(m:merge ...objects)</code></h3>
+        (m:map { :foo 1 :bar 2 } (@ [item key]
+          (if (= key :foo)
+                (* item 10))
+              item))
+        =&gt; { [Symbol.for(&quot;foo&quot;)]: 10, [Symbol.for(&quot;bar&quot;)]: 2 }
+        </code></pre>
+        <h3 id="-m-merge-objects-"><code>(m:merge ...objects)</code></h3>
         <p>Takes a series of objects or arrays and merges them into a new object/array containing shallow-ly copied items from each argument.</p>
         <ul>
         <li><code>...objects</code> - Arrays or objects.</li>
         </ul>
-        <pre><code>(m:merge { :foo 1 } { :bar 2 })
-        #=&gt; { :foo 1 :bar 2 }
+        <pre><code class="lang-maplescript">(m:merge { :foo 1 } { :bar 2 })
+        =&gt; { :foo 1 :bar 2 }
         
         (m:merge [1 2] [3 4])
-        #=&gt; [1 2 3 4]
-        </code></pre><h3 id="-m-new-constructor-args-"><code>(m:new constructor [...args])</code></h3>
+        =&gt; [1 2 3 4]
+        </code></pre>
+        <h3 id="-m-new-constructor-args-"><code>(m:new constructor [...args])</code></h3>
         <p>Instantiates a constructor.</p>
         <ul>
         <li><code>constructor</code> - A function for constructing an object.</li>
         <li><code>...args</code> - Optional arguments to pass to the constructor.</li>
         </ul>
-        <pre><code>(m:new Date &#39;10/21/1985&#39;)
-        #=&gt; Mon Oct 21 1985 00:00:00 GMT-0400 (EDT)
-        </code></pre><h3 id="-m-noop-"><code>m:noop</code></h3>
+        <pre><code class="lang-maplescript">(m:new Date &#39;10/21/1985&#39;)
+        =&gt; Mon Oct 21 1985 00:00:00 GMT-0400 (EDT)
+        </code></pre>
+        <h3 id="-m-noop-"><code>m:noop</code></h3>
         <p>You will sometimes need a function that does nothing. Here&#39;s one for you.</p>
-        <pre><code>(m:noop)
-        #=&gt; nothing happens
-        </code></pre><h3 id="-m-random-array-"><code>(m:random array)</code></h3>
+        <pre><code class="lang-maplescript">(m:noop)
+        =&gt; nothing happens
+        </code></pre>
+        <h3 id="-m-random-array-"><code>(m:random array)</code></h3>
         <p>Selects a random item from an array.</p>
         <ul>
         <li><code>array</code> - Any array.</li>
         </ul>
-        <pre><code>(m:random [1 2 3 4 5])
-        #=&gt; 2
+        <pre><code class="lang-maplescript">(m:random [1 2 3 4 5])
+        =&gt; 2
         
         (m:random [1 2 3 4 5])
-        #=&gt; 5
-        </code></pre><h3 id="-m-range-from-through-"><code>(m:range from through)</code></h3>
+        =&gt; 5
+        </code></pre>
+        <h3 id="-m-range-from-through-"><code>(m:range from through)</code></h3>
         <p>Creates an array populated by all numbers from <code>from</code> through <code>through</code>.</p>
         <ul>
         <li><code>from</code> - Number. The first item in the range.</li>
         <li><code>through</code> - Number. The last item in the range.</li>
         </ul>
-        <pre><code>(m:range 1 10)
+        <pre><code class="lang-maplescript">(m:range 1 10)
         [1 2 3 4 5 6 7 8 9 10]
-        </code></pre><h3 id="-m-remove-collection-key-"><code>(m:remove collection key)</code></h3>
+        </code></pre>
+        <h3 id="-m-remove-collection-key-"><code>(m:remove collection key)</code></h3>
         <p>Returns a new, shallow copy of a collection with a provided key removed.</p>
         <ul>
         <li><code>collection</code> - Object or Array. Contains an item to be removed.</li>
         <li><code>key</code> - Identifies the object key or array index to be removed.</li>
         </ul>
-        <pre><code>(make obj { :foo 1 :bar 2 })
+        <pre><code class="lang-maplescript">(make obj { :foo 1 :bar 2 })
         (make arr [&#39;a&#39; &#39;b&#39; &#39;c&#39;])
         
         (m:remove obj :foo)
-        #=&gt; { :bar 2 }
+        =&gt; { :bar 2 }
         
         (m:remove arr 1)
-        #=&gt; [&#39;a&#39; &#39;c&#39;]
-        </code></pre><h3 id="-m-signal-channel-data-"><code>(m:signal channel [data])</code></h3>
+        =&gt; [&#39;a&#39; &#39;c&#39;]
+        </code></pre>
+        <h3 id="-m-signal-channel-data-"><code>(m:signal channel [data])</code></h3>
         <p>Broadcasts data on a global event channel. Returns undefined.</p>
         <ul>
         <li><code>channel</code> - Symbol. The name of the event.</li>
         <li><code>data</code> - Optional. Data to send along with the event.</li>
         </ul>
-        <pre><code>(m:handle :my-event (fn [data] (m:log data)))
+        <pre><code class="lang-maplescript">(m:handle :my-event (@ [data] (m:log data)))
         
         (m:signal :my-event &#39;foo&#39;)
-        #=&gt; logs &#39;foo&#39;
-        </code></pre><h3 id="-m-tail-array-"><code>(m:tail array)</code></h3>
+        =&gt; logs &#39;foo&#39;
+        </code></pre>
+        <h3 id="-m-tail-array-"><code>(m:tail array)</code></h3>
         <p>Creates a slice of all array items except the first one.</p>
         <ul>
         <li><code>array</code> - Any array.</li>
         </ul>
-        <pre><code>(m:tail [1 2 3])
-        #=&gt; [2, 3]
-        </code></pre><h3 id="-m-throw-err-"><code>(m:throw err)</code></h3>
+        <pre><code class="lang-maplescript">(m:tail [1 2 3])
+        =&gt; [2, 3]
+        </code></pre>
+        <h3 id="-m-throw-err-"><code>(m:throw err)</code></h3>
         <p>Throws an error object.</p>
         <ul>
         <li><code>err</code> - Any error object.</li>
         </ul>
-        <pre><code>(m:throw (n:new Error))
-        #=&gt; ERROR!
-        </code></pre><h3 id="-m-typeof-data-"><code>(m:typeof data)</code></h3>
+        <pre><code class="lang-maplescript">(m:throw (n:new Error))
+        =&gt; ERROR!
+        </code></pre>
+        <h3 id="-m-typeof-data-"><code>(m:typeof data)</code></h3>
         <p>Determines the type of <code>data</code> and returns one of the following symbols:
         <code>:array, :boolean, :date, :function, :htmlelement, :nan, :null, :number, :object, :process, :regexp, :string, :symbol, :undefined, :vnode</code>. Provides more accurate output than JavaScript&#39;s native <code>typeof</code> operator.</p>
         <ul>
         <li><code>data</code> - Any value.</li>
         </ul>
-        <pre><code>(m:typeof [])                    #=&gt;  :array
-        (m:typeof true)                  #=&gt;  :boolean
-        (m:typeof (m:new Date))          #=&gt;  :date
-        (m:typeof (fn [] null))          #=&gt;  :function
-        (m:typeof (m:dom &#39;div&#39;))         #=&gt;  :htmlelement
-        (m:typeof NaN)                   #=&gt;  :nan
-        (m:typeof null)                  #=&gt;  :null
-        (m:typeof 4)                     #=&gt;  :number
-        (m:typeof {})                    #=&gt;  :object
-        (m:typeof (m:new Worker &#39;url&#39;))  #=&gt;  :process
-        (m:typeof /foo/g)                #=&gt;  :regexp
-        (m:typeof &#39;foo&#39;)                 #=&gt;  :string
-        (m:typeof :foo)                  #=&gt;  :symbol
-        (m:typeof undefined)             #=&gt;  :undefined
-        (m:typeof &lt;\div&gt;&lt;\/div&gt;)           #=&gt;  :vnode
-        </code></pre><h3 id="-m-unhandle-channel-fun-"><code>(m:unhandle channel fun)</code></h3>
+        <pre><code class="lang-maplescript">(m:typeof [])                    =&gt;  :array
+        (m:typeof true)                  =&gt;  :boolean
+        (m:typeof (m:new Date))          =&gt;  :date
+        (m:typeof (@ null))              =&gt;  :function
+        (m:typeof (m:dom &#39;div&#39;))         =&gt;  :htmlelement
+        (m:typeof NaN)                   =&gt;  :nan
+        (m:typeof null)                  =&gt;  :null
+        (m:typeof 4)                     =&gt;  :number
+        (m:typeof {})                    =&gt;  :object
+        (m:typeof (m:new Worker &#39;url&#39;))  =&gt;  :process
+        (m:typeof /foo/g)                =&gt;  :regexp
+        (m:typeof &#39;foo&#39;)                 =&gt;  :string
+        (m:typeof :foo)                  =&gt;  :symbol
+        (m:typeof undefined)             =&gt;  :undefined
+        (m:typeof &lt;\div&gt;&lt;\/div&gt;)         =&gt;  :vnode
+        </code></pre>
+        <h3 id="-m-unhandle-channel-fun-"><code>(m:unhandle channel fun)</code></h3>
         <p>Removes a handler function from a global event channel. Returns undefined.</p>
         <ul>
         <li><code>channel</code> - Symbol. The name of the event.</li>
         <li><code>fun</code> - The function to remove.</li>
         </ul>
-        <pre><code>(make handler (fun [data] (m:log data)))
+        <pre><code class="lang-maplescript">(make handler (@ [data] (m:log data)))
         
         (m:handle :my-event handler)
         
         (m:signal :my-event &#39;foo&#39;)
-        #=&gt; logs &#39;foo&#39;
+        =&gt; logs &#39;foo&#39;
         
         (m:unhandle :my-event handler)
         
         (m:signal :my-event &#39;foo&#39;)
-        #=&gt; nothing happens
-        </code></pre><h3 id="-m-update-collection-key-val-"><code>(m:update collection key val)</code></h3>
+        =&gt; nothing happens
+        </code></pre>
+        <h3 id="-m-update-collection-key-val-"><code>(m:update collection key val)</code></h3>
         <p>Returns a new, shallow copy of a collection with a provided key updated with a new value.</p>
         <ul>
         <li><code>collection</code> - Object or Array. Contains an item to be updated.</li>
         <li><code>key</code> - Identifies the object key or array index to be updated.</li>
         <li><code>val</code> - The new value for the key.</li>
         </ul>
-        <pre><code>(make obj { :foo 1 :bar 2 })
+        <pre><code class="lang-maplescript">(make obj { :foo 1 :bar 2 })
         (make arr [&#39;a&#39; &#39;b&#39; &#39;c&#39;])
         
         (m:update obj :foo 3)
-        #=&gt; { :foo 3 :bar 2 }
+        =&gt; { :foo 3 :bar 2 }
         
         (m:update arr 1 &#39;d&#39;)
-        #=&gt; [&#39;a&#39; &#39;d&#39; &#39;c&#39;]
-        </code></pre><h3 id="-m-vdom-create-type-attrs-children-"><code>(m:vdom:create type [attrs] [children])</code></h3>
+        =&gt; [&#39;a&#39; &#39;d&#39; &#39;c&#39;]
+        </code></pre>
+        <h3 id="-m-vdom-create-type-attrs-children-"><code>(m:vdom:create type [attrs] [children])</code></h3>
         <p>Creates a new virtual DOM node. MapleML syntax is a shortcut for this function.</p>
         <ul>
         <li><code>type</code> - String. The type of node to create.</li>
         <li><code>attrs</code> - Optional. An object specifying all attributes. Each should be named with a symbol.</li>
         <li><code>children</code> - Optional. An array of child virtual DOM nodes.</li>
         </ul>
-        <pre><code>(m:vdom:create &#39;div&#39; { :class &#39;my-class&#39; } [
+        <pre><code class="lang-maplescript">(m:vdom:create &#39;div&#39; { :class &#39;my-class&#39; } [
           (m:vdom:create &#39;span&#39; {} [&#39;Hello, world!&#39;])
         ])
         
-        #...produces the same thing as...
+        -- produces the same thing as...
         
         &lt;\div { :class &#39;my-class&#39; }&gt;
           &lt;\span&gt;
@@ -765,38 +854,42 @@
           &lt;\/span&gt;
         &lt;\/div&gt;
         
-        #...which is a virtual tree
-        </code></pre><h3 id="-m-vdom-diff-vtree1-vtree2-"><code>(m:vdom:diff vtree1 vtree2)</code></h3>
+        -- which is a virtual tree
+        </code></pre>
+        <h3 id="-m-vdom-diff-vtree1-vtree2-"><code>(m:vdom:diff vtree1 vtree2)</code></h3>
         <p>Compares two virtual trees and outputs the differences between them.</p>
         <ul>
         <li><code>vtree1</code> - VNode. The result of calling <code>m:vdom:create</code>.</li>
         <li><code>vtree2</code> - Another VNode.</li>
         </ul>
-        <pre><code>(make tree1 &lt;\div&gt;&#39;hello&#39;&lt;\/div&gt;)
+        <pre><code class="lang-maplescript">(make tree1 &lt;\div&gt;&#39;hello&#39;&lt;\/div&gt;)
         (make tree2 &lt;\div&gt;&#39;goodbye&#39;&lt;\/div&gt;)
         
         (m:vdom:diff tree1 tree2)
-        #=&gt; Object of differences
-        </code></pre><h3 id="-m-vdom-render-vtree-"><code>(m:vdom:render vtree)</code></h3>
+        =&gt; Object of differences
+        </code></pre>
+        <h3 id="-m-vdom-render-vtree-"><code>(m:vdom:render vtree)</code></h3>
         <p>Converts a virtual DOM tree into a tree of real DOM nodes.</p>
         <ul>
         <li><code>vtree</code> - VNode. The result of calling <code>m:vdom:create</code>.</li>
         </ul>
-        <pre><code>(make tree1 &lt;\div&gt;&#39;hello&#39;&lt;\/div&gt;)
+        <pre><code class="lang-maplescript">(make tree1 &lt;\div&gt;&#39;hello&#39;&lt;\/div&gt;)
         (make tree2 &lt;\div&gt;&#39;goodbye&#39;&lt;\/div&gt;)
         
         (m:vdom:render &lt;\div { :class &#39;foo&#39; }&gt;&#39;hello&#39;&lt;\/div&gt;)
-        #=&gt; &lt;\div class=&quot;foo&quot;&gt;hello&lt;\/div&gt;
-        </code></pre><h3 id="-m-vdom-injectnodes-nodes-target-"><code>(m:vdom:injectNodes nodes target)</code></h3>
+        =&gt; &lt;\div class=&quot;foo&quot;&gt;hello&lt;\/div&gt;
+        </code></pre>
+        <h3 id="-m-vdom-injectnodes-nodes-target-"><code>(m:vdom:injectNodes nodes target)</code></h3>
         <p>Injects a tree of nodes into the real DOM. Returns the tree of real nodes.</p>
         <ul>
         <li><code>nodes</code> - VNode or HtmlElement.</li>
         <li><code>target</code> - String or HtmlElement.</li>
         </ul>
-        <pre><code>(m:vdom:injectNodes &lt;\div { :class &#39;foo&#39; }&gt;&#39;hello&#39;&lt;\/div&gt; &#39;#app&#39;)
-        #=&gt; Injects real nodes into the selement identified by &#39;#app&#39;.
-        #=&gt; Returns &lt;\div class=&quot;foo&quot;&gt;hello&lt;\/div&gt;
-        </code></pre><h3 id="-m-vdom-patchnodes-realnodes-changes-"><code>(m:vdom:patchNodes realNodes changes)</code></h3>
+        <pre><code class="lang-maplescript">(m:vdom:injectNodes &lt;\div { :class &#39;foo&#39; }&gt;&#39;hello&#39;&lt;\/div&gt; &#39;#app&#39;)
+        -- Injects real nodes into the selement identified by &#39;#app&#39;.
+        -- Returns &lt;\div class=&quot;foo&quot;&gt;hello&lt;\/div&gt;
+        </code></pre>
+        <h3 id="-m-vdom-patchnodes-realnodes-changes-"><code>(m:vdom:patchNodes realNodes changes)</code></h3>
         <p>Updates a tree of real DOM nodes according to an object of virtual DOM changes.</p>
         <ul>
         <li><code>realNodes</code> - HtmlElement.</li>
@@ -807,53 +900,54 @@
         <ul>
         <li><code>...msgs</code> - Items to log to the console.</li>
         </ul>
-        <pre><code>(m:warn &#39;Scary warning!&#39;)
-        #=&gt; logs &#39;Scary warning!&#39;
-        </code></pre><h2 id="syrup">Syrup</h2>
+        <pre><code class="lang-maplescript">(m:warn &#39;Scary warning!&#39;)
+        -- logs &#39;Scary warning!&#39;
+        </code></pre>
+        <h2 id="syrup">Syrup</h2>
         <p>Syrup is a simple framework built using MapleScript&#39;s virtual DOM technology to provide a somewhat React/Redux-like experience. With it, you can build components and tie them to a state object. When the state object changes, your app can re-render itself based on those changes. Here is a simple example:</p>
-        <pre><code>(import &#39;maplescript/syrup/syrup&#39; syrup)
+        <pre><code class="lang-maplescript">(import &#39;maplescript/syrup/syrup&#39; syrup)
         
-        # Start by defining initial state values
+        -- Start by defining initial state values
         (make initialStateValues { :title-text &#39;App is alive!&#39; })
         
-        # Create a function for transforming the state
-        (make reducer [state action]
+        -- Create a function for transforming the state
+        (make (reducer state action)
           (m:merge state { :title-text action:title-text }))
         
-        # Use these values to create an application state
+        -- Use these values to create an application state
         (make state (-&gt; (syrup:state :my-app initialStateValues)
-                        (syrup:reduce @ reducer)))
+                        (syrup:reduce &amp; reducer)))
         
-        ### Now we&#39;ll create a nested component architecture ###
+        --- Now we&#39;ll create a nested component architecture ---
         
-        # Define a basic Title element
-        (element TitleBase [attrs]
+        -- Define a basic Title element
+        (make (TitleBase attrs)
           &lt;\h1&gt;attrs:title-text&lt;\/h1&gt;
         )
         
-        # Now extend that element with lifecycle events
-        (make Title (-&gt; TitleBase
-                        (syrup:afterMount @ (fn [attrs] (m:log &#39;aftermount&#39;)))
-                        (syrup:beforeUnmount @ (fn [attrs] (m:log &#39;beforeunmount&#39;)))))
+        -- Now extend that element with lifecycle events
+        (make Title (-&gt; (syrup:afterMount TitleBase (@ (m:log &#39;aftermount&#39;)))
+                        (syrup:beforeUnmount &amp; (@ (m:log &#39;beforeunmount&#39;)))))
         
-        # Define our top-level application element
-        # It will create an instance of Title
-        (element App [attrs]
+        -- Define our top-level application element
+        -- It will create an instance of Title
+        (make (App attrs)
           &lt;\div { :class &#39;app&#39; }&gt;
             &lt;\Title { :title-text attrs:state:title-text } /&gt;
           &lt;\/div&gt;
         )
         
-        # Render our app (with state!) into the DOM
+        -- Render our app (with state!) into the DOM
         (syrup:render App state &#39;#app&#39;)
         
-        ### Now we&#39;ll modify the state and trigger an auto-rerender ###
+        --- Now we&#39;ll modify the state and trigger an auto-rerender ---
         
-        # Send data on the event channel associated with the state
+        -- Send data on the event channel associated with the state
         (m:signal :my-app { :title-text &#39;App is reactive!&#39; })
         
-        # The app automatically re-renders using the new text.
+        -- The app automatically re-renders using the new text.
         </code></pre>
+        
       </div>
     </section>
     <script src="./assets/js/app.js"></script>

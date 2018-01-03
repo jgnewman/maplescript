@@ -1,14 +1,14 @@
-###
+---
 Syrup.maple: ~8kb min
 
 A framework utilizing MapleScript and its virtual-dom capabilities to
 provide a somewhat React.js-like experience.
-###
+---
 
 (import './lib/lifecycle' [:runInitialHooks :applyPatches])
 (import './lib/state' [:state :reduce])
 
-###
+---
 @public render
 
 Injects a virtual tree into the actual dom and associates it with
@@ -18,21 +18,30 @@ re-rendered, diffed, and patched.
 @param {Function}    treeBuilder  A function returning the entire virtual tree.
 @param {Object}      state        A state object as returned by `(state)`.
 @param {String|Node} target       Represents a dom node in which to render the tree.
-###
-(make render [treeBuilder state target]
-  (make dom { :current-tree null :current-nodes null })
-  (make initialState (state:get))
-  (m:dangerouslyMutate :current-tree (treeBuilder { :state initialState }) dom)
-  (m:dangerouslyMutate :current-nodes (m:vdom:render dom:current-tree) dom)
-  (m:vdom:injectNodes dom:current-nodes target)
-  (state:sub
-    (fn [newState]
-      (make newTree (treeBuilder { :state newState }))
-      (applyPatches dom:current-tree newTree dom:current-nodes)
-      (m:dangerouslyMutate :current-tree newTree dom)))
-  (runInitialHooks dom:current-tree initialState))
+---
+(make (render treeBuilder state target)
 
-###
+  -- Create initial dom tracker and grab initial state values
+  (do (make dom { :current-tree null :current-nodes null })
+      (make initialState (state:get))
+
+      -- Set our initial vnode tree and real node tree on our dom tracker
+      (m:dangerouslyMutate :current-tree (treeBuilder { :state initialState }) dom)
+      (m:dangerouslyMutate :current-nodes (m:vdom:render dom:current-tree) dom)
+
+      -- Inject nodes into the dom
+      (m:vdom:injectNodes dom:current-nodes target)
+
+      -- Set up a subscription to the state that diffs and patches the dom
+      (state:sub
+        (@ [newState] (make newTree (treeBuilder { :state newState }))
+                      (applyPatches dom:current-tree newTree dom:current-nodes)
+                      (m:dangerouslyMutate :current-tree newTree dom)))
+
+      -- Since this is the first render, run aftermount hooks
+      (runInitialHooks dom:current-tree initialState)))
+
+---
 @public afterMount
 
 Takes a component function and a hook function; returns a new component
@@ -40,17 +49,19 @@ function that executes the hook after being mounted into the actual dom.
 
 @param {Function} comp  A function that produces a vnode tree.
 @param {Function} fun   A hook to run after mount. Called with attributes.
-###
-(make afterMount [comp fun]
-  (fn [attrs children]
+---
+(make (afterMount comp fun)
+  (@ [attrs children]
     (make inst (comp attrs children))
-    (make hook (fn [] (fun attrs)))
-    (if inst (do
-      (m:dangerouslyMutate :lifecycle (any inst:lifecycle {}) inst)
-      (m:dangerouslyMutate :after-mount hook inst:lifecycle)))
-    inst))
+    (make hook (@ (fun attrs)))
+    (if
+      inst
+        (do (m:dangerouslyMutate :lifecycle (any inst:lifecycle {}) inst)
+            (m:dangerouslyMutate :after-mount hook inst:lifecycle)))
+      :else
+        inst))
 
-###
+---
 @public beforeUnmount
 
 Takes a component function and a hook function; returns a new component
@@ -58,19 +69,21 @@ function that executes the hook beforeremoved from the actual dom.
 
 @param {Function} comp  A function that produces a vnode tree.
 @param {Function} fun   A hook to run before ummount. Called with attributes.
-###
-(make beforeUnmount [comp fun]
-  (fn [attrs children]
+---
+(make (beforeUnmount comp fun)
+  (@ [attrs children]
     (make inst (comp attrs children))
-    (make hook (fn [] (fun attrs)))
-    (if inst (do
-      (m:dangerouslyMutate :lifecycle (any inst:lifecycle {}) inst)
-      (m:dangerouslyMutate :before-unmount hook inst:lifecycle)))
-    inst))
+    (make hook (@ (fun attrs)))
+    (if
+      inst
+        (do (m:dangerouslyMutate :lifecycle (any inst:lifecycle {}) inst)
+            (m:dangerouslyMutate :before-unmount hook inst:lifecycle)))
+      :else
+        inst))
 
-###
+---
 Export all of our public functions.
-###
+---
 (export [
   state
   reduce

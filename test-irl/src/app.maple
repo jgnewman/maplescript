@@ -1,52 +1,50 @@
 (import '../../syrup/syrup' syrup)
 
-# Create a standard maplescript custom element
-(element TitleBase [attrs children]
+-- Create a standard maplescript custom element
+(make (TitleBase attrs children) (do
   <h1>attrs:title-text</h1>
-)
+))
 
-# Convert our element into a component and add
-# lifecycle hooks
+-- Convert our element into a component and add
+-- lifecycle hooks
 (make Title
   (-> TitleBase
-      (syrup:afterMount @ (fn [attrs] (m:log 'aftermount running with' attrs)))
-      (syrup:beforeUnmount @ (fn [attrs] (m:log 'beforeunmount running with' attrs)))))
+      (syrup:afterMount & (@ [attrs] (m:log 'aftermount running with' attrs)))
+      (syrup:beforeUnmount & (@ [attrs] (m:log 'beforeunmount running with' attrs)))))
 
-(element App [attrs children]
-  <div {:class 'app'}>
+(make (App attrs children)
+  <div { :class 'app' }>
     (if
       (= :string (m:typeof attrs:state:title-text))
-        <Title {:title-text attrs:state:title-text} />
+        <Title { :title-text attrs:state:title-text } />
       null)
   </div>
 )
 
-# Create a reducer
-(make reducer [state action]
-  (m:merge state {:title-text action:title-text}))
+-- Create a reducer
+(make (reducer state action)
+      (m:merge state { :title-text action:title-text }))
 
-# Set up the state we'll use for this app
+-- Set up the state we'll use for this app
 (make initialState
-  (-> (syrup:state :test-app {:title-text 'App is alive!'})
-      (syrup:reduce @ reducer)))
+  (-> (syrup:state :test-app { :title-text 'App is alive!' })
+      (syrup:reduce & reducer)))
 
-# Render our app (with state!) into the DOM
+-- Render our app (with state!) into the DOM
 (syrup:render App initialState '#app')
 
-# Make sure our app works with changes over time by
-# causing changes on a recurring interval. Correct behavior
-# looks like text appearing and disappearing every 2 seconds.
-(make repeater [index]
-  (make realIndex (any index 0))
-  (if
-    (= 0 (% realIndex 2))
-      (setTimeout (fn []
-        (m:signal :test-app { :title-text null })
-        (repeater (+ realIndex 1))
-      ) 2000)
-    (setTimeout (fn []
-      (m:signal :test-app { :title-text `App is reactive! ${realIndex}` })
-      (repeater (+ realIndex 1))
-    ) 2000)))
+-- Make sure our app works with changes over time by
+-- causing changes on a recurring interval. Correct behavior
+-- looks like text appearing and disappearing every 2 seconds.
+(make (repeater index)
+  (do
+    (make realIndex (any index 0))
+    (make (timeout text)
+          (setTimeout (@ (m:signal :test-app { :title-text text })
+                         (repeater (+ realIndex 1)))
+                      2000))
+    (if (= 0 (% realIndex 2))
+          (timeout null)
+        (timeout `App is reactive! ${realIndex}`))))
 
 (repeater)

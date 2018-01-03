@@ -1,56 +1,54 @@
 (import 'custom-syntax-highlighter' highlight)
+(import './highlight-patterns' patterns)
 
-# Fix the result of markdownifying where code blocks
-# are weirdly indented by 4 spaces.
-(make dedentBlocks []
+-- Fix the result of markdownifying where code blocks
+-- are weirdly indented by 4 spaces.
+(make (dedentBlocks)
   (m:map
     (m:domArray 'pre code')
-    (fn [block]
-      (make newText (-> (block.innerText.split /\n/g)
-                        (m:map @ (fn [line] (line.replace /^\s{8}/ '')))
-                        (@join '\n')))
-      (m:dangerouslyMutate 'innerHTML' newText block))))
+    (@ [block] (make newText (-> (block.innerText.split /\n/g)
+                                 (m:map & (@ [line] (line.replace /^\s{8}/ '')))
+                                 (&join '\n')))
+               (m:dangerouslyMutate 'innerHTML' newText block))))
 
 (dedentBlocks)
 
-# Run the syntax highlighter on code blocks
+-- Run the syntax highlighter on code blocks
 (highlight {
-  patterns {
-    'string single'  /^(\'[^\'\n]*\')/
-    'string double'  /^(\"[^\'\n]*\")/
-    'string tick'    /^(\`[^\'\n]*\`)/
-    'number'         /^(\d+(\.\d+)?)/
-    'keyword sym'    /^(\:\:)/
-    'keyword ref'    /^(\@|async|await|const|do|element|fn|from|if|import|make|NaN|null|of|return|undefined)\b/
-    'keyword call'   [/^\((=\>\>|\-\>|\@|async|await|do|element|fn|if|make|of)\b/ '(']
-    'normal call'    [/^\(([^\s\,\)\;]+)/ '(']
-    'symbol'         [/^ (\:[A-Za-z0-9_\-\$]+)/ ' ']
-    'comment single' /^((\#|\/\/)[^\r\n]+)/
-    'comment multi'  /^(\#\#\#.*\#\#\#)/
-    'html close'     [/^\<\\\/([A-Za-z0-9\-]+)/ '<&#47;']
-    'html open'      [/^\<\\([A-Za-z0-9\-]+)/ '<' ]
-  }
+
+  patterns
+    (@ [block] (if (>= (block.className.indexOf 'maplescript') 0)
+                     (patterns:maplePatterns)
+                   (>= (block.className.indexOf 'javascript') 0)
+                     (patterns:jsPatterns)
+                   []))
+
+  postProcess
+    (@ [text] (text.replace /(\&)([^\#])/g '<span class="keyword ref">$1</span>$2'))
+
 })
 
-# Build navigation
+-- Build navigation
 
 
-(make buildNode [type id text]
-  (make cleanText (text.replace /\(([^\s]+)(\s+[^\s]+)*\)/ '$1'))
-  (m:vdom:render <a {
-    :href `#${id}`
-    :class (type.toLowerCase)
-  }>cleanText</a>))
+(make (buildNode type id text)
+  (do (make cleanText (text.replace /\(([^\s]+)(\s+[^\s]+)*\)/ '$1'))
+      (m:vdom:render
+        <a { :href `#${id}` :class (type.toLowerCase) }>
+          cleanText
+        </a>
+      )))
 
-(make buildNav
-  (of [] (buildNav (m:domArray 'h1, h2, h3, h4, h5, h6') (m:dom '#js-nav')))
-  (of [[] nav] nav)
-  (of [[title|rest] nav]
-    (make node (buildNode title.nodeName (title.getAttribute 'id') title.innerText))
-    (nav.appendChild node)
-    (setTimeout (fn []
-      (node.setAttribute 'class' `show ${(node.getAttribute 'class')}`)
-      (buildNav rest nav))
-    10)))
+(make
+  (buildNav)
+    (buildNav (m:domArray 'h1, h2, h3, h4, h5, h6') (m:dom '#js-nav'))
+  (buildNav [] nav)
+    nav
+  (buildNav [title|rest] nav)
+    (do (make node (buildNode title.nodeName (title.getAttribute 'id') title.innerText))
+        (nav.appendChild node)
+        (setTimeout (@ (node.setAttribute 'class' `show ${(node.getAttribute 'class')}`)
+                       (buildNav rest nav))
+                    10)))
 
 (buildNav)

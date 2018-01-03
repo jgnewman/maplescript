@@ -17,6 +17,12 @@ h1, h2, h3, h4, h5, h6,
   font-size: 16px;
   font-weight: 400;
   line-height: 1.6; }
+  .docs .warning {
+    background: #ffeecc;
+    padding: 15px 25px;
+    border-radius: 4px;
+    font-size: 85%;
+    margin: 35px auto; }
   .docs p:nth-of-type(2) {
     margin: 60px 0 40px;
     font-size: 42px;
@@ -54,18 +60,27 @@ h1, h2, h3, h4, h5, h6,
     font-size: 95%;
     background: #efe9e9;
     padding: 3px 5px 2px; }
+  .docs p a, .docs li a {
+    transition: all .3s ease;
+    color: #911841; }
+    .docs p a:hover, .docs li a:hover {
+      color: #EF5A66; }
   .docs pre {
-    border-left: 3px solid #EF5A66;
-    padding: 15px 25px;
-    margin-left: 15px;
-    line-height: 1.3; }
+    border-left: 2px solid #faced2;
+    background: #F3EFEF;
+    padding: 25px 25px;
+    line-height: 1.3;
+    border-radius: 4px; }
     .docs pre:first-of-type {
       border: 0;
+      background: transparent;
       margin: -36px 0 0 0;
       font-size: 125%;
       padding: 0 0 0 32%; }
     .docs pre code {
       font-size: 85%; }
+      .docs pre code .normal {
+        color: #242424; }
       .docs pre code .comment {
         color: #adadad;
         font-style: italic; }
@@ -76,8 +91,10 @@ h1, h2, h3, h4, h5, h6,
       .docs pre code .html {
         color: #EF5A66; }
       .docs pre code .symbol {
-        color: #d8832d; }
+        color: #ca7a29; }
       .docs pre code .number {
+        color: #6e2295; }
+      .docs pre code .regex {
         color: #6e2295; }
       .docs pre code .normal.call {
         color: #1564a7; }

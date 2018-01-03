@@ -103,10 +103,10 @@ function unconfidentLookup(precompiled) {
 compile(nodes.IdentifierNode, function () {
   let word = this.text;
 
-  if (word === '@') {
+  if (word === '&') {
     word = 'this';
   } else {
-    word = word.replace(/^\@(\:|\.)/, 'this$1').replace(/^\@/, 'this.');
+    word = word.replace(/^\&(\:|\.)/, 'this$1').replace(/^\&/, 'this.');
   }
 
   const maybeReserved = word.replace(/(\?|\.|\:).*$/, '');
@@ -143,6 +143,9 @@ compile(nodes.IdentifierNode, function () {
   if (/\?/.test(word)) {
     word = unconfidentLookup(word);
   }
+
+  // Turn all references to arguments into an array
+  word = word.replace(/^arguments(\.|\[|$)/, 'MAPLE_.args_(arguments)$1');
 
   return word;
 
