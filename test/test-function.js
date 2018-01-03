@@ -84,20 +84,20 @@ describe('Functions', () => {
           return 1;
         }
         if (MAPLE_.match_(args_, [{type:"Number", value: "2" }, {type:"Identifier", value: "n" }])) {
-          var n = args[1];
+          var n = args_[1];
           return 2;
         }
         if (MAPLE_.match_(args_, [{type:"Identifier", value: "n" }, {type:"Identifier", value: "_" }])) {
-          var n = args[0];
+          var n = args_[0];
           return 3;
         }
         if (MAPLE_.match_(args_, [{type:"Arr", value: "[hd|tl]" }])) {
-          var hd = args[0][0];
-          var tl = args[0].slice(1);
+          var hd = args_[0][0];
+          var tl = args_[0].slice(1);
           return 4;
         }
         if (MAPLE_.match_(args_, [{type:"Identifier", value: "n" }])) {
-          var n = args[0];
+          var n = args_[0];
           if ((n === 5)) {
             return 5;
           }

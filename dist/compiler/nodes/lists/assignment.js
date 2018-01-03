@@ -50,7 +50,7 @@ function getVars(patterns) {
 }
 
 function compilePolymorph(bodies) {
-  return 'function () {\n' + 'const args = Array.prototype.slice.call(arguments || []);\n' + bodies.map(function (body) {
+  return 'function () {\n' + 'const args_ = Array.prototype.slice.call(arguments || []);\n' + bodies.map(function (body) {
 
     var qualifier = null;
 
@@ -64,7 +64,7 @@ function compilePolymorph(bodies) {
 
     var vars = getVars(body.pattern);
     var compiledVars = vars.map(function (varObj) {
-      return 'var ' + varObj.name + ' = args' + varObj.index;
+      return 'var ' + varObj.name + ' = args_' + varObj.index;
     }).join(';\n') + ';\n';
 
     var actions = [body.action];
@@ -72,7 +72,7 @@ function compilePolymorph(bodies) {
       actions = body.action.items.slice(1);
     }
 
-    return 'if (MAPLE_.match_(args, ' + params + ')) {\n' + (vars.length ? compiledVars : '') + (!qualifier ? '' : 'if (' + qualifier.compile(true) + ') {\n') + actions.map(function (action, index) {
+    return 'if (MAPLE_.match_(args_, ' + params + ')) {\n' + (vars.length ? compiledVars : '') + (!qualifier ? '' : 'if (' + qualifier.compile(true) + ') {\n') + actions.map(function (action, index) {
       return (index === actions.length - 1 ? 'return ' : '') + action.compile(true);
     }).join(';\n') + ';\n' + (!qualifier ? '' : '}\n') + '}';
   }).join('\n') + " throw new Error('Could not find an argument match.');\n" + '}';
@@ -89,9 +89,20 @@ function compileAssignment(items) {
     // not a polymorph
     if (bodies.length === 1 && bodies[0].allArgsIdentifiers) {
       var body = bodies[0];
+      var actions = void 0;
+
+      // No need to wrap `do` in a function in this case.
+      if (body.action.type === 'List' && body.action.items[0].text === 'do') {
+        actions = body.action.items.slice(1);
+      } else {
+        actions = [body.action];
+      }
+
       return ('\n        const ' + items[0].items[0].compile(true) + ' = function (' + body.pattern.map(function (arg) {
         return arg.compile(true);
-      }).join(', ') + ') {\n          const args = Array.prototype.slice.call(arguments || []);\n          return ' + body.action.compile(true) + ';\n        }\n      ').trim();
+      }).join(', ') + ') {\n          ' + actions.map(function (action, index) {
+        return (index === actions.length - 1 ? 'return ' : '') + action.compile(true);
+      }).join(';\n') + ';\n        }\n      ').trim();
 
       // polymorph!
     } else {

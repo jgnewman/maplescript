@@ -1,9 +1,9 @@
 (import '../../syrup/syrup' syrup)
 
 -- Create a standard maplescript custom element
-(make (TitleBase attrs children)
+(make (TitleBase attrs children) (do
   <h1>attrs:title-text</h1>
-)
+))
 
 -- Convert our element into a component and add
 -- lifecycle hooks

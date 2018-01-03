@@ -58,7 +58,7 @@ function compilePolymorph(bodies) {
 
            const vars = getVars(body.pattern);
            const compiledVars = vars.map(varObj => {
-             return `var ${varObj.name} = args${varObj.index}`;
+             return `var ${varObj.name} = args_${varObj.index}`;
            }).join(';\n') + ';\n';
 
            let actions = [body.action];

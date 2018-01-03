@@ -1,4 +1,4 @@
----
+
 &
 &foo
 &.foo
@@ -48,13 +48,6 @@
 -- async function
 (make foo (@async :err [x y] (await (+ x y))))
 
----
-
-(make (add x y)
-  (do (m:log 'need a do block for multi actions')
-      (+ x y)))
-
----
 
 -- pattern matching with qualifier
 (make (factorial n (where (?< n 2)))
@@ -138,5 +131,3 @@ foo:bar?.baz?.0.qux?
 
 -- dosomething(1, 2)(3, 4)(5, 6)
 (>>= dosomething [1 2] [3 4] [5 6])
-
----

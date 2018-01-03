@@ -144,6 +144,9 @@ compile(nodes.IdentifierNode, function () {
     word = unconfidentLookup(word);
   }
 
+  // Turn all references to arguments into an array
+  word = word.replace(/^arguments(\.|\[|$)/, 'MAPLE_.args_(arguments)$1');
+
   return word;
 
 });

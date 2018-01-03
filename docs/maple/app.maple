@@ -1,4 +1,5 @@
 (import 'custom-syntax-highlighter' highlight)
+(import './highlight-patterns' patterns)
 
 -- Fix the result of markdownifying where code blocks
 -- are weirdly indented by 4 spaces.
@@ -14,22 +15,17 @@
 
 -- Run the syntax highlighter on code blocks
 (highlight {
-  patterns {
-    'string single'  /^(\'[^\'\n]*\')/
-    'string double'  /^(\"[^\'\n]*\")/
-    'string tick'    /^(\`[^\'\n]*\`)/
-    'number'         /^(\d+(\.\d+)?)/
-    'keyword sym'    /^(\:\:|\@|\-\>)/
-    'keyword ref'    /^(\-\>|\@|\&|async|await|const|do|from|if|import|make|NaN|null|of|return|undefined)\b/
-    'keyword call'   [/^\((=\>\>|\-\>|\@|\&|async|await|do|if|make|where)\b/ '(']
-    'normal call'    [/^\(([^\s\,\)\;\@]+)/ '(']
-    'symbol'         [/^ (\:[A-Za-z0-9_\-\$]+)/ ' ']
-    'comment single' /^((\-\-|\/\/)[^\r\n]+)/
-    'comment arrow'  /^((\=\>|\/\/)[^\r\n]+)/
-    'comment multi'  /^(\-\-\-[.\r\n]*\-\-\-)/
-    'html close'     [/^\<\\\/([A-Za-z0-9\-]+)/ '<&#47;']
-    'html open'      [/^\<\\([A-Za-z0-9\-]+)/ '<' ]
-  }
+
+  patterns
+    (@ [block] (if (>= (block.className.indexOf 'maplescript') 0)
+                     (patterns:maplePatterns)
+                   (>= (block.className.indexOf 'javascript') 0)
+                     (patterns:jsPatterns)
+                   []))
+
+  postProcess
+    (@ [text] (text.replace /(\&)([^\#])/g '<span class="keyword ref">$1</span>$2'))
+
 })
 
 -- Build navigation

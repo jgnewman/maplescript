@@ -2,6 +2,7 @@
 var MAPLE_ = m = require("maplescript/library");
 
 const highlight = require('custom-syntax-highlighter');
+const patterns = require('./highlight-patterns');
 const dedentBlocks = function () {
           const args = Array.prototype.slice.call(arguments || []);
           return m[Symbol.for("map")](m[Symbol.for("domArray")]('pre code'), function (block) {
@@ -24,7 +25,25 @@ return m[Symbol.for("dangerouslyMutate")]('innerHTML', newText, block);
     });
         };
 dedentBlocks();
-highlight({ "patterns": { 'string single': /^(\'[^\'\n]*\')/, 'string double': /^(\"[^\'\n]*\")/, 'string tick': /^(\`[^\'\n]*\`)/, 'number': /^(\d+(\.\d+)?)/, 'keyword sym': /^(\:\:|\@|\-\>)/, 'keyword ref': /^(\-\>|\@|\&|async|await|const|do|from|if|import|make|NaN|null|of|return|undefined)\b/, 'keyword call': [/^\((=\>\>|\-\>|\@|\&|async|await|do|if|make|where)\b/, '('], 'normal call': [/^\(([^\s\,\)\;\@]+)/, '('], 'symbol': [/^ (\:[A-Za-z0-9_\-\$]+)/, ' '], 'comment single': /^((\-\-|\/\/)[^\r\n]+)/, 'comment arrow': /^((\=\>|\/\/)[^\r\n]+)/, 'comment multi': /^(\-\-\-[.\r\n]*\-\-\-)/, 'html close': [/^\<\\\/([A-Za-z0-9\-]+)/, '<&#47;'], 'html open': [/^\<\\([A-Za-z0-9\-]+)/, '<'] } });
+highlight({ "patterns": function (block) {
+      
+      const args = Array.prototype.slice.call(arguments || []);
+      return (function(){
+if ((block["className"]["indexOf"]('maplescript') >= 0)) {
+return patterns[Symbol.for("maplePatterns")]()
+} else if ((block["className"]["indexOf"]('javascript') >= 0)) {
+return patterns[Symbol.for("jsPatterns")]()
+} else {
+return []
+}
+}).call(this);
+      
+    }, "postProcess": function (text) {
+      
+      const args = Array.prototype.slice.call(arguments || []);
+      return text["replace"](/(\&)([^\#])/g, '<span class="keyword ref">$1</span>$2');
+      
+    } });
 const buildNode = function (type, id, text) {
           const args = Array.prototype.slice.call(arguments || []);
           return (function(){
@@ -60,9 +79,22 @@ return buildNav(rest, nav);
 };
 buildNav();
 
-},{"custom-syntax-highlighter":4,"maplescript/library":10}],2:[function(require,module,exports){
+},{"./highlight-patterns":2,"custom-syntax-highlighter":5,"maplescript/library":11}],2:[function(require,module,exports){
+var MAPLE_ = m = require("maplescript/library");
 
-},{}],3:[function(require,module,exports){
+const maplePatterns = function () {
+          const args = Array.prototype.slice.call(arguments || []);
+          return [{ "name": 'comment multi', "match": /^(\-\-\-(.|\r|\n)*?\-\-\-)/ }, { "name": 'comment single', "match": /^((\-\-|\/\/)[^\r\n]+)/ }, { "name": 'comment arrow', "match": /^((\=\>|\/\/)[^\r\n]+)/ }, { "name": 'string single', "match": /^(\'[^\'\n]*\')/ }, { "name": 'string double', "match": /^(\"[^\'\n]*\")/ }, { "name": 'string tick', "match": /^(\`[^\'\n]*\`)/ }, { "name": 'number', "match": /^(\d+(\.\d+)?)/ }, { "name": 'symbol', "match": [/^ (\:[A-Za-z0-9_\-\$]+)/, ' '] }, { "name": 'keyword sym', "match": /^(\:\:|\@)/ }, { "name": 'keyword ref', "match": /^(async|await|const|do|from|if|import|make|NaN|null|of|return|undefined)\b/ }, { "name": 'keyword call', "match": [/^\((=\>\>|\-\>|\@|async|await|do|export|if|import|make|where)\b/, '(', ''] }, { "name": 'keyword call sym', "match": [/^\((\-\>)\s/, '(', ' '] }, { "name": 'normal call', "match": [/^\(([^\s\,\(\)\;\@]+)/, '('] }, { "name": 'html close', "match": [/^\<\\\/([A-Za-z0-9\-]+)/, '<&#47;'] }, { "name": 'html open', "match": [/^\<\\([A-Za-z0-9\-]+)/, '<'] }];
+        };
+const jsPatterns = function () {
+          const args = Array.prototype.slice.call(arguments || []);
+          return [{ "name": 'comment multi', "match": /^(\/\*(.|\r|\n)*?\*\/)/ }, { "name": 'comment single', "match": /^(\/\/[^\r\n]+)/ }, { "name": 'string single', "match": /^(\'[^\'\n]*\')/ }, { "name": 'string double', "match": /^(\"[^\'\n]*\")/ }, { "name": 'string tick', "match": /^(\`[^\'\n]*\`)/ }, { "name": 'string key', "match": /^([A-Za-z0-9\&_]+\:)/ }, { "name": 'number', "match": /^(\d+(\.\d+)?)/ }, { "name": 'regex', "match": /^(\/.+\/[gim]*)/ }, { "name": 'keyword ref', "match": /^\b(async|await|const|do|from|if|import|make|NaN|null|of|return|throw|undefined)\b/ }, { "name": 'keyword sym', "match": /^(\=\>|\=)/ }, { "name": 'normal call', "match": [/^([A-Za-z0-9\&_]+)\(/, '', '('] }];
+        };
+module.exports = {[Symbol.for("maplePatterns")]: MAPLE_.aritize_(maplePatterns, 0), [Symbol.for("jsPatterns")]: MAPLE_.aritize_(jsPatterns, 0)};
+
+},{"maplescript/library":11}],3:[function(require,module,exports){
+
+},{}],4:[function(require,module,exports){
 /*!
  * Cross-Browser Split 1.1.1
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
@@ -170,7 +202,7 @@ module.exports = (function split(undef) {
   return self;
 })();
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 /**
@@ -180,7 +212,7 @@ module.exports = (function split(undef) {
  * collects the match, wraps it in a span with a class name, and recurses. It
  * goes until the whole string has been collected.
  *
- * @param  {Object} patterns  The patterns to parse against
+ * @param  {Object} patterns  The array of pattern objects to parse against
  * @param  {String} incoming  The original text, being shortened as we recurse.
  * @param  {String} output    The new text with spans.
  *
@@ -207,14 +239,15 @@ function parse(patterns, incoming, output) {
    * Check each pattern against the string. If we find a match, assign it to the
    * match variable.
    */
-  Object.keys(patterns).some(function (key) {
-    var isRegex = patterns[key] instanceof RegExp;
-    var pattern = isRegex ? patterns[key] : patterns[key][0];
-    var prefix = isRegex ? null : patterns[key][1] || null;
-    var suffix = isRegex ? null : patterns[key][2] || null;
+  patterns.some(function (pattern) {
+    var name = pattern.name;
+    var isRegex = pattern.match instanceof RegExp;
+    var capture = isRegex ? pattern.match : pattern.match[0];
+    var prefix = isRegex ? null : pattern.match[1] || null;
+    var suffix = isRegex ? null : pattern.match[2] || null;
 
-    match = incoming.match(pattern);
-    matchType = match ? key : null;
+    match = incoming.match(capture);
+    matchType = match ? pattern.name : null;
     matchPrefix = prefix;
     matchSuffix = suffix;
     return !!match;
@@ -283,7 +316,7 @@ function clean(text) {
  * Highlights code blocks in a way you specify.
  *
  * @param  {Object} config    Allows the following keys:
- *                              patterns:    {...} (The regex patterns used to parse)
+ *                              patterns:    [...] (The regex patterns used to parse)
  *                              linenums:    true  (Turns on line numbers)
  *                              selector:    'pre' (Defaults to 'pre code')
  *                              preProcess:  fn    (Allows you to eff with the string after parsing)
@@ -341,7 +374,7 @@ function highlight(config) {
  * Export the hightlight function
  */
 module.exports = exports = highlight;
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var OneVersionConstraint = require('individual/one-version');
@@ -363,7 +396,7 @@ function EvStore(elem) {
     return hash;
 }
 
-},{"individual/one-version":8}],6:[function(require,module,exports){
+},{"individual/one-version":9}],7:[function(require,module,exports){
 (function (global){
 var topLevel = typeof global !== 'undefined' ? global :
     typeof window !== 'undefined' ? window : {}
@@ -384,7 +417,7 @@ if (typeof document !== 'undefined') {
 module.exports = doccy;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":2}],7:[function(require,module,exports){
+},{"min-document":3}],8:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -407,7 +440,7 @@ function Individual(key, value) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var Individual = require('./index.js');
@@ -431,14 +464,14 @@ function OneVersion(moduleName, version, defaultValue) {
     return Individual(key, defaultValue);
 }
 
-},{"./index.js":7}],9:[function(require,module,exports){
+},{"./index.js":8}],10:[function(require,module,exports){
 "use strict";
 
 module.exports = function isObject(x) {
 	return typeof x === "object" && x !== null;
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /*
  * Maple Language Function Library
  */
@@ -876,27 +909,27 @@ var MAPLE_ = {
 
 module.exports = MAPLE_;
 
-},{"virtual-dom/create-element":11,"virtual-dom/diff":12,"virtual-dom/h":13,"virtual-dom/patch":14,"virtual-dom/vnode/vnode":32}],11:[function(require,module,exports){
+},{"virtual-dom/create-element":12,"virtual-dom/diff":13,"virtual-dom/h":14,"virtual-dom/patch":15,"virtual-dom/vnode/vnode":33}],12:[function(require,module,exports){
 var createElement = require("./vdom/create-element.js")
 
 module.exports = createElement
 
-},{"./vdom/create-element.js":16}],12:[function(require,module,exports){
+},{"./vdom/create-element.js":17}],13:[function(require,module,exports){
 var diff = require("./vtree/diff.js")
 
 module.exports = diff
 
-},{"./vtree/diff.js":36}],13:[function(require,module,exports){
+},{"./vtree/diff.js":37}],14:[function(require,module,exports){
 var h = require("./virtual-hyperscript/index.js")
 
 module.exports = h
 
-},{"./virtual-hyperscript/index.js":23}],14:[function(require,module,exports){
+},{"./virtual-hyperscript/index.js":24}],15:[function(require,module,exports){
 var patch = require("./vdom/patch.js")
 
 module.exports = patch
 
-},{"./vdom/patch.js":19}],15:[function(require,module,exports){
+},{"./vdom/patch.js":20}],16:[function(require,module,exports){
 var isObject = require("is-object")
 var isHook = require("../vnode/is-vhook.js")
 
@@ -995,7 +1028,7 @@ function getPrototype(value) {
     }
 }
 
-},{"../vnode/is-vhook.js":27,"is-object":9}],16:[function(require,module,exports){
+},{"../vnode/is-vhook.js":28,"is-object":10}],17:[function(require,module,exports){
 var document = require("global/document")
 
 var applyProperties = require("./apply-properties")
@@ -1043,7 +1076,7 @@ function createElement(vnode, opts) {
     return node
 }
 
-},{"../vnode/handle-thunk.js":25,"../vnode/is-vnode.js":28,"../vnode/is-vtext.js":29,"../vnode/is-widget.js":30,"./apply-properties":15,"global/document":6}],17:[function(require,module,exports){
+},{"../vnode/handle-thunk.js":26,"../vnode/is-vnode.js":29,"../vnode/is-vtext.js":30,"../vnode/is-widget.js":31,"./apply-properties":16,"global/document":7}],18:[function(require,module,exports){
 // Maps a virtual DOM tree onto a real DOM tree in an efficient manner.
 // We don't want to read all of the DOM nodes in the tree so we use
 // the in-order tree indexing to eliminate recursion down certain branches.
@@ -1130,7 +1163,7 @@ function ascending(a, b) {
     return a > b ? 1 : -1
 }
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var applyProperties = require("./apply-properties")
 
 var isWidget = require("../vnode/is-widget.js")
@@ -1283,7 +1316,7 @@ function replaceRoot(oldRoot, newRoot) {
     return newRoot;
 }
 
-},{"../vnode/is-widget.js":30,"../vnode/vpatch.js":33,"./apply-properties":15,"./update-widget":20}],19:[function(require,module,exports){
+},{"../vnode/is-widget.js":31,"../vnode/vpatch.js":34,"./apply-properties":16,"./update-widget":21}],20:[function(require,module,exports){
 var document = require("global/document")
 var isArray = require("x-is-array")
 
@@ -1365,7 +1398,7 @@ function patchIndices(patches) {
     return indices
 }
 
-},{"./create-element":16,"./dom-index":17,"./patch-op":18,"global/document":6,"x-is-array":37}],20:[function(require,module,exports){
+},{"./create-element":17,"./dom-index":18,"./patch-op":19,"global/document":7,"x-is-array":38}],21:[function(require,module,exports){
 var isWidget = require("../vnode/is-widget.js")
 
 module.exports = updateWidget
@@ -1382,7 +1415,7 @@ function updateWidget(a, b) {
     return false
 }
 
-},{"../vnode/is-widget.js":30}],21:[function(require,module,exports){
+},{"../vnode/is-widget.js":31}],22:[function(require,module,exports){
 'use strict';
 
 var EvStore = require('ev-store');
@@ -1411,7 +1444,7 @@ EvHook.prototype.unhook = function(node, propertyName) {
     es[propName] = undefined;
 };
 
-},{"ev-store":5}],22:[function(require,module,exports){
+},{"ev-store":6}],23:[function(require,module,exports){
 'use strict';
 
 module.exports = SoftSetHook;
@@ -1430,7 +1463,7 @@ SoftSetHook.prototype.hook = function (node, propertyName) {
     }
 };
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 var isArray = require('x-is-array');
@@ -1569,7 +1602,7 @@ function errorString(obj) {
     }
 }
 
-},{"../vnode/is-thunk":26,"../vnode/is-vhook":27,"../vnode/is-vnode":28,"../vnode/is-vtext":29,"../vnode/is-widget":30,"../vnode/vnode.js":32,"../vnode/vtext.js":34,"./hooks/ev-hook.js":21,"./hooks/soft-set-hook.js":22,"./parse-tag.js":24,"x-is-array":37}],24:[function(require,module,exports){
+},{"../vnode/is-thunk":27,"../vnode/is-vhook":28,"../vnode/is-vnode":29,"../vnode/is-vtext":30,"../vnode/is-widget":31,"../vnode/vnode.js":33,"../vnode/vtext.js":35,"./hooks/ev-hook.js":22,"./hooks/soft-set-hook.js":23,"./parse-tag.js":25,"x-is-array":38}],25:[function(require,module,exports){
 'use strict';
 
 var split = require('browser-split');
@@ -1625,7 +1658,7 @@ function parseTag(tag, props) {
     return props.namespace ? tagName : tagName.toUpperCase();
 }
 
-},{"browser-split":3}],25:[function(require,module,exports){
+},{"browser-split":4}],26:[function(require,module,exports){
 var isVNode = require("./is-vnode")
 var isVText = require("./is-vtext")
 var isWidget = require("./is-widget")
@@ -1667,14 +1700,14 @@ function renderThunk(thunk, previous) {
     return renderedThunk
 }
 
-},{"./is-thunk":26,"./is-vnode":28,"./is-vtext":29,"./is-widget":30}],26:[function(require,module,exports){
+},{"./is-thunk":27,"./is-vnode":29,"./is-vtext":30,"./is-widget":31}],27:[function(require,module,exports){
 module.exports = isThunk
 
 function isThunk(t) {
     return t && t.type === "Thunk"
 }
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 module.exports = isHook
 
 function isHook(hook) {
@@ -1683,7 +1716,7 @@ function isHook(hook) {
        typeof hook.unhook === "function" && !hook.hasOwnProperty("unhook"))
 }
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualNode
@@ -1692,7 +1725,7 @@ function isVirtualNode(x) {
     return x && x.type === "VirtualNode" && x.version === version
 }
 
-},{"./version":31}],29:[function(require,module,exports){
+},{"./version":32}],30:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualText
@@ -1701,17 +1734,17 @@ function isVirtualText(x) {
     return x && x.type === "VirtualText" && x.version === version
 }
 
-},{"./version":31}],30:[function(require,module,exports){
+},{"./version":32}],31:[function(require,module,exports){
 module.exports = isWidget
 
 function isWidget(w) {
     return w && w.type === "Widget"
 }
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 module.exports = "2"
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var version = require("./version")
 var isVNode = require("./is-vnode")
 var isWidget = require("./is-widget")
@@ -1785,7 +1818,7 @@ function VirtualNode(tagName, properties, children, key, namespace) {
 VirtualNode.prototype.version = version
 VirtualNode.prototype.type = "VirtualNode"
 
-},{"./is-thunk":26,"./is-vhook":27,"./is-vnode":28,"./is-widget":30,"./version":31}],33:[function(require,module,exports){
+},{"./is-thunk":27,"./is-vhook":28,"./is-vnode":29,"./is-widget":31,"./version":32}],34:[function(require,module,exports){
 var version = require("./version")
 
 VirtualPatch.NONE = 0
@@ -1809,7 +1842,7 @@ function VirtualPatch(type, vNode, patch) {
 VirtualPatch.prototype.version = version
 VirtualPatch.prototype.type = "VirtualPatch"
 
-},{"./version":31}],34:[function(require,module,exports){
+},{"./version":32}],35:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = VirtualText
@@ -1821,7 +1854,7 @@ function VirtualText(text) {
 VirtualText.prototype.version = version
 VirtualText.prototype.type = "VirtualText"
 
-},{"./version":31}],35:[function(require,module,exports){
+},{"./version":32}],36:[function(require,module,exports){
 var isObject = require("is-object")
 var isHook = require("../vnode/is-vhook")
 
@@ -1881,7 +1914,7 @@ function getPrototype(value) {
   }
 }
 
-},{"../vnode/is-vhook":27,"is-object":9}],36:[function(require,module,exports){
+},{"../vnode/is-vhook":28,"is-object":10}],37:[function(require,module,exports){
 var isArray = require("x-is-array")
 
 var VPatch = require("../vnode/vpatch")
@@ -2310,7 +2343,7 @@ function appendPatch(apply, patch) {
     }
 }
 
-},{"../vnode/handle-thunk":25,"../vnode/is-thunk":26,"../vnode/is-vnode":28,"../vnode/is-vtext":29,"../vnode/is-widget":30,"../vnode/vpatch":33,"./diff-props":35,"x-is-array":37}],37:[function(require,module,exports){
+},{"../vnode/handle-thunk":26,"../vnode/is-thunk":27,"../vnode/is-vnode":29,"../vnode/is-vtext":30,"../vnode/is-widget":31,"../vnode/vpatch":34,"./diff-props":36,"x-is-array":38}],38:[function(require,module,exports){
 var nativeIsArray = Array.isArray
 var toString = Object.prototype.toString
 

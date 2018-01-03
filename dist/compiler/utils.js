@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.ensurePolymorphicStructure = exports.getOperatorForms = exports.getSpecialForms = exports.getReservedWords = exports.getMsgPassingFns = exports.getExposedFns = exports.compileBody = exports.compile = exports.die = exports.nodes = exports.parser = undefined;
+exports.ensurePolymorphicStructure = exports.getOperatorForms = exports.getSpecialForms = exports.getReservedWords = exports.getExposedFns = exports.compileBody = exports.compile = exports.die = exports.nodes = exports.parser = undefined;
 
 var _parser = require('../parser/parser');
 
@@ -112,12 +112,8 @@ function getOperatorForms() {
   return ["+", "-", "*", "/", "%", "=", "!=", "?<", "?>", "<=", ">="];
 }
 
-function getMsgPassingFns() {
-  return ['spawn', 'receive', 'kill', 'reply', 'send'];
-}
-
 function getSpecialForms() {
-  return ['->', 'all', 'any', 'async', 'await', 'destr', 'do', 'export', 'if', 'import', 'make', 'none', 'not'];
+  return ['->', 'all', 'any', 'await', 'destr', 'do', 'export', 'if', 'import', 'make', 'none', 'not'];
 }
 
 // Official list of reserved words
@@ -131,7 +127,6 @@ exports.die = die;
 exports.compile = compile;
 exports.compileBody = compileBody;
 exports.getExposedFns = getExposedFns;
-exports.getMsgPassingFns = getMsgPassingFns;
 exports.getReservedWords = getReservedWords;
 exports.getSpecialForms = getSpecialForms;
 exports.getOperatorForms = getOperatorForms;

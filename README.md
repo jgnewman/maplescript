@@ -23,7 +23,7 @@ The purpose behind MapleScript is to allow you to trade out 100kb+ libraries for
 Here are a few examples of things you can do in MapleScript:
 
 ```
-# Create a factorial calculator
+-- Create a factorial calculator
 
 (make (factorial n)
   (if
@@ -31,12 +31,12 @@ Here are a few examples of things you can do in MapleScript:
       1
     (* n (factorial (- n 1)))))
 
-# Create a factorial calculator with pattern matching!
+-- Create a factorial calculator with pattern matching!
 
 (make (factorial 0) 1
       (factorial n) (* n (factorial (- n 1))))
 
-# More easily use Symbols, especially as object keys
+-- More easily use Symbols, especially as object keys
 
 (make person {
   :name 'John'
@@ -44,16 +44,16 @@ Here are a few examples of things you can do in MapleScript:
   :hair 'brown'
 })
 
-person:name          #=> 'John'
-person:age?:birthday #=> undefined
+person:name           =>  'John'
+person:age?:birthday  =>  undefined
 
-# Enjoy more accurate type checking
+-- Enjoy more accurate type checking
 
-(m:typeof {})    #=> :object
-(m:typeof null)  #=> :null
-(m:typeof [1 2]) #=> :array
+(m:typeof {})     =>  :object
+(m:typeof null)   =>  :null
+(m:typeof [1 2])  =>  :array
 
-# Chain context between function calls
+-- Chain context between function calls
 
 (-> (jquery '#my-div')
     (&.addClass 'my-class')
@@ -64,12 +64,12 @@ person:age?:birthday #=> undefined
     (&.then (@ [result] (returnPromise result)))
     (&.then (@ [result] result)))
 
-# Use the built-in event system
+-- Use the built-in event system
 
 (m:handle :my-event (@ [data] (m:log data)))
 (m:signal :my-event 'foo')
 
-# Generate nodes in a virtual DOM!
+-- Generate nodes in a virtual DOM!
 
 (make title
   <h1 {:class 'my-class'}>
@@ -77,15 +77,15 @@ person:age?:birthday #=> undefined
   </h1>
 )
 
-# Turn them into real html nodes!
+-- Turn them into real html nodes!
 
 (make renderedTitle (m:vdom:render title))
 
-# Inject them into a web page!
+-- Inject them into a web page!
 
 (m:vdom:injectNodes renderedTitle '#target-selector')
 
-# Diff two versions of a virtual DOM!
+-- Diff two versions of a virtual DOM!
 
 (make title2
   <h1 {:class 'different-clas'}>
@@ -95,7 +95,7 @@ person:age?:birthday #=> undefined
 
 (make patches (m:vdom:diff ))
 
-# Automatically apply changes from a diff!
+-- Automatically apply changes from a diff!
 
 (m:vdom:patchNodes renderedTitle patches)
 ```

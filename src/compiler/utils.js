@@ -114,18 +114,11 @@ function getOperatorForms() {
   ]
 }
 
-function getMsgPassingFns() {
-  return [
-    'spawn', 'receive', 'kill', 'reply', 'send'
-  ];
-}
-
 function getSpecialForms() {
   return [
     '->',
     'all',
     'any',
-    'async',
     'await',
     'destr',
     'do',
@@ -177,7 +170,6 @@ export {
   compile,
   compileBody,
   getExposedFns,
-  getMsgPassingFns,
   getReservedWords,
   getSpecialForms,
   getOperatorForms,

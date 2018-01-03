@@ -86,7 +86,7 @@ function compileFnBody() {
 
   return ('\n    ' + (isAsync ? 'async ' : '') + 'function (' + items.args.map(function (arg) {
     return arg.compile(true);
-  }).join(', ') + ') {\n      ' + (isAsync ? 'try {' : '') + '\n      const args = Array.prototype.slice.call(arguments || []);\n      ' + items.actions.map(function (action, index) {
+  }).join(', ') + ') {\n      ' + (isAsync ? 'try {' : '') + '\n      ' + items.actions.map(function (action, index) {
     return index === items.actions.length - 1 ? 'return ' + action.compile(true) + ';' : action.compile(true);
   }).join(';\n') + '\n      ' + (isAsync ? '} catch (err_) { MAPLE_[Symbol.for("signal")](' + asyncChannel + ', err_); }' : '') + '\n    }\n  ').trim();
 }

@@ -7,7 +7,7 @@ layout: docs
 
 ![MapleScript](https://github.com/jgnewman/maplescript/raw/master/logo.svg?sanitize=true)
 
-```
+```maplescript
 (make (delicious code)
   (maplescript:compile code))
 ```
@@ -104,7 +104,7 @@ gulp.task('maple', function () {
 
 In MapleScript, all expressions return values and, aside from raw data, just about everything is syntactically structured like a function call. Function calls are just lists of values enclosed in parentheses ("s-expressions"). Here are a few MapleScript s-expressions and their JavaScript equivalents:
 
-```
+```maplescript
 (foo bar baz)
 -- foo(bar, baz);
 
@@ -116,20 +116,22 @@ In MapleScript, all expressions return values and, aside from raw data, just abo
   (all (?< x y) (?> x z)) bar
   baz)
 
--- if (x === y) {
---   return foo;
--- } else if (x < y && x > z) {
---   return bar;  
--- } else {
---   return baz;  
--- }
+---
+if (x === y) {
+  return foo;
+} else if (x < y && x > z) {
+  return bar;  
+} else {
+  return baz;  
+}
+---
 ```
 
 ### Comments
 
 As you may have already noticed, single line comments are prefixed with `--` while multi-line comments are surrounded by two instances of `---`, just like YAML front matter.
 
-```
+```maplescript
 -- This is a single line comment.
 
 ---
@@ -144,14 +146,14 @@ In MapleScript, all named values (variables, functions, etc) are translated to `
 
 Normally, `make` takes 2 arguments — one for the variable name and one for the value:
 
-```
+```maplescript
 -- A variable `foo` with a value of 'bar'.
 (make foo 'bar')
 ```
 
 However, when you're defining a function, `make` takes any even number of arguments. You can think of these arguments as occurring in pairs where the first item in the pair is a pattern that describes a way the function can be called and the second item in the pair is what should be returned when that pattern is used:
 
-```
+```maplescript
 -- Whenever we call `baz` of `x`,
 -- we'll return the result of adding x to x.
 (make (baz x) (+ x x))
@@ -167,7 +169,7 @@ You are allowed to use dashes in symbol names because of how they compile: `Symb
 
 Here is an example of a MapleScript object:
 
-```
+```maplescript
 (make person {
   :name 'John'
   :eyes 'hazel'
@@ -179,7 +181,7 @@ Odd numbered items are keys. Even numbered items are associated values. Of cours
 
 In fact, there is no array notation syntax for accessing values inside of objects. Here's how you'll do it:
 
-```
+```maplescript
 foo.0
 -- foo[0];
 
@@ -197,32 +199,32 @@ MapleScript also takes a tip from CoffeeScript and allows you to perform "unconf
 
 Most of the MapleScript operators are the same as in JavaScript except that they're written in prefix notation as function calls. There are only a couple of differences as outlined below:
 
-```
-(+ x y z)   # x + y + z
-(- x y z)   # x - y - z
-(* x y z)   # x * y * z
-(/ x y z)   # x / y / z
-(= x y z)   # x === y === z
-(!= x y z)  # x !== y !== z
-(% x y)     # x % y
-(?< x y)    # x < y
-(?> x y)    # x > y
-(<= x y)    # x <= y
-(>= x y)    # x >= y
-(not x)     # !x
+```maplescript
+(+ x y z)   =>  x + y + z
+(- x y z)   =>  x - y - z
+(* x y z)   =>  x * y * z
+(/ x y z)   =>  x / y / z
+(= x y z)   =>  x === y === z
+(!= x y z)  =>  x !== y !== z
+(% x y)     =>  x % y
+(?< x y)    =>  x < y
+(?> x y)    =>  x > y
+(<= x y)    =>  x <= y
+(>= x y)    =>  x >= y
+(not x)     =>  !x
 ```
 
 To help with some of this, there are a few built-in special forms for performing logic:
 
-```
+```maplescript
 (all (= x y) (= a b))
--- x === y && a === b
+=>  x === y && a === b
 
 (any (= x y) (= a b))
--- x === y || a === b
+=>  x === y || a === b
 
 (none (= x y) (= a b))
--- !(x === y) && !(a === b)
+=>  !(x === y) && !(a === b)
 ```
 
 Notice that these are called "special forms" because even though they are structured like function calls, each argument is not eagerly evaluated. This works because we transpile to infix JavaScript operators rather than to actual function calls.
@@ -233,7 +235,7 @@ The MapleScript condition is another special form. The `if` expression looks lik
 
 But if we think of `if` like a function call, arguments are divided into pairs where the first member of the pair is a condition and the second member is an expression to evaluate if the condition was truthy. If the last argument does not have a second pair member, it is used as an else case.
 
-```
+```maplescript
 (make food 'pizza')
 
 (if (= food 'pizza') (eat food))
@@ -254,7 +256,7 @@ Sometimes you will need to execute more than one expression if a condition is tr
 
 All `do` really does is create a block of many expressions wrapped up in a single expression.
 
-```
+```maplescript
 (if
   (= food 'pizza')
     (do
@@ -266,7 +268,7 @@ All `do` really does is create a block of many expressions wrapped up in a singl
 
 Although MapleScript is loosely functional, it encourages you to write functional code. To that end, it doesn't include any new iteration syntax. You can use native methods like `Array.map` or any other iterative function, or you can use recursion.
 
-```
+```maplescript
 (make arr [1 2 3])
 
 (arr.map (@ [num] (* num 10)))
@@ -290,7 +292,7 @@ Functions are created using the `make` command, which must take an even number o
 
 Unnamed (anonymous) functions are created by calling the `@` function. If the first argument you pass to `@` is an array, its items will be used as parameters for the function.
 
-```
+```maplescript
 -- A function `add` taking x and y
 -- It returns the result of adding x to y.
 
@@ -318,7 +320,7 @@ Unnamed (anonymous) functions are created by calling the `@` function. If the fi
 
 Within polymorphic functions, you can add qualifiers to your parameter lists. In other words, if the arguments that come in match the pattern, you can execute an additional test before the match is proved.
 
-```
+```maplescript
 -- Factorial of n where n is less than 2, return 1.
 -- Factorial of n in any other case, recurse.
 
@@ -330,7 +332,7 @@ Keep in mind that your patterns will be tested in the order in which they are de
 
 When one of your arguments is expected to be an array, you have a few extra options for pattern matching. In the following example, we'll test for an empty array as well as destructure a populated array into variables representing the first item and a slice containing all remaining items.
 
-```
+```maplescript
 -- A function for doubling each number in an array.
 (make
 
@@ -357,7 +359,7 @@ Note that in the above function, `first|rest` must not contain any spaces.
 
 Additional argument destructuring will not happen within the argument pattern. Instead, you'll use the `destr` function for it.
 
-```
+```maplescript
 -- Turn object properties into variables with the same names
 (make (addProps obj)
   (do (destr obj [ :foo :bar ])
@@ -379,7 +381,7 @@ Additional argument destructuring will not happen within the argument pattern. I
 
 MapleScript sticks with JavaScript's native data types for the most part. However, it removes your ability to use the `typeof` operator and instead provides a function called `m:typeof` that will give you much better accuracy. The result of calling this function is always a symbol.
 
-```
+```maplescript
 (m:typeof 'foo')         =>  :string
 (m:typeof 100)           =>  :number
 (m:typeof (@ x))         =>  :function
@@ -408,7 +410,7 @@ The `instanceof` operator has also been re-purposed as `m:instanceof`, however t
 
 MapleScript has a built-in system for subscribing to and triggering events. The most important thing to keep in mind here is that all events are named by symbols.
 
-```
+```maplescript
 (make (handler data)
   (m:log `I got ${data}!`))
 
@@ -432,11 +434,9 @@ MapleScript's technique for error handling is built on the event system and allo
 
 The `m:attempt` function takes an event channel and a function to execute. If that function throws an error, the error will be caught and signaled along the event channel.
 
-```
+```maplescript
 (make (failer)
-  (m:attempt
-    :bad-json
-    (@ (JSON.parse 'asdfasdf'))))
+  (m:attempt :bad-json (@ (JSON.parse 'asdfasdf'))))
 
 (m:handle :bad-json (@ [err] (m:log err)))
 
@@ -448,7 +448,7 @@ The `m:attempt` function takes an event channel and a function to execute. If th
 
 Importing modules in MapleScript is done with the `import` function. The first argument is the location of the module. The second argument is optional and represents variables to be generated from the values in that module.
 
-```
+```maplescript
 -- Import a module but don't reference any specific values
 
 (import '/path/to/file')
@@ -471,7 +471,7 @@ Importing modules in MapleScript is done with the `import` function. The first a
 
 When it comes to exports, it is important to remember that **all MapleScript modules export an object**. No matter how you structure your export statement, the result will be an object.
 
-```
+```maplescript
 -- Export an object with key `:foo` as a reference to `foo`.
 
 (export foo)
@@ -492,7 +492,7 @@ When it comes to exports, it is important to remember that **all MapleScript mod
 
 The other useful tool you can apply during export is aritization. Sometimes we may define a polymorphic function where certain "morphs" are intended just for recursive purposes. For example:
 
-```
+```maplescript
 (make
   (doubleEach arr)
     (doubleEach arr [])
@@ -507,7 +507,7 @@ The other useful tool you can apply during export is aritization. Sometimes we m
 
 When we export this function, we can lock it down to one allowed "arity" (number of arguments) such that, if we try to call the function with a different number of arguments, we'll get an error. However, internally, that function can recurse with all kinds of arguments to its heart's content.
 
-```
+```maplescript
 -- Use "/1" to denote that only 1 argument is allowed.
 (export [doubleEach/1])
 ```
@@ -518,25 +518,24 @@ First and foremost, because async/await is not universal yet, you'll need to mak
 
 Because async functions need to implement try/catch in order to properly handle rejected promises, MapleScript makes you choose an error channel for your async functions when you define them. Having done this, you can handle their errors just like you would with any other function.
 
-```
+```maplescript
 (make foo
   (@async :foo-error []
     (await (something cool))
     (await (more cool stuff))
     (done)))
 
-(handle :foo-error
-        (@ [err] (m:log err)))
+(handle :foo-error (@ [err] (m:log err)))
 ```
 
 ### Chains
 
 Sometimes Lisp-y syntax can make JavaScript-y things gross. Consider trying to chain promises:
 
-```
-((((createPromise).then (fn [result]
-  (createPromise))).then (fn [result]
-    (createPromise))).then (fn [result]
+```maplescript
+((((createPromise).then (@ [result]
+  (createPromise))).then (@ [result]
+    (createPromise))).then (@ [result]
       (console.log result)))
 ```
 
@@ -544,7 +543,7 @@ Aside from just looking ugly, it doesn't really make sense to try and chain meth
 
 A context chain is a special form that begins with `->` and evaluates each of its arguments in order, passing in the result of the previous one as the `this` context for the next one.
 
-```
+```maplescript
 (-> (createPromise)
     (&then (@ [result] (createPromise)))
     (&then (@ [result] (createPromise)))
@@ -559,7 +558,7 @@ Any time you start thinking you need to put more parentheses on the left-hand si
 
 Less frequently, you may find yourself in need of a "call chain" which is actually a function (not a special form) that allows you to mimic something like `foo()()()` in JavaScript:
 
-```
+```maplescript
 (make (foo x)
   (@ [y]
     (@ [z]
@@ -577,7 +576,7 @@ MapleScript provides a very nice way to create virtual DOM nodes (meaning an obj
 
 The syntax for this is inspired by React's JSX dialect, but you don't need any extra libraries to make it work. It's built in. We call it MapleML.
 
-```
+```maplescript
 -- Create a custom dom node called Title.
 -- Custom element functions must begin with a capital letter
 -- in order to be compiled correctly when written
@@ -618,7 +617,7 @@ Calls a provided function (`fun`) with argument list `args`, optionally with pro
 - `args` - Array. Contains all arguments to pass to the function.
 - `ctx` - Optional. A context in which to call the function.
 
-```
+```maplescript
 (make (logger text)
   (m:log text))
 
@@ -633,7 +632,7 @@ Calls a provided function (`fun`) and checks to see if it produced any errors. I
 - `channel` - Symbol. An event channel name.
 - `fun` - Function. Will be executed and checked for errors.
 
-```
+```maplescript
 (m:handle :bad-json
           (@ [err] (m:log err)))
 
@@ -648,11 +647,11 @@ Binds a function to a context and returns the new function.
 - `fun` - Any function.
 - `ctx` - Any value. Will become the `this` context of the new function.
 
-```
+```maplescript
 (make ctx 'foo')
 
 (make (myfun)
-  (m:bind (@ (m:log @)) ctx))
+  (m:bind (@ (m:log &)) ctx))
 
 (myfun)
 -- logs 'foo'
@@ -664,7 +663,7 @@ Generates a deep copy of a provided value (`collection`) as long as that value i
 
 - `collection` - Object or Array. The collection to be copied.
 
-```
+```maplescript
 (make obj { :foo 'bar' })
 
 (make copy (m:copy obj))
@@ -683,7 +682,7 @@ Allows you to mutate the value of a key in an existing object. This is necessary
 - `val` - The new value for the key.
 - `object` - The object receiving the change.
 
-```
+```maplescript
 -- dangerously mutate href to foo in location
 (m:dangerouslyMutate 'href' '/foo' location)
 ```
@@ -694,7 +693,7 @@ Creates and throws an error built from a provided message (`msg`).
 
 - `msg` - String. The error message.
 
-```
+```maplescript
 (m:die 'Application broke!')
 ```
 
@@ -704,7 +703,7 @@ Selects a single element from the real DOM by the provided selector.
 
 - `selector` - String. A standard, CSS selector string.
 
-```
+```maplescript
 (m:dom '.my-class')
 => <\div class="my-class">
 ```
@@ -715,7 +714,7 @@ Selects an array of elements from the real DOM by the provided selector.
 
 - `selector` - String. A standard, CSS selector string.
 
-```
+```maplescript
 (m:domArray '.my-class')
 => [<\div class="my-class">, <\div class="my-class">]
 ```
@@ -727,7 +726,7 @@ Determines whether two provided objects are deep equal. Returns a boolean.
 - `obj1` - One of two objects to compare.
 - `obj2` - Another of two objects to compare.
 
-```
+```maplescript
 (m:eql { :foo 'bar' }
        { :foo 'bar' })
 => true
@@ -744,7 +743,7 @@ Retrieves a value from a collection.
 - `collection` - Any kind of object with retrievable values.
 - `key` - Number, String, or Symbol. Identifies the key of the value to be retrieved.
 
-```
+```maplescript
 (make person { :name 'John' })
 
 (make key :name)
@@ -760,7 +759,7 @@ Registers a handler function (`fun`) for events broadcast on a global event chan
 - `channel` - Symbol. The name of an event channel.
 - `fun` - The handler function. Takes the data sent over the channel.
 
-```
+```maplescript
 (m:handle :my-event (@ [data] (m:log data)))
 
 (m:signal :my-event 'foo')
@@ -773,7 +772,7 @@ Retrieves the first item in an array.
 
 - `array` - Any array.
 
-```
+```maplescript
 (m:head [1 2 3])
 => 1
 ```
@@ -785,7 +784,7 @@ Determines whether a value (`val`) was built from a constructor (`type`). Return
 - `val` - Any value.
 - `type` - A constructor function.
 
-```
+```maplescript
 (make date (m:new Date))
 
 (m:instanceof date Date)
@@ -798,7 +797,7 @@ Selects a single element from the real DOM by the provided selector.
 
 - `selector` - String. A standard, CSS selector string.
 
-```
+```maplescript
 (m:dom '.my-class')
 #=> <\div class="my-class">
 ```
@@ -809,7 +808,7 @@ Returns an array of all string and symbol keys in a provided object.
 
 - `object` - The object whose keys we want to retrieve.
 
-```
+```maplescript
 (make obj {
   foo   1
   "bar" 2
@@ -826,7 +825,7 @@ Retrieves the last item in an array.
 
 - `array` - Any array.
 
-```
+```maplescript
 (m:last [1 2 3])
 => 3
 ```
@@ -837,7 +836,7 @@ Creates a slice of all array items except the last one.
 
 - `array` - Any array.
 
-```
+```maplescript
 (m:lead [1 2 3])
 => [1, 2]
 ```
@@ -848,7 +847,7 @@ A pass-through to console.log. If `console` does not exist in the current enviro
 
 - `...msgs` - Items to log to the console.
 
-```
+```maplescript
 (m:log 'hello' 'world')
 => logs 'hello' 'world'
 ```
@@ -860,7 +859,7 @@ Iterates over all items in an array or object and returns a new shallow copy of 
 - `collection` - Any array or plain object.
 - `fun` - A function to call for each item. Takes arguments `item` and `index/key`.
 
-```
+```maplescript
 (m:map [1 2 3] (@ [item index]
   (if (= 0 (% index 2))
         (* item 10))
@@ -880,7 +879,7 @@ Takes a series of objects or arrays and merges them into a new object/array cont
 
 - `...objects` - Arrays or objects.
 
-```
+```maplescript
 (m:merge { :foo 1 } { :bar 2 })
 => { :foo 1 :bar 2 }
 
@@ -895,7 +894,7 @@ Instantiates a constructor.
 - `constructor` - A function for constructing an object.
 - `...args` - Optional arguments to pass to the constructor.
 
-```
+```maplescript
 (m:new Date '10/21/1985')
 => Mon Oct 21 1985 00:00:00 GMT-0400 (EDT)
 ```
@@ -904,7 +903,7 @@ Instantiates a constructor.
 
 You will sometimes need a function that does nothing. Here's one for you.
 
-```
+```maplescript
 (m:noop)
 => nothing happens
 ```
@@ -915,7 +914,7 @@ Selects a random item from an array.
 
 - `array` - Any array.
 
-```
+```maplescript
 (m:random [1 2 3 4 5])
 => 2
 
@@ -930,7 +929,7 @@ Creates an array populated by all numbers from `from` through `through`.
 - `from` - Number. The first item in the range.
 - `through` - Number. The last item in the range.
 
-```
+```maplescript
 (m:range 1 10)
 [1 2 3 4 5 6 7 8 9 10]
 ```
@@ -942,7 +941,7 @@ Returns a new, shallow copy of a collection with a provided key removed.
 - `collection` - Object or Array. Contains an item to be removed.
 - `key` - Identifies the object key or array index to be removed.
 
-```
+```maplescript
 (make obj { :foo 1 :bar 2 })
 (make arr ['a' 'b' 'c'])
 
@@ -960,7 +959,7 @@ Broadcasts data on a global event channel. Returns undefined.
 - `channel` - Symbol. The name of the event.
 - `data` - Optional. Data to send along with the event.
 
-```
+```maplescript
 (m:handle :my-event (@ [data] (m:log data)))
 
 (m:signal :my-event 'foo')
@@ -973,7 +972,7 @@ Creates a slice of all array items except the first one.
 
 - `array` - Any array.
 
-```
+```maplescript
 (m:tail [1 2 3])
 => [2, 3]
 ```
@@ -984,7 +983,7 @@ Throws an error object.
 
 - `err` - Any error object.
 
-```
+```maplescript
 (m:throw (n:new Error))
 => ERROR!
 ```
@@ -996,7 +995,7 @@ Determines the type of `data` and returns one of the following symbols:
 
 - `data` - Any value.
 
-```
+```maplescript
 (m:typeof [])                    =>  :array
 (m:typeof true)                  =>  :boolean
 (m:typeof (m:new Date))          =>  :date
@@ -1021,7 +1020,7 @@ Removes a handler function from a global event channel. Returns undefined.
 - `channel` - Symbol. The name of the event.
 - `fun` - The function to remove.
 
-```
+```maplescript
 (make handler (@ [data] (m:log data)))
 
 (m:handle :my-event handler)
@@ -1043,7 +1042,7 @@ Returns a new, shallow copy of a collection with a provided key updated with a n
 - `key` - Identifies the object key or array index to be updated.
 - `val` - The new value for the key.
 
-```
+```maplescript
 (make obj { :foo 1 :bar 2 })
 (make arr ['a' 'b' 'c'])
 
@@ -1062,7 +1061,7 @@ Creates a new virtual DOM node. MapleML syntax is a shortcut for this function.
 - `attrs` - Optional. An object specifying all attributes. Each should be named with a symbol.
 - `children` - Optional. An array of child virtual DOM nodes.
 
-```
+```maplescript
 (m:vdom:create 'div' { :class 'my-class' } [
   (m:vdom:create 'span' {} ['Hello, world!'])
 ])
@@ -1085,7 +1084,7 @@ Compares two virtual trees and outputs the differences between them.
 - `vtree1` - VNode. The result of calling `m:vdom:create`.
 - `vtree2` - Another VNode.
 
-```
+```maplescript
 (make tree1 <\div>'hello'<\/div>)
 (make tree2 <\div>'goodbye'<\/div>)
 
@@ -1099,7 +1098,7 @@ Converts a virtual DOM tree into a tree of real DOM nodes.
 
 - `vtree` - VNode. The result of calling `m:vdom:create`.
 
-```
+```maplescript
 (make tree1 <\div>'hello'<\/div>)
 (make tree2 <\div>'goodbye'<\/div>)
 
@@ -1114,7 +1113,7 @@ Injects a tree of nodes into the real DOM. Returns the tree of real nodes.
 - `nodes` - VNode or HtmlElement.
 - `target` - String or HtmlElement.
 
-```
+```maplescript
 (m:vdom:injectNodes <\div { :class 'foo' }>'hello'<\/div> '#app')
 -- Injects real nodes into the selement identified by '#app'.
 -- Returns <\div class="foo">hello<\/div>
@@ -1133,7 +1132,7 @@ A pass-through to console.warn. If `console` does not exist in the current envir
 
 - `...msgs` - Items to log to the console.
 
-```
+```maplescript
 (m:warn 'Scary warning!')
 -- logs 'Scary warning!'
 ```
@@ -1142,7 +1141,7 @@ A pass-through to console.warn. If `console` does not exist in the current envir
 
 Syrup is a simple framework built using MapleScript's virtual DOM technology to provide a somewhat React/Redux-like experience. With it, you can build components and tie them to a state object. When the state object changes, your app can re-render itself based on those changes. Here is a simple example:
 
-```
+```maplescript
 (import 'maplescript/syrup/syrup' syrup)
 
 -- Start by defining initial state values

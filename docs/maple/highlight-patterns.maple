@@ -1,0 +1,114 @@
+(make (maplePatterns) [
+  {
+    name 'comment multi'
+    match /^(\-\-\-(.|\r|\n)*?\-\-\-)/
+  }
+  {
+    name 'comment single'
+    match /^((\-\-|\/\/)[^\r\n]+)/
+  }
+  {
+    name 'comment arrow'
+    match /^((\=\>|\/\/)[^\r\n]+)/
+  }
+  {
+    name 'string single'
+    match /^(\'[^\'\n]*\')/
+  }
+  {
+    name 'string double'
+    match /^(\"[^\'\n]*\")/
+  }
+  {
+    name 'string tick'
+    match /^(\`[^\'\n]*\`)/
+  }
+  {
+    name 'number'
+    match /^(\d+(\.\d+)?)/
+  }
+  {
+    name 'symbol'
+    match [/^ (\:[A-Za-z0-9_\-\$]+)/ ' ']
+  }
+  {
+    name 'keyword sym'
+    match /^(\:\:|\@)/
+  }
+  {
+    name 'keyword ref'
+    match /^(async|await|const|do|from|if|import|make|NaN|null|of|return|undefined)\b/
+  }
+  {
+    name 'keyword call'
+    match [/^\((=\>\>|\-\>|\@|async|await|do|export|if|import|make|where)\b/ '(' '']
+  }
+  {
+    name 'keyword call sym'
+    match [/^\((\-\>)\s/ '(' ' ']
+  }
+  {
+    name 'normal call'
+    match [/^\(([^\s\,\(\)\;\@]+)/ '(']
+  }
+  {
+    name 'html close'
+    match [/^\<\\\/([A-Za-z0-9\-]+)/ '<&#47;']
+  }
+  {
+    name 'html open'
+    match [/^\<\\([A-Za-z0-9\-]+)/ '<' ]
+  }
+])
+
+(make (jsPatterns) [
+  {
+    name 'comment multi'
+    match /^(\/\*(.|\r|\n)*?\*\/)/
+  }
+  {
+    name 'comment single'
+    match /^(\/\/[^\r\n]+)/
+  }
+  {
+    name 'string single'
+    match /^(\'[^\'\n]*\')/
+  }
+  {
+    name 'string double'
+    match /^(\"[^\'\n]*\")/
+  }
+  {
+    name 'string tick'
+    match /^(\`[^\'\n]*\`)/
+  }
+  {
+    name 'string key'
+    match /^([A-Za-z0-9\&_]+\:)/
+  }
+  {
+    name 'number'
+    match /^(\d+(\.\d+)?)/
+  }
+  {
+    name 'regex'
+    match /^(\/.+\/[gim]*)/
+  }
+  {
+    name 'keyword ref'
+    match /^\b(async|await|const|do|from|if|import|make|NaN|null|of|return|throw|undefined)\b/
+  }
+  {
+    name 'keyword sym'
+    match /^(\=\>|\=)/
+  }
+  {
+    name 'normal call'
+    match [/^([A-Za-z0-9\&_]+)\(/ '' '(']
+  }
+])
+
+(export [
+  maplePatterns/0
+  jsPatterns/0
+])
