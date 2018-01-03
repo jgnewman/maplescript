@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MapleScript Docs</title>
-    <link rel="icon" type="image/x-icon" href="../../assets/images/favicon.png" />
+    <link rel="icon" type="image/x-icon" href="./assets/images/favicon.png" />
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,800" rel="stylesheet">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css" />
     <link rel="stylesheet" href="./assets/css/app.css">
@@ -46,7 +46,8 @@
         # or
         
         yarn add maplescript --dev
-        </code></pre><h3 id="compiling-manually">Compiling Manually</h3>
+        </code></pre><p>You can also download <strong><a href="https://atom.io/packages/language-maplescript">MapleScript language support for Atom</a>!</strong></p>
+        <h3 id="compiling-manually">Compiling Manually</h3>
         <pre><code class="lang-javascript">import { compile, compileCode } from &#39;maplescript&#39;;
         
         compile(&#39;path/to/file.maple&#39;, (err, result) =&gt; {
@@ -188,6 +189,16 @@
         =&gt;  !(x === y) &amp;&amp; !(a === b)
         </code></pre>
         <p>Notice that these are called &quot;special forms&quot; because even though they are structured like function calls, each argument is not eagerly evaluated. This works because we transpile to infix JavaScript operators rather than to actual function calls.</p>
+        <p>MapleScript does not contain any infix or unary operations. It just has functions and function-like special forms. As such, the following JavaScript operations have been repurposed as functions in MapleScript:</p>
+        <pre><code class="lang-maplescript">-- typeof x
+        (m:typeof x)
+        
+        -- x instanceof y
+        (m:instanceof x y)
+        
+        -- new Foo(x, y)
+        (m:new Foo x y)
+        </code></pre>
         <h3 id="conditions">Conditions</h3>
         <p>The MapleScript condition is another special form. The <code>if</code> expression looks like a function call but it can only work properly if we don&#39;t eagerly evaluate all of its arguments. They&#39;re conditional, after all.</p>
         <p>But if we think of <code>if</code> like a function call, arguments are divided into pairs where the first member of the pair is a condition and the second member is an expression to evaluate if the condition was truthy. If the last argument does not have a second pair member, it is used as an else case.</p>
@@ -205,6 +216,13 @@
           (= food &#39;pizza&#39;) (m:log &#39;yum!&#39;)
           (= food &#39;fish&#39;) (m:log &#39;gross&#39;)
           (m:log &#39;never tried it&#39;))
+        </code></pre>
+        <p>If you find yourself needing a visual trigger to detect that else case, one option is to use the <code>:else</code> symbol. There&#39;s nothing special about it, but it is a truthy value so it&#39;ll always pass and it has clear semantic meaning.</p>
+        <pre><code class="lang-maplescript">(if
+          (= food &#39;pizza&#39;)
+            (eat food)
+          :else
+            (dontEat food))
         </code></pre>
         <p>Sometimes you will need to execute more than one expression if a condition is true. In that case, you can use the <code>do</code> special form.</p>
         <p>All <code>do</code> really does is create a block of many expressions wrapped up in a single expression.</p>
@@ -230,9 +248,9 @@
         </code></pre>
         <h3 id="functions">Functions</h3>
         <p>Because all MapleScript expressions return a value, functions don&#39;t have <code>return</code> statements. Instead, they will implicitly return the value of the last expression executed.</p>
-        <p>Functions can be named or anonymous. Either way, you have the option of making them polymorphic (meaning you can execute different function bodies depending on what your arguments look like).</p>
-        <p>Functions are created using the <code>make</code> command, which must take an even number of arguments. Those arguments can be thought of as occurring in pairs where the first member of the pair is a function pattern and the second member represents what is returned when that pattern is matched. In order to execute multiple commands within a function body, you&#39;ll wrap them up in a <code>do</code> block.</p>
-        <p>Unnamed (anonymous) functions are created by calling the <code>@</code> function. If the first argument you pass to <code>@</code> is an array, its items will be used as parameters for the function.</p>
+        <p>Functions can be named or anonymous but named functions can be polymorphic (meaning you can execute different function bodies depending on what your arguments look like).</p>
+        <p>Named functions are created using the <code>make</code> command, which must take an even number of arguments. Those arguments can be thought of as occurring in pairs where the first member of the pair is a function pattern and the second member represents what is returned when that pattern is matched. In order to execute multiple commands within a function body, you&#39;ll wrap them up in a <code>do</code> block.</p>
+        <p>Unnamed (anonymous) functions are created by calling the <code>@</code> function. If the first argument you pass to <code>@</code> is an array, its items will be used as parameters for the function. Anonymous functions may contain as many commands as necessary without the need to wrap them in a <code>do</code> block.</p>
         <pre><code class="lang-maplescript">-- A function `add` taking x and y
         -- It returns the result of adding x to y.
         
@@ -256,6 +274,11 @@
         (make (foo x)
           (do (something x)
               (somethingElse x)))
+        
+        -- The `do` block is not necessary for
+        -- anonymous functions.
+        
+        (make foo (@ [x] (something x) (somethingElse x)))
         </code></pre>
         <p>Within polymorphic functions, you can add qualifiers to your parameter lists. In other words, if the arguments that come in match the pattern, you can execute an additional test before the match is proved.</p>
         <pre><code class="lang-maplescript">-- Factorial of n where n is less than 2, return 1.
@@ -374,6 +397,11 @@
         
         (import &#39;/path/to/file&#39; [foo bar])
         
+        -- Assume the module exports an object with symbol keys `:foo` and `:bar`.
+        -- Create variables called `foo` and `bar` as references to these values.
+        
+        (import &#39;/path/to/file&#39; [ :foo :bar ])
+        
         -- Assume the module exports an object with keys `:foo` and `:bar`.
         -- Create variables called `x` and `y` as references to these values.
         
@@ -427,17 +455,18 @@
         <h3 id="chains">Chains</h3>
         <p>Sometimes Lisp-y syntax can make JavaScript-y things gross. Consider trying to chain promises:</p>
         <pre><code class="lang-maplescript">((((createPromise).then (@ [result]
-          (createPromise))).then (@ [result]
-            (createPromise))).then (@ [result]
+          (createPromise result))).then (@ [result]
+            (createPromise result))).then (@ [result]
               (console.log result)))
         </code></pre>
         <p>Aside from just looking ugly, it doesn&#39;t really make sense to try and chain methods off of an s-expression. So to ease your pain in cases like this, MapleScript includes the &quot;context chain&quot;.</p>
         <p>A context chain is a special form that begins with <code>-&gt;</code> and evaluates each of its arguments in order, passing in the result of the previous one as the <code>this</code> context for the next one.</p>
         <pre><code class="lang-maplescript">(-&gt; (createPromise)
-            (&amp;then (@ [result] (createPromise)))
-            (&amp;then (@ [result] (createPromise)))
+            (&amp;then (@ [result] (createPromise result)))
+            (&amp;then (@ [result] (createPromise result)))
             (&amp;then (@ [result] (m:log result))))
         
+        -- a jQuery example
         (-&gt; ($ &#39;#my-div&#39;)
             (&amp;addClass &#39;foo&#39;)
             (&amp;hide))
@@ -453,9 +482,10 @@
         (&gt;&gt;= foo [2] [3] [4])
         </code></pre>
         <p>Without the call chain, you might be left having to do something like <code>(((foo 2) 3) 4)</code> and nobody likes extra parentheses on the left.</p>
+        <p>For those of you who are familiar with Haskell, it may be important to call out the fact that <code>&gt;&gt;=</code> does <em>not</em> denote a monad in MapleScript.</p>
         <h3 id="virtual-dom">Virtual DOM</h3>
         <p>MapleScript provides a very nice way to create virtual DOM nodes (meaning an object tree <em>representing</em> the DOM). Virtual nodes can be rendered into real nodes or diffed against other virtual nodes to find the differences between the two virtual trees. With those differences, you can quickly make changes to an existing real DOM.</p>
-        <p>The syntax for this is inspired by React&#39;s JSX dialect, but you don&#39;t need any extra libraries to make it work. It&#39;s built in. We call it MapleML.</p>
+        <p>The syntax for this is inspired by React&#39;s JSX dialect, but you don&#39;t need any extra libraries to make it work. It&#39;s built in. We call it MapleML. <em>Unlike JSX</em>, MapleML does not use <code>attribute={value}</code> syntax. Instead, you&#39;ll pass in an object containing all properties and attributes for each element — <code>&lt;div { :id &#39;my-div&#39; }&gt;&lt;/div&gt;</code>. Because this object&#39;s keys will be symbols, you do not have to modify reserved words. For example, you do not have to change <code>class</code> to <code>className</code> as you do in JSX. Instead, you&#39;ll use the symbol <code>:class</code>.</p>
         <pre><code class="lang-maplescript">-- Create a custom dom node called Title.
         -- Custom element functions must begin with a capital letter
         -- in order to be compiled correctly when written
@@ -914,7 +944,9 @@
         (make (reducer state action)
           (m:merge state { :title-text action:title-text }))
         
-        -- Use these values to create an application state
+        -- Use the above values to create an application state
+        -- The :my-app symbol denotes an event channel
+        -- The state will receive its updates on that channel
         (make state (-&gt; (syrup:state :my-app initialStateValues)
                         (syrup:reduce &amp; reducer)))
         

@@ -36,6 +36,8 @@ npm install --save-dev maplescript
 yarn add maplescript --dev
 ```
 
+You can also download **[MapleScript language support for Atom](https://atom.io/packages/language-maplescript)!**
+
 ### Compiling Manually
 
 ```javascript
@@ -229,6 +231,19 @@ To help with some of this, there are a few built-in special forms for performing
 
 Notice that these are called "special forms" because even though they are structured like function calls, each argument is not eagerly evaluated. This works because we transpile to infix JavaScript operators rather than to actual function calls.
 
+MapleScript does not contain any infix or unary operations. It just has functions and function-like special forms. As such, the following JavaScript operations have been repurposed as functions in MapleScript:
+
+```maplescript
+-- typeof x
+(m:typeof x)
+
+-- x instanceof y
+(m:instanceof x y)
+
+-- new Foo(x, y)
+(m:new Foo x y)
+```
+
 ### Conditions
 
 The MapleScript condition is another special form. The `if` expression looks like a function call but it can only work properly if we don't eagerly evaluate all of its arguments. They're conditional, after all.
@@ -250,6 +265,16 @@ But if we think of `if` like a function call, arguments are divided into pairs w
   (= food 'pizza') (m:log 'yum!')
   (= food 'fish') (m:log 'gross')
   (m:log 'never tried it'))
+```
+
+If you find yourself needing a visual trigger to detect that else case, one option is to use the `:else` symbol. There's nothing special about it, but it is a truthy value so it'll always pass and it has clear semantic meaning.
+
+```maplescript
+(if
+  (= food 'pizza')
+    (eat food)
+  :else
+    (dontEat food))
 ```
 
 Sometimes you will need to execute more than one expression if a condition is true. In that case, you can use the `do` special form.
@@ -286,11 +311,11 @@ Although MapleScript is loosely functional, it encourages you to write functiona
 
 Because all MapleScript expressions return a value, functions don't have `return` statements. Instead, they will implicitly return the value of the last expression executed.
 
-Functions can be named or anonymous. Either way, you have the option of making them polymorphic (meaning you can execute different function bodies depending on what your arguments look like).
+Functions can be named or anonymous but named functions can be polymorphic (meaning you can execute different function bodies depending on what your arguments look like).
 
-Functions are created using the `make` command, which must take an even number of arguments. Those arguments can be thought of as occurring in pairs where the first member of the pair is a function pattern and the second member represents what is returned when that pattern is matched. In order to execute multiple commands within a function body, you'll wrap them up in a `do` block.
+Named functions are created using the `make` command, which must take an even number of arguments. Those arguments can be thought of as occurring in pairs where the first member of the pair is a function pattern and the second member represents what is returned when that pattern is matched. In order to execute multiple commands within a function body, you'll wrap them up in a `do` block.
 
-Unnamed (anonymous) functions are created by calling the `@` function. If the first argument you pass to `@` is an array, its items will be used as parameters for the function.
+Unnamed (anonymous) functions are created by calling the `@` function. If the first argument you pass to `@` is an array, its items will be used as parameters for the function. Anonymous functions may contain as many commands as necessary without the need to wrap them in a `do` block.
 
 ```maplescript
 -- A function `add` taking x and y
@@ -316,6 +341,11 @@ Unnamed (anonymous) functions are created by calling the `@` function. If the fi
 (make (foo x)
   (do (something x)
       (somethingElse x)))
+
+-- The `do` block is not necessary for
+-- anonymous functions.
+
+(make foo (@ [x] (something x) (somethingElse x)))
 ```
 
 Within polymorphic functions, you can add qualifiers to your parameter lists. In other words, if the arguments that come in match the pattern, you can execute an additional test before the match is proved.
@@ -463,6 +493,11 @@ Importing modules in MapleScript is done with the `import` function. The first a
 
 (import '/path/to/file' [foo bar])
 
+-- Assume the module exports an object with symbol keys `:foo` and `:bar`.
+-- Create variables called `foo` and `bar` as references to these values.
+
+(import '/path/to/file' [ :foo :bar ])
+
 -- Assume the module exports an object with keys `:foo` and `:bar`.
 -- Create variables called `x` and `y` as references to these values.
 
@@ -534,8 +569,8 @@ Sometimes Lisp-y syntax can make JavaScript-y things gross. Consider trying to c
 
 ```maplescript
 ((((createPromise).then (@ [result]
-  (createPromise))).then (@ [result]
-    (createPromise))).then (@ [result]
+  (createPromise result))).then (@ [result]
+    (createPromise result))).then (@ [result]
       (console.log result)))
 ```
 
@@ -545,10 +580,11 @@ A context chain is a special form that begins with `->` and evaluates each of it
 
 ```maplescript
 (-> (createPromise)
-    (&then (@ [result] (createPromise)))
-    (&then (@ [result] (createPromise)))
+    (&then (@ [result] (createPromise result)))
+    (&then (@ [result] (createPromise result)))
     (&then (@ [result] (m:log result))))
 
+-- a jQuery example
 (-> ($ '#my-div')
     (&addClass 'foo')
     (&hide))
@@ -570,11 +606,13 @@ Less frequently, you may find yourself in need of a "call chain" which is actual
 
 Without the call chain, you might be left having to do something like `(((foo 2) 3) 4)` and nobody likes extra parentheses on the left.
 
+For those of you who are familiar with Haskell, it may be important to call out the fact that `>>=` does _not_ denote a monad in MapleScript.
+
 ### Virtual DOM
 
 MapleScript provides a very nice way to create virtual DOM nodes (meaning an object tree _representing_ the DOM). Virtual nodes can be rendered into real nodes or diffed against other virtual nodes to find the differences between the two virtual trees. With those differences, you can quickly make changes to an existing real DOM.
 
-The syntax for this is inspired by React's JSX dialect, but you don't need any extra libraries to make it work. It's built in. We call it MapleML.
+The syntax for this is inspired by React's JSX dialect, but you don't need any extra libraries to make it work. It's built in. We call it MapleML. _Unlike JSX_, MapleML does not use `attribute={value}` syntax. Instead, you'll pass in an object containing all properties and attributes for each element — `<div { :id 'my-div' }></div>`. Because this object's keys will be symbols, you do not have to modify reserved words. For example, you do not have to change `class` to `className` as you do in JSX. Instead, you'll use the symbol `:class`.
 
 ```maplescript
 -- Create a custom dom node called Title.
@@ -1151,7 +1189,9 @@ Syrup is a simple framework built using MapleScript's virtual DOM technology to 
 (make (reducer state action)
   (m:merge state { :title-text action:title-text }))
 
--- Use these values to create an application state
+-- Use the above values to create an application state
+-- The :my-app symbol denotes an event channel
+-- The state will receive its updates on that channel
 (make state (-> (syrup:state :my-app initialStateValues)
                 (syrup:reduce & reducer)))
 

@@ -4,16 +4,13 @@ var MAPLE_ = m = require("maplescript/library");
 const highlight = require('custom-syntax-highlighter');
 const patterns = require('./highlight-patterns');
 const dedentBlocks = function () {
-          const args = Array.prototype.slice.call(arguments || []);
           return m[Symbol.for("map")](m[Symbol.for("domArray")]('pre code'), function (block) {
       
-      const args = Array.prototype.slice.call(arguments || []);
       const newText = (function(){
     var ref_ = this;
     (function(){ ref_ = block["innerText"]["split"](/\n/g) }).call(ref_);
 (function(){ ref_ = m[Symbol.for("map")](this, function (line) {
       
-      const args = Array.prototype.slice.call(arguments || []);
       return line["replace"](/^\s{8}/, '');
       
     }) }).call(ref_);
@@ -27,7 +24,6 @@ return m[Symbol.for("dangerouslyMutate")]('innerHTML', newText, block);
 dedentBlocks();
 highlight({ "patterns": function (block) {
       
-      const args = Array.prototype.slice.call(arguments || []);
       return (function(){
 if ((block["className"]["indexOf"]('maplescript') >= 0)) {
 return patterns[Symbol.for("maplePatterns")]()
@@ -40,37 +36,32 @@ return []
       
     }, "postProcess": function (text) {
       
-      const args = Array.prototype.slice.call(arguments || []);
       return text["replace"](/(\&)([^\#])/g, '<span class="keyword ref">$1</span>$2');
       
     } });
 const buildNode = function (type, id, text) {
-          const args = Array.prototype.slice.call(arguments || []);
-          return (function(){
-const cleanText = text["replace"](/\(([^\s]+)(\s+[^\s]+)*\)/, '$1');
+          const cleanText = text["replace"](/\(([^\s]+)(\s+[^\s]+)*\)/, '$1');
 return m[Symbol.for("vdom")][Symbol.for("render")](MAPLE_[Symbol.for("vdom")][Symbol.for("create")]("a", { [Symbol.for("href")]: ("#" + (id)), [Symbol.for("class")]: type["toLowerCase"]() }, [
 cleanText
 ]));
-}).call(this);
         };
 const buildNav = function () {
-const args = Array.prototype.slice.call(arguments || []);
-if (MAPLE_.match_(args, [])) {
+const args_ = Array.prototype.slice.call(arguments || []);
+if (MAPLE_.match_(args_, [])) {
 return buildNav(m[Symbol.for("domArray")]('h1, h2, h3, h4, h5, h6'), m[Symbol.for("dom")]('#js-nav'));
 }
-if (MAPLE_.match_(args, [{type:"Arr", value: "[]" }, {type:"Identifier", value: "nav" }])) {
-var nav = args[1];
+if (MAPLE_.match_(args_, [{type:"Arr", value: "[]" }, {type:"Identifier", value: "nav" }])) {
+var nav = args_[1];
 return nav;
 }
-if (MAPLE_.match_(args, [{type:"Arr", value: "[title|rest]" }, {type:"Identifier", value: "nav" }])) {
-var title = args[0][0];
-var rest = args[0].slice(1);
-var nav = args[1];
+if (MAPLE_.match_(args_, [{type:"Arr", value: "[title|rest]" }, {type:"Identifier", value: "nav" }])) {
+var title = args_[0][0];
+var rest = args_[0].slice(1);
+var nav = args_[1];
 const node = buildNode(title["nodeName"], title["getAttribute"]('id'), title["innerText"]);
 nav["appendChild"](node);
 return setTimeout(function () {
       
-      const args = Array.prototype.slice.call(arguments || []);
       node["setAttribute"]('class', ("show " + (node["getAttribute"]('class'))));
 return buildNav(rest, nav);
       
@@ -83,11 +74,9 @@ buildNav();
 var MAPLE_ = m = require("maplescript/library");
 
 const maplePatterns = function () {
-          const args = Array.prototype.slice.call(arguments || []);
           return [{ "name": 'comment multi', "match": /^(\-\-\-(.|\r|\n)*?\-\-\-)/ }, { "name": 'comment single', "match": /^((\-\-|\/\/)[^\r\n]+)/ }, { "name": 'comment arrow', "match": /^((\=\>|\/\/)[^\r\n]+)/ }, { "name": 'string single', "match": /^(\'[^\'\n]*\')/ }, { "name": 'string double', "match": /^(\"[^\'\n]*\")/ }, { "name": 'string tick', "match": /^(\`[^\'\n]*\`)/ }, { "name": 'number', "match": /^(\d+(\.\d+)?)/ }, { "name": 'symbol', "match": [/^ (\:[A-Za-z0-9_\-\$]+)/, ' '] }, { "name": 'keyword sym', "match": /^(\:\:|\@)/ }, { "name": 'keyword ref', "match": /^(async|await|const|do|from|if|import|make|NaN|null|of|return|undefined)\b/ }, { "name": 'keyword call', "match": [/^\((=\>\>|\-\>|\@|async|await|do|export|if|import|make|where)\b/, '(', ''] }, { "name": 'keyword call sym', "match": [/^\((\-\>)\s/, '(', ' '] }, { "name": 'normal call', "match": [/^\(([^\s\,\(\)\;\@]+)/, '('] }, { "name": 'html close', "match": [/^\<\\\/([A-Za-z0-9\-]+)/, '<&#47;'] }, { "name": 'html open', "match": [/^\<\\([A-Za-z0-9\-]+)/, '<'] }];
         };
 const jsPatterns = function () {
-          const args = Array.prototype.slice.call(arguments || []);
           return [{ "name": 'comment multi', "match": /^(\/\*(.|\r|\n)*?\*\/)/ }, { "name": 'comment single', "match": /^(\/\/[^\r\n]+)/ }, { "name": 'string single', "match": /^(\'[^\'\n]*\')/ }, { "name": 'string double', "match": /^(\"[^\'\n]*\")/ }, { "name": 'string tick', "match": /^(\`[^\'\n]*\`)/ }, { "name": 'string key', "match": /^([A-Za-z0-9\&_]+\:)/ }, { "name": 'number', "match": /^(\d+(\.\d+)?)/ }, { "name": 'regex', "match": /^(\/.+\/[gim]*)/ }, { "name": 'keyword ref', "match": /^\b(async|await|const|do|from|if|import|make|NaN|null|of|return|throw|undefined)\b/ }, { "name": 'keyword sym', "match": /^(\=\>|\=)/ }, { "name": 'normal call', "match": [/^([A-Za-z0-9\&_]+)\(/, '', '('] }];
         };
 module.exports = {[Symbol.for("maplePatterns")]: MAPLE_.aritize_(maplePatterns, 0), [Symbol.for("jsPatterns")]: MAPLE_.aritize_(jsPatterns, 0)};
