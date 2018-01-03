@@ -8,11 +8,6 @@ import { compile, nodes, die } from '../utils';
 compile(nodes.ProgramNode, function () {
   const newBody = this.body;
   this.shared.output = '';
-  this.shared.insertSemis = true; // Turn this off when we're going to manually handle it
-  this.shared.refs = -1;
-  this.shared.lookups = -1;
-  this.shared.prevLookup = '';
-  this.shared.disableLookupResets = false;
   newBody.forEach(node => {
     try {
       node.compile();

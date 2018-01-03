@@ -20,8 +20,8 @@ describe('Strings', () => {
   });
 
   it('should include interpolations in backtick strings', () => {
-    const toCompile = '`This is an interpolated string ${(+ 2 2)}`';
-    const expected = '("This is an interpolated string " + ((2 + 2)));'
+    const toCompile = '`${foo} This is an interpolated string ${(+ 2 2)}`';
+    const expected = '((foo) + " This is an interpolated string " + ((2 + 2)));'
     assert.equal(compileCode(toCompile).trim(), expected);
   });
 

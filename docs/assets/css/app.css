@@ -17,6 +17,37 @@ h1, h2, h3, h4, h5, h6,
   font-size: 16px;
   font-weight: 400;
   line-height: 1.6; }
+  .docs #js-menu-open {
+    background: #efe9e9;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 80%;
+    padding: 3px 5px 1px;
+    border-radius: 4px;
+    display: none;
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    cursor: pointer;
+    z-index: 5; }
+    @media screen and (max-width: 1080px) {
+      .docs #js-menu-open {
+        display: block; } }
+  .docs #js-menu-close {
+    background: #e8e0e0;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 80%;
+    padding: 3px 5px 1px;
+    border-radius: 4px;
+    display: none;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    cursor: pointer; }
+    @media screen and (max-width: 1080px) {
+      .docs #js-menu-close {
+        display: block; } }
   .docs .warning {
     background: #ffeecc;
     padding: 15px 25px;
@@ -28,22 +59,46 @@ h1, h2, h3, h4, h5, h6,
     font-size: 42px;
     font-weight: 300;
     line-height: 1.3; }
+    @media screen and (max-width: 600px) {
+      .docs p:nth-of-type(2) {
+        font-size: 36px; } }
   .docs .sidebar pre, .docs .content pre {
     display: block;
     box-sizing: border-box;
     max-width: 100%;
     overflow-x: auto; }
   .docs .sidebar {
+    z-index: 10;
     background: #F3EFEF;
     width: 25%;
     position: fixed;
     top: 0;
     left: 0;
     height: 100%;
-    overflow: auto; }
+    overflow: auto;
+    transition: all .3s ease; }
+    @media screen and (max-width: 1080px) {
+      .docs .sidebar {
+        width: 50%;
+        left: -50%;
+        background: rgba(243, 239, 239, 0.97);
+        box-shadow: 3px 0 100px transparent; } }
+    @media screen and (max-width: 540px) {
+      .docs .sidebar {
+        width: 75%;
+        left: -75%; } }
+    @media screen and (max-width: 1080px) {
+      .docs .sidebar.open {
+        left: 0;
+        box-shadow: 3px 0 100px rgba(0, 0, 0, 0.1); } }
   .docs .content {
     width: 75%;
-    margin-left: 25%; }
+    margin-left: 25%;
+    transition: all .3s ease; }
+    @media screen and (max-width: 1080px) {
+      .docs .content {
+        width: 100%;
+        margin-left: 0; } }
   .docs .sidebar-inner {
     box-sizing: border-box;
     padding: 25px;
@@ -77,6 +132,13 @@ h1, h2, h3, h4, h5, h6,
       margin: -36px 0 0 0;
       font-size: 125%;
       padding: 0 0 0 32%; }
+      @media screen and (max-width: 600px) {
+        .docs pre:first-of-type {
+          font-size: 90%;
+          margin: -25px 0 0 0; } }
+      @media screen and (max-width: 400px) {
+        .docs pre:first-of-type {
+          display: none; } }
     .docs pre code {
       font-size: 85%; }
       .docs pre code .normal {

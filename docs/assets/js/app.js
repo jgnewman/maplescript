@@ -69,6 +69,43 @@ return buildNav(rest, nav);
 } throw new Error('Could not find an argument match.');
 };
 buildNav();
+const sidebar = m[Symbol.for("dom")]('.sidebar');
+const contains = function (str, text) {
+          const classes = str["split"](/\s+/g);
+return (classes["indexOf"](text) >= 0);
+        };
+const addClass = function (elem, cls) {
+          return (function(){
+if ((true && ! contains(elem["className"], cls))) {
+return m[Symbol.for("dangerouslyMutate")]('className', ((elem["className"]) + " " + (cls)), elem)
+} else {
+return
+}
+}).call(this);
+        };
+const removeClass = function (elem, cls) {
+          return (function(){
+if (contains(elem["className"], cls)) {
+return (function(){
+const classes = elem["className"]["split"](/\s+/g);
+classes["splice"](classes["indexOf"](cls), 1);
+return m[Symbol.for("dangerouslyMutate")]('className', classes["join"](' '), elem);
+}).call(this)
+} else {
+return
+}
+}).call(this);
+        };
+const open = function (evt) {
+          evt["preventDefault"]();
+return addClass(sidebar, 'open');
+        };
+const close = function (evt) {
+          evt["preventDefault"]();
+return removeClass(sidebar, 'open');
+        };
+m[Symbol.for("dangerouslyMutate")]('onclick', open, m[Symbol.for("dom")]('#js-menu-open'));
+m[Symbol.for("dangerouslyMutate")]('onclick', close, m[Symbol.for("dom")]('#js-menu-close'));
 
 },{"./highlight-patterns":2,"custom-syntax-highlighter":5,"maplescript/library":11}],2:[function(require,module,exports){
 var MAPLE_ = m = require("maplescript/library");

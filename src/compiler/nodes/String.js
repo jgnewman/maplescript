@@ -74,23 +74,9 @@ function chooseQuote(str) {
  */
 function compileInterpBlocks(blocks, origNode) {
 
-  // Old string compilation technique.
-  // Keeping it around in case we want to bring it back.
-  // const out = `${blocks.map(block => {
-  //   if (block.type === 'str') {
-  //     return block.val;
-  //   } else {
-  //     const value = parser.parse(block.val).body[0];
-  //     value.loc = origNode.loc;
-  //     value.shared = origNode.shared;
-  //     return value.compile(true);
-  //   }
-  // }).join('')}`;
-  // return out;
-
   const out = [];
   blocks.forEach((block, index) => {
-    const prev = out[index - 1];
+    const prev = out[out.length - 1];
     const next = blocks[index + 1];
     const isFirst = index === 0;
     const isLast = index === blocks.length - 1;

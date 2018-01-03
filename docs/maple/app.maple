@@ -30,7 +30,6 @@
 
 -- Build navigation
 
-
 (make (buildNode type id text)
   (do (make cleanText (text.replace /\(([^\s]+)(\s+[^\s]+)*\)/ '$1'))
       (m:vdom:render
@@ -52,3 +51,32 @@
                     10)))
 
 (buildNav)
+
+-- Init menu opening and closing
+
+(make sidebar (m:dom '.sidebar'))
+
+(make (contains str text)
+  (do (make classes (str.split /\s+/g))
+      (>= (classes.indexOf text) 0)))
+
+(make (addClass elem cls)
+  (if (not (contains elem.className cls))
+        (m:dangerouslyMutate 'className' `${elem.className} ${cls}` elem)))
+
+(make (removeClass elem cls)
+  (if (contains elem.className cls)
+        (do (make classes (elem.className.split /\s+/g))
+            (classes.splice (classes.indexOf cls) 1)
+            (m:dangerouslyMutate 'className' (classes.join ' ') elem))))
+
+(make (open evt)
+  (do (evt.preventDefault)
+      (addClass sidebar 'open')))
+
+(make (close evt)
+  (do (evt.preventDefault)
+      (removeClass sidebar 'open')))
+
+(m:dangerouslyMutate 'onclick' open (m:dom '#js-menu-open'))
+(m:dangerouslyMutate 'onclick' close (m:dom '#js-menu-close'))
