@@ -162,9 +162,9 @@
         (m:get foo bar)
         -- foo[bar];
         </code></pre>
-        <p>If you need to reference <code>this</code>, you can still use the keyword <code>this</code>, or you can use <code>&amp;</code>. For example, <code>&amp;foo</code>, <code>&amp;.foo</code>, and <code>@:foo</code>.</p>
+        <p>If you need to reference <code>this</code>, you can still use the keyword <code>this</code>, or you can use <code>&amp;</code>. For example, <code>&amp;foo</code>, <code>&amp;.foo</code>, and <code>&amp;:foo</code>.</p>
         <p>Regarding <code>m:get</code>, <code>m</code> is a reference to the MapleScript core library (which is always available) and <code>get</code> retrieves values from objects and arrays.</p>
-        <p>MapleScript also takes a tip from CoffeeScript and allows you to perform &quot;unconfident retrievals&quot;. For example, the expression <code>foo?:bar?.baz</code> will only return the value for <code>baz</code> if all the values along the chain exist. So if <code>foo</code> doesn&#39;t exist or if <code>foo:bar</code> doesn&#39;t exist, it will return undefined rather than throwing an error.</p>
+        <p>MapleScript also takes a tip from CoffeeScript and allows you to perform &quot;conditional lookups&quot;. For example, the expression <code>foo?:bar?.baz</code> will only return the value for <code>baz</code> if all the values along the chain exist. So if <code>foo</code> doesn&#39;t exist or if <code>foo:bar</code> doesn&#39;t exist, it will return undefined rather than throwing an error.</p>
         <h3 id="operators">Operators</h3>
         <p>Most of the MapleScript operators are the same as in JavaScript except that they&#39;re written in prefix notation as function calls. There are only a couple of differences as outlined below:</p>
         <pre><code class="lang-maplescript">(+ x y z)   =&gt;  x + y + z
@@ -556,6 +556,18 @@
         (myfun)
         -- logs &#39;foo&#39;
         </code></pre>
+        <h3 id="-m-contains-list-value-"><code>(m:contains list value)</code></h3>
+        <p>Determines whether a string or array (<code>list</code>) contains a value.</p>
+        <ul>
+        <li><code>list</code> - Any String or Array.</li>
+        <li><code>value</code> - The value to search for in the list.</li>
+        </ul>
+        <pre><code class="lang-maplescript">(m:contains [ :a :b :c ] :b)
+        =&gt; true
+        
+        (m:contains &#39;abc&#39; &#39;b&#39;)
+        =&gt; true
+        </code></pre>
         <h3 id="-m-copy-collection-"><code>(m:copy collection)</code></h3>
         <p>Generates a deep copy of a provided value (<code>collection</code>) as long as that value is an object or an array. If any other data type is provided, will return the provided value.</p>
         <ul>
@@ -640,6 +652,24 @@
         
         (m:signal :my-event &#39;foo&#39;)
         =&gt; logs &#39;foo&#39;
+        </code></pre>
+        <h3 id="-m-haskey-obj-key-"><code>(m:hasKey obj key)</code></h3>
+        <p>Determines whether an object (<code>obj</code>) owns a provided key.</p>
+        <ul>
+        <li><code>obj</code> - Any Object.</li>
+        <li><code>key</code> - Any String or Symbol.</li>
+        </ul>
+        <pre><code class="lang-maplescript">(make person {
+          :name &#39;John&#39;
+          :eyes &#39;hazel&#39;
+          :hair &#39;brown&#39;
+        })
+        
+        (m:hasKey person :name)
+        =&gt; true
+        
+        (m:hasKey person &#39;prototype&#39;)
+        =&gt; false
         </code></pre>
         <h3 id="-m-head-array-"><code>(m:head array)</code></h3>
         <p>Retrieves the first item in an array.</p>

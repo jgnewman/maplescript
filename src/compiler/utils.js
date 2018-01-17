@@ -26,15 +26,9 @@ function die(node, problem) {
  * @return {undefined}
  */
 function compile(node, fn) {
-  node.prototype.compile = function (noAdd) {
+  node.prototype.compile = function () {
     try {
-      const out = fn.bind(this)();
-      // By default, add our compiled node to the output
-      // unless noAdd is set to true. Then don't.
-      if (!noAdd) {
-        this.shared.output += out;
-      }
-      return out;
+      return fn.bind(this)();
     } catch (err) {
       console.log(`\nERROR compiling ${this.type} node between ${this.loc.start.line}:${this.loc.start.column} and ${this.loc.end.line}:${this.loc.end.column}.\n`);
       console.log(err.stack);
@@ -42,18 +36,6 @@ function compile(node, fn) {
     }
   };
 }
-
-/**
- * Removes NewLine nodes from a list of compilable nodes.
- *
- * @param  {Array} body  A list of compilable nodes.
- *
- * @return {Array}
- */
-function removeNewlines(body) {
-  return body.filter(item => item.type !== 'NewLine');
-}
-
 
 /**
  * Runs through a series of compilable nodes, compiles them all,
@@ -66,10 +48,9 @@ function removeNewlines(body) {
  */
 function compileBody(body, delim) {
   const end = delim || ';';
-  const cleanBody = removeNewlines(body);
   const bodyPieces = [];
-  cleanBody.forEach((item, index) => {
-    const prefix = (index === cleanBody.length - 1 && !delim) ? 'return ' : '' ;
+  body.forEach((item, index) => {
+    const prefix = (index === body.length - 1 && !delim) ? 'return ' : '' ;
     if (!item.compile) {
       throw new Error(`Item type ${item.type} has no compile method.`);
     }
@@ -78,18 +59,6 @@ function compileBody(body, delim) {
   return !bodyPieces.length ? '' : bodyPieces.join(`${end}\n`) + (delim === ';' ? ';' : '');
 }
 
-function ensurePolymorphicStructure(bodyItems) {
-  let bad = false;
-  bodyItems.some(item => {
-    const isList = item.type === 'List';
-    const isMorph = isList && item.items[0] && item.items[0].text === 'of';
-    if (!isList || !isMorph) {
-      bad = true;
-      return true;
-    }
-  });
-  return !bad;
-}
 
 // Official list of exposed system functions
 function getExposedFns() {
@@ -172,6 +141,5 @@ export {
   getExposedFns,
   getReservedWords,
   getSpecialForms,
-  getOperatorForms,
-  ensurePolymorphicStructure
+  getOperatorForms
 };

@@ -4,7 +4,7 @@ function compileAwait(items) {
   if (items.length > 1) {
     return die(this, 'Await can only take 1 argument.')
   }
-  return `await ${items[0].compile(true)}`
+  return `await ${items[0].compile()}`
 }
 
 export default compileAwait;

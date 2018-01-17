@@ -9,7 +9,7 @@ function compileOperator(op, items, prepend) {
 
   return "("
     + (prepend ? (prepend + ' ' + op + ' ') : '')
-    + items.map(item => item.compile(true)).join(' ' + op + ' ')
+    + items.map(item => item.compile()).join(' ' + op + ' ')
     + ")";
 }
 

@@ -23,7 +23,7 @@ function compileExport(items) {
   if (toExport.type === 'Arr') {
     return 'module.exports = {'
       + toExport.items.map(item => {
-          const ident = aritize(item.compile(true));
+          const ident = aritize(item.compile());
           return `[Symbol.for("${ident.clean}")]: ${ident.aritized}`;
         }).join(', ')
       + '}'
@@ -34,9 +34,9 @@ function compileExport(items) {
       + toExport.items.map((item, index) => {
           if (index % 2 === 0) { // key
             const symbol = item.type === 'Symbol';
-            return (symbol ? '[' : '"') + item.compile(true) + (symbol ? ']' : '"') + ':';
+            return (symbol ? '[' : '"') + item.compile() + (symbol ? ']' : '"') + ':';
           } else { // value
-            const ident = aritize(item.compile(true));
+            const ident = aritize(item.compile());
             return ident.aritized + (index === toExport.length - 1 ? '' : ',');
           }
         }).join(' ')
@@ -44,7 +44,7 @@ function compileExport(items) {
   }
 
   if (toExport.type === 'Identifier') {
-    const ident = aritize(toExport.compile(true));
+    const ident = aritize(toExport.compile());
     return `module.exports = {[Symbol.for("${ident.clean}")]: ${ident.aritized}}`;
   }
 

@@ -9,7 +9,7 @@ compile(nodes.ObjNode, function () {
     if (index % 2 === 0) { // key
       const isSymbol = item.type === 'Symbol';
       const isString = item.type === 'String';
-      const compiled = item.compile(true);
+      const compiled = item.compile();
 
       if (isSymbol) {
         return '[' + compiled + ']:';
@@ -20,7 +20,7 @@ compile(nodes.ObjNode, function () {
       }
 
     } else { // value
-      return item.compile(true) + (index === this.length - 1 ? '' : ',');
+      return item.compile() + (index === this.length - 1 ? '' : ',');
     }
 
   }).join(' ')} }`;

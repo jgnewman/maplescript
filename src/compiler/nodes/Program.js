@@ -10,8 +10,7 @@ compile(nodes.ProgramNode, function () {
   this.shared.output = '';
   newBody.forEach(node => {
     try {
-      node.compile();
-      this.shared.output += ';\n';
+      this.shared.output += (node.compile() + ';\n');
     } catch (err) {
       die(node, `Could not compile ${node.type ? node.type : 'node ' + JSON.stringify(node)}`);
     }

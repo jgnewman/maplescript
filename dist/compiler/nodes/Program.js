@@ -14,8 +14,7 @@ var _utils = require('../utils');
   this.shared.output = '';
   newBody.forEach(function (node) {
     try {
-      node.compile();
-      _this.shared.output += ';\n';
+      _this.shared.output += node.compile() + ';\n';
     } catch (err) {
       (0, _utils.die)(node, 'Could not compile ' + (node.type ? node.type : 'node ' + JSON.stringify(node)));
     }

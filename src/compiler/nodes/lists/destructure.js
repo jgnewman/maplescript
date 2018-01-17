@@ -5,7 +5,7 @@ function compileDestructure(items) {
     return die(this, 'Destructure statements must take 2 arguments.');
   }
 
-  const toDestructure = items[0].compile(true);
+  const toDestructure = items[0].compile();
   const spec = items[1];
 
   switch (spec.type) {
@@ -16,10 +16,10 @@ function compileDestructure(items) {
         if (key.type === 'Symbol') {
           const text = key.text.replace(/^\:/, '');
           if (/[^A-Za-z_\$]/.test(text)) die(this, `Can not implicitly translate key ${key.text} to a variable name as it contains characters not allowed in JavaScript variables.`);
-          return `const ${text} = ${toDestructure}[${key.compile(true)}]`;
+          return `const ${text} = ${toDestructure}[${key.compile()}]`;
 
         } else {
-          const compiledKey = key.compile(true);
+          const compiledKey = key.compile();
           if (key.type !== 'Identifier') die(this `Can only destructure symbols and variable identifiers.`);
           return `const ${compiledKey} = ${toDestructure}["${compiledKey}"]`;
         }
@@ -38,8 +38,8 @@ function compileDestructure(items) {
       });
 
       return pairs.map(pair => {
-        const key = pair[0].compile(true);
-        const val = pair[1].compile(true);
+        const key = pair[0].compile();
+        const val = pair[1].compile();
 
         return `const ${val} = ${toDestructure}[${pair[0].type === 'Identifier' ? '"' + key + '"' : key}]`;
       }).join(';\n');

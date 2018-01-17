@@ -56,16 +56,16 @@
 
 (make sidebar (m:dom '.sidebar'))
 
-(make (contains str text)
-  (do (make classes (str.split /\s+/g))
-      (>= (classes.indexOf text) 0)))
+(make (hasClass elem text)
+  (do (make classes (elem.className.split /\s+/g))
+      (m:contains classes text)))
 
 (make (addClass elem cls)
-  (if (not (contains elem.className cls))
+  (if (not (hasClass elem cls))
         (m:dangerouslyMutate 'className' `${elem.className} ${cls}` elem)))
 
 (make (removeClass elem cls)
-  (if (contains elem.className cls)
+  (if (hasClass elem cls)
         (do (make classes (elem.className.split /\s+/g))
             (classes.splice (classes.indexOf cls) 1)
             (m:dangerouslyMutate 'className' (classes.join ' ') elem))))

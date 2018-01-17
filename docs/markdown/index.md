@@ -191,11 +191,11 @@ foo.0
 -- foo[bar];
 ```
 
-If you need to reference `this`, you can still use the keyword `this`, or you can use `&`. For example, `&foo`, `&.foo`, and `@:foo`.
+If you need to reference `this`, you can still use the keyword `this`, or you can use `&`. For example, `&foo`, `&.foo`, and `&:foo`.
 
 Regarding `m:get`, `m` is a reference to the MapleScript core library (which is always available) and `get` retrieves values from objects and arrays.
 
-MapleScript also takes a tip from CoffeeScript and allows you to perform "unconfident retrievals". For example, the expression `foo?:bar?.baz` will only return the value for `baz` if all the values along the chain exist. So if `foo` doesn't exist or if `foo:bar` doesn't exist, it will return undefined rather than throwing an error.
+MapleScript also takes a tip from CoffeeScript and allows you to perform "conditional lookups". For example, the expression `foo?:bar?.baz` will only return the value for `baz` if all the values along the chain exist. So if `foo` doesn't exist or if `foo:bar` doesn't exist, it will return undefined rather than throwing an error.
 
 ### Operators
 
@@ -695,6 +695,21 @@ Binds a function to a context and returns the new function.
 -- logs 'foo'
 ```
 
+### `(m:contains list value)`
+
+Determines whether a string or array (`list`) contains a value.
+
+- `list` - Any String or Array.
+- `value` - The value to search for in the list.
+
+```maplescript
+(m:contains [ :a :b :c ] :b)
+=> true
+
+(m:contains 'abc' 'b')
+=> true
+```
+
 ### `(m:copy collection)`
 
 Generates a deep copy of a provided value (`collection`) as long as that value is an object or an array. If any other data type is provided, will return the provided value.
@@ -802,6 +817,27 @@ Registers a handler function (`fun`) for events broadcast on a global event chan
 
 (m:signal :my-event 'foo')
 => logs 'foo'
+```
+
+### `(m:hasKey obj key)`
+
+Determines whether an object (`obj`) owns a provided key.
+
+- `obj` - Any Object.
+- `key` - Any String or Symbol.
+
+```maplescript
+(make person {
+  :name 'John'
+  :eyes 'hazel'
+  :hair 'brown'
+})
+
+(m:hasKey person :name)
+=> true
+
+(m:hasKey person 'prototype')
+=> false
 ```
 
 ### `(m:head array)`

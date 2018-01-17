@@ -162,6 +162,10 @@ var MAPLE_ = {
     return fn.bind(ctx);
   },
 
+  [s_("contains")]: function (list, value) {
+    return list.indexOf(value) >= 0;
+  },
+
   [s_("copy")]: function (collection) {
     var type = MAPLE_[s_("typeof")](collection);
     if (type !== s_('object') && type !== s_('array')) {
@@ -226,6 +230,10 @@ var MAPLE_ = {
     const handlers = MAPLE_.channels_[channel] = MAPLE_.channels_[channel] || [];
     handlers.push(fun);
     return fun;
+  },
+
+  [s_("hasKey")]: function (obj, key) {
+    return MAPLE_[s_("contains")](MAPLE_[s_("keys")](obj), key);
   },
 
   [s_("head")]: function (list) {

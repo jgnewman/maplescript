@@ -165,6 +165,15 @@ describe('Library', () => {
       assert.equal(actualCtx, desiredCtx);
     });
 
+    it('contains', () => {
+      const str = 'foobarbaz';
+      const list = ['a', 'b', 'c'];
+      assert.equal(lib[s('contains')](str, 'obarb'), true, 'finds a match in a string');
+      assert.equal(lib[s('contains')](str, 'quux'), false, 'correctly discerns no match');
+      assert.equal(lib[s('contains')](list, 'b'), true, 'finds a match in an array');
+      assert.equal(lib[s('contains')](list, 'x'), false, 'correctly discerns no match');
+    });
+
     it('copy', () => {
       const toCopy = {
         foo: 'foo',
@@ -238,6 +247,14 @@ describe('Library', () => {
       lib[s("handle")](s('foo'), noop);
       assert.equal(lib.channels_[s('foo')][0], noop);
       assert.throws(function () { lib[s("handle")]('foo', noop) });
+    });
+
+    it('hasKey', () => {
+      const obj = {foo: 1, [Symbol.for('bar')]: 2};
+      assert.equal(lib[s('hasKey')](obj, 'foo'), true, 'finds a string key');
+      assert.equal(lib[s('hasKey')](obj, Symbol.for('bar')), true, 'finds a symbol key');
+      assert.equal(lib[s('hasKey')](obj, 'baz'), false, 'correctly discerns no match');
+      assert.equal(lib[s('hasKey')](obj, 'prototype'), false, 'ignores non-owned keys');
     });
 
     it('head', () => {

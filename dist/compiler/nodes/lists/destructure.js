@@ -18,7 +18,7 @@ function compileDestructure(items) {
     return (0, _utils.die)(this, 'Destructure statements must take 2 arguments.');
   }
 
-  var toDestructure = items[0].compile(true);
+  var toDestructure = items[0].compile();
   var spec = items[1];
 
   switch (spec.type) {
@@ -30,9 +30,9 @@ function compileDestructure(items) {
         if (key.type === 'Symbol') {
           var text = key.text.replace(/^\:/, '');
           if (/[^A-Za-z_\$]/.test(text)) (0, _utils.die)(_this, 'Can not implicitly translate key ' + key.text + ' to a variable name as it contains characters not allowed in JavaScript variables.');
-          return 'const ' + text + ' = ' + toDestructure + '[' + key.compile(true) + ']';
+          return 'const ' + text + ' = ' + toDestructure + '[' + key.compile() + ']';
         } else {
-          var compiledKey = key.compile(true);
+          var compiledKey = key.compile();
           if (key.type !== 'Identifier') (0, _utils.die)(_this(_templateObject));
           return 'const ' + compiledKey + ' = ' + toDestructure + '["' + compiledKey + '"]';
         }
@@ -51,8 +51,8 @@ function compileDestructure(items) {
       });
 
       return pairs.map(function (pair) {
-        var key = pair[0].compile(true);
-        var val = pair[1].compile(true);
+        var key = pair[0].compile();
+        var val = pair[1].compile();
 
         return 'const ' + val + ' = ' + toDestructure + '[' + (pair[0].type === 'Identifier' ? '"' + key + '"' : key) + ']';
       }).join(';\n');

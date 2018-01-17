@@ -10,7 +10,7 @@ import compileAssignment from './lists/assignment';
 import compileDestructure from './lists/destructure';
 
 function compileTail(arr) {
-  return arr.map(item => item.compile(true)).join(', ');
+  return arr.map(item => item.compile()).join(', ');
 }
 
 // #(+ 1 2)
@@ -49,14 +49,14 @@ function compileFnBody() {
   let asyncChannel;
 
   if (items.isAsync) {
-    asyncChannel = items.asyncChannel.compile(true);
+    asyncChannel = items.asyncChannel.compile();
   }
 
   return `
-    ${isAsync ? 'async ' : ''}function (${items.args.map(arg => arg.compile(true)).join(', ')}) {
+    ${isAsync ? 'async ' : ''}function (${items.args.map(arg => arg.compile()).join(', ')}) {
       ${isAsync ? 'try {': ''}
       ${items.actions.map((action, index) => {
-        return index === items.actions.length - 1 ? 'return ' + action.compile(true) + ';' : action.compile(true);
+        return index === items.actions.length - 1 ? 'return ' + action.compile() + ';' : action.compile();
       }).join(';\n')}
       ${isAsync ? '} catch (err_) { MAPLE_[Symbol.for("signal")](' + asyncChannel + ', err_); }': ''}
     }
@@ -100,7 +100,7 @@ compile(nodes.ListNode, function () {
     return compileOperator(head.text, tail);
   }
 
-  const compiledHead = head.compile(true);
+  const compiledHead = head.compile();
 
   // Translate things like (all 1 2 3) into (1 && 2 && 3)
   // Also things like (if a 1 2) into (function() { if (a) { return 1 } else { return 2 }})()

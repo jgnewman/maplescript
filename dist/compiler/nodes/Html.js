@@ -4,14 +4,14 @@ var _utils = require('../utils');
 
 function compileAttrs(attrs) {
   if (!attrs) return "null";
-  return attrs.compile(true);
+  return attrs.compile();
 }
 
 /*
  * Translate tuples 1-1.
  */
 (0, _utils.compile)(_utils.nodes.HtmlNode, function () {
-  var name = this.openTag.compile(true);
+  var name = this.openTag.compile();
   var body = this.body ? (0, _utils.compileBody)(this.body, ',') : '';
   var close = !this.selfClosing ? this.closeTag.replace(/^\<\/\s*|\s*\>$/g, '') : null;
   var attrs = compileAttrs(this.attrs);

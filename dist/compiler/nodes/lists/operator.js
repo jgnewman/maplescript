@@ -17,7 +17,7 @@ function compileOperator(op, items, prepend) {
   }
 
   return "(" + (prepend ? prepend + ' ' + op + ' ' : '') + items.map(function (item) {
-    return item.compile(true);
+    return item.compile();
   }).join(' ' + op + ' ') + ")";
 }
 

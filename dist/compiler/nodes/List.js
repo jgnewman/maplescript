@@ -42,7 +42,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function compileTail(arr) {
   return arr.map(function (item) {
-    return item.compile(true);
+    return item.compile();
   }).join(', ');
 }
 
@@ -81,13 +81,13 @@ function compileFnBody() {
   var asyncChannel = void 0;
 
   if (items.isAsync) {
-    asyncChannel = items.asyncChannel.compile(true);
+    asyncChannel = items.asyncChannel.compile();
   }
 
   return ('\n    ' + (isAsync ? 'async ' : '') + 'function (' + items.args.map(function (arg) {
-    return arg.compile(true);
+    return arg.compile();
   }).join(', ') + ') {\n      ' + (isAsync ? 'try {' : '') + '\n      ' + items.actions.map(function (action, index) {
-    return index === items.actions.length - 1 ? 'return ' + action.compile(true) + ';' : action.compile(true);
+    return index === items.actions.length - 1 ? 'return ' + action.compile() + ';' : action.compile();
   }).join(';\n') + '\n      ' + (isAsync ? '} catch (err_) { MAPLE_[Symbol.for("signal")](' + asyncChannel + ', err_); }' : '') + '\n    }\n  ').trim();
 }
 
@@ -140,7 +140,7 @@ function compileSpecial(form, items) {
     return (0, _operator2.default)(head.text, tail);
   }
 
-  var compiledHead = head.compile(true);
+  var compiledHead = head.compile();
 
   // Translate things like (all 1 2 3) into (1 && 2 && 3)
   // Also things like (if a 1 2) into (function() { if (a) { return 1 } else { return 2 }})()

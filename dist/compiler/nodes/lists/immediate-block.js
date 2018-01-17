@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 function compileDoBlock(items) {
   var body = items.map(function (action, index) {
-    return (index === items.length - 1 ? "return " : "") + action.compile(true);
+    return (index === items.length - 1 ? "return " : "") + action.compile();
   }).join(';\n') + ';';
   return "(function(){\n" + body + "\n}).call(this)";
 }

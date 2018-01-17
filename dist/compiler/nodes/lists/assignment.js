@@ -38,7 +38,7 @@ function getVars(patterns) {
   var args = [];
   patterns.forEach(function (pattern, index) {
     if (pattern.type === 'Identifier' && pattern.text !== '_') {
-      args.push({ name: pattern.compile(true), index: "[" + index + "]" });
+      args.push({ name: pattern.compile(), index: "[" + index + "]" });
     }
     if (pattern.type === 'Arr' && pattern.items.length === 1 && pattern.items[0].text.indexOf('|') >= 0) {
       var pieces = pattern.items[0].text.split('|');
@@ -59,7 +59,7 @@ function compilePolymorph(bodies) {
         qualifier = param.items[1];
         return '';
       }
-      return '{type:"' + param.type + '", value: "' + param.compile(true).replace(/(\'|\"|\`)/g, "\\$1") + '" }';
+      return '{type:"' + param.type + '", value: "' + param.compile().replace(/(\'|\"|\`)/g, "\\$1") + '" }';
     }).join(', ').replace(/, $/, '') + "]";
 
     var vars = getVars(body.pattern);
@@ -72,8 +72,8 @@ function compilePolymorph(bodies) {
       actions = body.action.items.slice(1);
     }
 
-    return 'if (MAPLE_.match_(args_, ' + params + ')) {\n' + (vars.length ? compiledVars : '') + (!qualifier ? '' : 'if (' + qualifier.compile(true) + ') {\n') + actions.map(function (action, index) {
-      return (index === actions.length - 1 ? 'return ' : '') + action.compile(true);
+    return 'if (MAPLE_.match_(args_, ' + params + ')) {\n' + (vars.length ? compiledVars : '') + (!qualifier ? '' : 'if (' + qualifier.compile() + ') {\n') + actions.map(function (action, index) {
+      return (index === actions.length - 1 ? 'return ' : '') + action.compile();
     }).join(';\n') + ';\n' + (!qualifier ? '' : '}\n') + '}';
   }).join('\n') + " throw new Error('Could not find an argument match.');\n" + '}';
 }
@@ -98,20 +98,20 @@ function compileAssignment(items) {
         actions = [body.action];
       }
 
-      return ('\n        const ' + items[0].items[0].compile(true) + ' = function (' + body.pattern.map(function (arg) {
-        return arg.compile(true);
+      return ('\n        const ' + items[0].items[0].compile() + ' = function (' + body.pattern.map(function (arg) {
+        return arg.compile();
       }).join(', ') + ') {\n          ' + actions.map(function (action, index) {
-        return (index === actions.length - 1 ? 'return ' : '') + action.compile(true);
+        return (index === actions.length - 1 ? 'return ' : '') + action.compile();
       }).join(';\n') + ';\n        }\n      ').trim();
 
       // polymorph!
     } else {
-      return "const " + items[0].items[0].compile(true) + " = " + compilePolymorph(bodies);
+      return "const " + items[0].items[0].compile() + " = " + compilePolymorph(bodies);
     }
 
     // Not a named function
   } else {
-    return "const " + items[0].compile(true) + " = " + items[1].compile(true);
+    return "const " + items[0].compile() + " = " + items[1].compile();
   }
 }
 

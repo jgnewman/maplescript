@@ -15,17 +15,17 @@ function compileImport(items) {
 
   if (items.length === 1) {
     // just location
-    return 'require(' + items[0].compile(true) + ')';
+    return 'require(' + items[0].compile() + ')';
   }
 
   if (items.length === 2) {
     // location and name(s)
-    var modLocation = items[0].compile(true);
+    var modLocation = items[0].compile();
 
     switch (items[1].type) {
 
       case 'Identifier':
-        return 'const ' + items[1].compile(true) + ' = require(' + modLocation + ')';
+        return 'const ' + items[1].compile() + ' = require(' + modLocation + ')';
 
       case 'Arr':
         return items[1].items.map(function (key) {
@@ -33,9 +33,9 @@ function compileImport(items) {
           if (key.type === 'Symbol') {
             var text = key.text.replace(/^\:/, '');
             if (/[^A-Za-z_\$]/.test(text)) (0, _utils.die)(_this, 'Can not implicitly translate key ' + key.text + ' to a variable name as it contains characters not allowed in JavaScript variables.');
-            return 'const ' + text + ' = require(' + modLocation + ')[' + key.compile(true) + ']';
+            return 'const ' + text + ' = require(' + modLocation + ')[' + key.compile() + ']';
           } else {
-            var compiledKey = key.compile(true);
+            var compiledKey = key.compile();
             if (key.type !== 'Identifier') (0, _utils.die)(_this(_templateObject));
             return 'const ' + compiledKey + ' = require(' + modLocation + ')["' + compiledKey + '"]';
           }
@@ -53,8 +53,8 @@ function compileImport(items) {
         });
 
         return pairs.map(function (pair) {
-          var key = pair[0].compile(true);
-          var val = pair[1].compile(true);
+          var key = pair[0].compile();
+          var val = pair[1].compile();
 
           return 'const ' + val + ' = require(' + modLocation + ')[' + (pair[0].type === 'Identifier' ? '"' + key + '"' : key) + ']';
         }).join(';\n');

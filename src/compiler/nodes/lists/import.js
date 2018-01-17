@@ -2,16 +2,16 @@ import { die } from '../../utils';
 
 function compileImport(items) {
   if (items.length === 1) { // just location
-    return `require(${items[0].compile(true)})`;
+    return `require(${items[0].compile()})`;
   }
 
   if (items.length === 2) { // location and name(s)
-    const modLocation = items[0].compile(true);
+    const modLocation = items[0].compile();
 
     switch (items[1].type) {
 
       case 'Identifier':
-        return `const ${items[1].compile(true)} = require(${modLocation})`;
+        return `const ${items[1].compile()} = require(${modLocation})`;
 
       case 'Arr':
         return items[1].items.map(key => {
@@ -19,10 +19,10 @@ function compileImport(items) {
           if (key.type === 'Symbol') {
             const text = key.text.replace(/^\:/, '');
             if (/[^A-Za-z_\$]/.test(text)) die(this, `Can not implicitly translate key ${key.text} to a variable name as it contains characters not allowed in JavaScript variables.`);
-            return `const ${text} = require(${modLocation})[${key.compile(true)}]`
+            return `const ${text} = require(${modLocation})[${key.compile()}]`
 
           } else {
-            const compiledKey = key.compile(true);
+            const compiledKey = key.compile();
             if (key.type !== 'Identifier') die(this `Can only import symbols and variable identifiers.`);
             return `const ${compiledKey} = require(${modLocation})["${compiledKey}"]`;
           }
@@ -41,8 +41,8 @@ function compileImport(items) {
         });
 
         return pairs.map(pair => {
-          const key = pair[0].compile(true);
-          const val = pair[1].compile(true);
+          const key = pair[0].compile();
+          const val = pair[1].compile();
 
           return `const ${val} = require(${modLocation})[${pair[0].type === 'Identifier' ? '"' + key + '"' : key}]`;
         }).join(';\n');

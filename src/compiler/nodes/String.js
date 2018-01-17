@@ -96,7 +96,7 @@ function compileInterpBlocks(blocks, origNode) {
       const value = parser.parse(block.val).body[0];
       value.loc = origNode.loc;
       value.shared = origNode.shared;
-      out.push('(' + value.compile(true) + ')');
+      out.push('(' + value.compile() + ')');
     }
   });
   return out.join(' + ');

@@ -14,7 +14,7 @@ var _utils = require('../utils');
       // key
       var isSymbol = item.type === 'Symbol';
       var isString = item.type === 'String';
-      var compiled = item.compile(true);
+      var compiled = item.compile();
 
       if (isSymbol) {
         return '[' + compiled + ']:';
@@ -25,7 +25,7 @@ var _utils = require('../utils');
       }
     } else {
       // value
-      return item.compile(true) + (index === _this.length - 1 ? '' : ',');
+      return item.compile() + (index === _this.length - 1 ? '' : ',');
     }
   }).join(' ') + ' }';
 });

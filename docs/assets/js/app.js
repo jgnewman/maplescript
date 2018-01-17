@@ -70,13 +70,13 @@ return buildNav(rest, nav);
 };
 buildNav();
 const sidebar = m[Symbol.for("dom")]('.sidebar');
-const contains = function (str, text) {
-          const classes = str["split"](/\s+/g);
-return (classes["indexOf"](text) >= 0);
+const hasClass = function (elem, text) {
+          const classes = elem["className"]["split"](/\s+/g);
+return m[Symbol.for("contains")](classes, text);
         };
 const addClass = function (elem, cls) {
           return (function(){
-if ((true && ! contains(elem["className"], cls))) {
+if ((true && ! hasClass(elem, cls))) {
 return m[Symbol.for("dangerouslyMutate")]('className', ((elem["className"]) + " " + (cls)), elem)
 } else {
 return
@@ -85,7 +85,7 @@ return
         };
 const removeClass = function (elem, cls) {
           return (function(){
-if (contains(elem["className"], cls)) {
+if (hasClass(elem, cls)) {
 return (function(){
 const classes = elem["className"]["split"](/\s+/g);
 classes["splice"](classes["indexOf"](cls), 1);

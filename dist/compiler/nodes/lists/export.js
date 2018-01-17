@@ -28,7 +28,7 @@ function compileExport(items) {
 
   if (toExport.type === 'Arr') {
     return 'module.exports = {' + toExport.items.map(function (item) {
-      var ident = aritize(item.compile(true));
+      var ident = aritize(item.compile());
       return '[Symbol.for("' + ident.clean + '")]: ' + ident.aritized;
     }).join(', ') + '}';
   }
@@ -38,17 +38,17 @@ function compileExport(items) {
       if (index % 2 === 0) {
         // key
         var symbol = item.type === 'Symbol';
-        return (symbol ? '[' : '"') + item.compile(true) + (symbol ? ']' : '"') + ':';
+        return (symbol ? '[' : '"') + item.compile() + (symbol ? ']' : '"') + ':';
       } else {
         // value
-        var ident = aritize(item.compile(true));
+        var ident = aritize(item.compile());
         return ident.aritized + (index === toExport.length - 1 ? '' : ',');
       }
     }).join(' ') + '}';
   }
 
   if (toExport.type === 'Identifier') {
-    var ident = aritize(toExport.compile(true));
+    var ident = aritize(toExport.compile());
     return 'module.exports = {[Symbol.for("' + ident.clean + '")]: ' + ident.aritized + '}';
   }
 

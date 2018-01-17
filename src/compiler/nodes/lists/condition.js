@@ -15,9 +15,9 @@ function compileCondition(items) {
 
   return ""
     + "(function(){\n"
-    +   "if (" + ifcase[0].compile(true) + ") {\nreturn " + ifcase[1].compile(true) + "\n}"
-    +   sets.map(pair => " else if (" + pair[0].compile(true) + ") {\nreturn " + pair[1].compile(true) + "\n}").join('')
-    +   (!elsecase ? " else {\nreturn\n}" : " else {\nreturn " + elsecase.compile(true) + "\n}")
+    +   "if (" + ifcase[0].compile() + ") {\nreturn " + ifcase[1].compile() + "\n}"
+    +   sets.map(pair => " else if (" + pair[0].compile() + ") {\nreturn " + pair[1].compile() + "\n}").join('')
+    +   (!elsecase ? " else {\nreturn\n}" : " else {\nreturn " + elsecase.compile() + "\n}")
     + "\n}).call(this)";
 }
 

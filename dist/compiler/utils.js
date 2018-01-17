@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.ensurePolymorphicStructure = exports.getOperatorForms = exports.getSpecialForms = exports.getReservedWords = exports.getExposedFns = exports.compileBody = exports.compile = exports.die = exports.nodes = exports.parser = undefined;
+exports.getOperatorForms = exports.getSpecialForms = exports.getReservedWords = exports.getExposedFns = exports.compileBody = exports.compile = exports.die = exports.nodes = exports.parser = undefined;
 
 var _parser = require('../parser/parser');
 
@@ -37,34 +37,15 @@ function die(node, problem) {
  * @return {undefined}
  */
 function compile(node, fn) {
-  node.prototype.compile = function (noAdd) {
+  node.prototype.compile = function () {
     try {
-      var out = fn.bind(this)();
-      // By default, add our compiled node to the output
-      // unless noAdd is set to true. Then don't.
-      if (!noAdd) {
-        this.shared.output += out;
-      }
-      return out;
+      return fn.bind(this)();
     } catch (err) {
       console.log('\nERROR compiling ' + this.type + ' node between ' + this.loc.start.line + ':' + this.loc.start.column + ' and ' + this.loc.end.line + ':' + this.loc.end.column + '.\n');
       console.log(err.stack);
       process.exit(1);
     }
   };
-}
-
-/**
- * Removes NewLine nodes from a list of compilable nodes.
- *
- * @param  {Array} body  A list of compilable nodes.
- *
- * @return {Array}
- */
-function removeNewlines(body) {
-  return body.filter(function (item) {
-    return item.type !== 'NewLine';
-  });
 }
 
 /**
@@ -78,29 +59,15 @@ function removeNewlines(body) {
  */
 function compileBody(body, delim) {
   var end = delim || ';';
-  var cleanBody = removeNewlines(body);
   var bodyPieces = [];
-  cleanBody.forEach(function (item, index) {
-    var prefix = index === cleanBody.length - 1 && !delim ? 'return ' : '';
+  body.forEach(function (item, index) {
+    var prefix = index === body.length - 1 && !delim ? 'return ' : '';
     if (!item.compile) {
       throw new Error('Item type ' + item.type + ' has no compile method.');
     }
     bodyPieces.push(prefix + item.compile(true));
   });
   return !bodyPieces.length ? '' : bodyPieces.join(end + '\n') + (delim === ';' ? ';' : '');
-}
-
-function ensurePolymorphicStructure(bodyItems) {
-  var bad = false;
-  bodyItems.some(function (item) {
-    var isList = item.type === 'List';
-    var isMorph = isList && item.items[0] && item.items[0].text === 'of';
-    if (!isList || !isMorph) {
-      bad = true;
-      return true;
-    }
-  });
-  return !bad;
 }
 
 // Official list of exposed system functions
@@ -130,4 +97,3 @@ exports.getExposedFns = getExposedFns;
 exports.getReservedWords = getReservedWords;
 exports.getSpecialForms = getSpecialForms;
 exports.getOperatorForms = getOperatorForms;
-exports.ensurePolymorphicStructure = ensurePolymorphicStructure;

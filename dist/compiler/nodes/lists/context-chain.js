@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 function compileContextChain(items) {
   return "(function(){\n    var ref_ = this;\n    " + items.map(function (item) {
-    return "(function(){ ref_ = " + item.compile(true) + " }).call(ref_);";
+    return "(function(){ ref_ = " + item.compile() + " }).call(ref_);";
   }).join('\n') + "\n    return ref_;\n  }).call(this)";
 }
 
