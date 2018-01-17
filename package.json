@@ -1,6 +1,6 @@
 {
   "name": "maplescript",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A friendlier Lisp over JavaScript",
   "author": "John Newman",
   "license": "MIT",
