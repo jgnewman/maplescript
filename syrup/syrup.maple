@@ -78,13 +78,37 @@ function that executes the hook after being mounted into the actual dom.
 @public beforeUnmount
 
 Takes a component function and a hook function; returns a new component
-function that executes the hook beforeremoved from the actual dom.
+function that executes the hook before being removed from the actual dom.
 
 @param {Function} comp  A function that produces a vnode tree.
 @param {Function} fun   A hook to run before ummount. Called with attributes.
 ---
 (make (beforeUnmount comp fun)
   (metaComponent :before-unmount comp fun))
+
+---
+@public beforeUpdate
+
+Takes a component function and a hook function; returns a new component
+function that executes the hook before the node is updated.
+
+@param {Function} comp  A function that produces a vnode tree.
+@param {Function} fun   A hook to run before update. Called with attributes.
+---
+(make (beforeUpdate comp fun)
+  (metaComponent :before-update comp fun))
+
+---
+@public beforeUpdate
+
+Takes a component function and a hook function; returns a new component
+function that executes the hook after the node is updated.
+
+@param {Function} comp  A function that produces a vnode tree.
+@param {Function} fun   A hook to run after update. Called with attributes.
+---
+(make (afterUpdate comp fun)
+  (metaComponent :after-update comp fun))
 
 ---
 Export all of our public functions.
@@ -95,4 +119,6 @@ Export all of our public functions.
   render
   afterMount
   beforeUnmount
+  afterUpdate
+  beforeUpdate
 ])

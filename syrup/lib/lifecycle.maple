@@ -1,3 +1,8 @@
+
+-- Create a copy-able base we can use so we don't have to redefine this
+-- object all over the place.
+(make PATCH_RECORD { :additions [] :removals [] :updates [] })
+
 ---
 @private isRemoval
 
@@ -22,6 +27,15 @@ a node will be added to the dom
     (= patch.vNode null)))
 
 ---
+@private isUpdate
+
+Determines whether a patch object created by virtual-dom is
+being updated in any way.
+---
+(make (isUpdate patch)
+  (= :number (m:typeof patch.type)))
+
+---
 @private collectChildHooks
 
 Loops over an array of objects where each contains :removals and :additions.
@@ -30,14 +44,15 @@ Flattens this array into a single object with the same properties.
 (make
 
   (collectChildHooks childPatches)
-    (collectChildHooks childPatches { :removals [] :additions [] })
+    (collectChildHooks childPatches (m:copy PATCH_RECORD))
 
   (collectChildHooks [] accum)
     accum
 
   (collectChildHooks [first|rest] accum)
-    (collectChildHooks rest { :removals (accum:removals.concat first:removals)
-                              :additions (accum:additions.concat first:additions) }))
+    (collectChildHooks rest { :removals  (accum:removals.concat first:removals)
+                              :additions (accum:additions.concat first:additions)
+                              :updates   (accum:updates.concat first:updates) }))
 
 ---
 @private getChildHooks
@@ -55,7 +70,7 @@ A function for looping over child nodes and returning their hook-ready nodes.
 
     -- When there are no child patches, return empty lists
     :else
-      { :removals [] :additions [] }))
+      (m:copy PATCH_RECORD)))
 
 ---
 @private flattenHooks
@@ -70,41 +85,46 @@ the patches with hooks for aftermount hooks and beforeunmount hooks.
 
   -- Called with just the patches, recurse with object keys and accumulators
   (flattenHooks patches)
-    (flattenHooks patches (m:keys patches) [] [])
+    (flattenHooks patches (m:keys patches) [] [] [])
 
   -- Called with an empty list of object keys, return the accumulators
-  (flattenHooks patches [] removals additions)
-    { :removals removals :additions additions }
+  (flattenHooks patches [] removals additions updates)
+    { :removals removals :additions additions :updates updates }
 
   -- Called with everything, recurse and accumulate
-  (flattenHooks patches [first|rest] removals additions)
+  (flattenHooks patches [first|rest] removals additions updates)
     (do
 
-      -- Reference the patch in question and handle its children if they exist
+      -- Reference the patch in question and recursively handle its children
       (make patch (m:get patches first))
       (make childHooks (getChildHooks patch))
+      (make patchArray (if (= :array (m:typeof patch)) patch :else [patch]))
 
-      (if
+      (make accumRecord { :removals (removals.concat childHooks:removals)
+                          :additions (additions.concat childHooks:additions)
+                          :updates (updates.concat childHooks:updates) })
 
-        -- For removals, all children are being removed as well so we
-        -- can concat child patches into the removals list
-        (isRemoval patch)
-          (flattenHooks patches
-                        rest
-                        (removals.concat childHooks:removals patch)
-                        (additions.concat childHooks:additions))
+      (patchArray.forEach
+        (@ [p]
+          (if
 
-        -- For additions, all children are being added as well so we
-        -- can concat child patches into the additions list
-        (isAddition patch)
-          (flattenHooks patches
-                        rest
-                        (removals.concat childHooks:removals)
-                        (additions.concat childHooks:additions patch))
+            -- For removals, concat this patch with the list of child removals
+            (isRemoval p)
+              (m:dangerouslyMutate :removals (accumRecord:removals.concat p) accumRecord)
 
-        -- Otherwise, we're just recursing and not doing anything
-        :else
-          (flattenHooks patches rest removals additions))))
+            -- For additions, concat this patch with the list of child additions
+            (isAddition p)
+              (m:dangerouslyMutate :additions (accumRecord:additions.concat p) accumRecord)
+
+            -- For other updates, concat this patch with the list of child updates
+            (isUpdate p)
+              (m:dangerouslyMutate :updates (accumRecord:updates.concat p) accumRecord))))
+
+      (flattenHooks patches
+                    rest
+                    accumRecord:removals
+                    accumRecord:additions
+                    accumRecord:updates)))
 
 ---
 @public applyPatches
@@ -130,6 +150,12 @@ aftermount hooks.
           (if patch.vNode?:lifecycle?:before-unmount
             (patch.vNode:lifecycle:before-unmount))))
 
+      -- For everything that looks like an update, call before-update
+      (hooks:updates.forEach
+        (@ [patch]
+          (if patch.vNode?:lifecycle?:before-update
+            (patch.vNode:lifecycle:before-update))))
+
       -- Apply the changes
       (m:vdom:patchNodes nodes changes)
 
@@ -138,6 +164,12 @@ aftermount hooks.
         (@ [patch]
           (if patch.patch?:lifecycle?:after-mount
             (patch.patch:lifecycle:after-mount))))
+
+      -- For everything that looks like an update, call after-update
+      (hooks:updates.forEach
+        (@ [patch]
+          (if patch.vNode?:lifecycle?:after-update
+            (patch.vNode:lifecycle:after-update))))
 
       -- Return the new vdom and real nodes
       { :newdom nextTree :nodes nodes }))

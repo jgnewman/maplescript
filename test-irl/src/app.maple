@@ -1,21 +1,40 @@
 (import '../../syrup/syrup' syrup)
 
--- Create a standard maplescript custom element
-(make (TitleBase attrs children) (do
+---
+STEP 1: Create a component
+
+We begin with a base render function that generates vdom nodes and is called
+with the component's attributes and child nodes.
+
+Subsequently, we'll augment this function with lifecycle functions. Each of
+these wraps our base in a meta component that attaches a listener for its
+respective lifecycle event.
+---
+
+(make (titleBase attrs children) (do
   <h1>attrs:title-text</h1>
 ))
 
--- Convert our element into a component and add
--- lifecycle hooks
 (make Title
-  (-> TitleBase
-      (syrup:afterMount & (@ [attrs] (m:log 'aftermount running with' attrs)))
+  (-> (syrup:afterMount titleBase (@ [attrs] (m:log 'aftermount running with' attrs)))
       (syrup:beforeUnmount & (@ [attrs] (m:log 'beforeunmount running with' attrs)))))
 
-(make (App attrs children)
+---
+STEP 2: Create a top-level application component
+
+This next component's top-level div will have its class attribute bound to a
+a state value and will only render its nested element if it has a truthy
+value for the title-text string, which then gets passed in as an attribute
+to the Title component.
+
+After defining the base render function for the component, we'll augment
+it with an afterUpdate lifecycle function.
+---
+
+(make (appBase attrs children)
   (do
     (make titleText attrs:state:subspace:title-text)
-    <div { :class 'app' }>
+    <div { :class attrs:state:subspace:state-class }>
       (if
         (= :string (m:typeof titleText))
           <Title { :title-text titleText } />
@@ -23,39 +42,70 @@
     </div>
   ))
 
--- Create initial state values
+(make App
+  (syrup:afterUpdate appBase (@ [attrs] (m:log 'afterupdate running with' attrs))))
+
+---
+STEP 3: Create a state to bind to our application
+
+In this step we create an object we can use to populate our initial state with
+values. We then create a reducer function that transforms the state as a
+redux reducer would. Lastly we generate the actual state object and attach the
+reducer to it. We can attach as many reducers as we would like in this manner.
+---
+
 (make initialStateVals {
   :subspace {
     :title-text 'App is alive!'
+    :state-class 'xx'
   }
 })
 
--- Create a reducer
 (make (reducer state action)
       (m:merge state {
         :title-text action:title-text
+        :state-class action:state-class
       }))
 
--- Set up the state we'll use for this app
 (make initialState
   (-> (syrup:state :test-app initialStateVals)
       (syrup:reduce & :subspace reducer)))
 
--- Render our app (with state!) into the DOM
+---
+STEP 4: Render the application.
+
+The state object is bound to the application upon calling the `render` function.
+---
+
 (syrup:render App initialState '#app')
 
--- Make sure our app works with changes over time by
--- causing changes on a recurring interval. Correct behavior
--- looks like text appearing and disappearing every 2 seconds.
+---
+STEP 5: Start updating things!
+
+Here we're just defining and calling a function that runs
+every 2 seconds and triggers state changes by sending a signal
+along the event channel associated with the state.
+
+The signal is picked up by the state and the reducer runs, thus causing
+vdom diffing and ultimate dom patching.
+
+In the console, we should see a beforeUnmount and an afterUpdate message
+followed by an afterMount and an afterUpdate message every other time this
+function recurses.
+---
+
 (make (repeater index)
   (do
     (make realIndex (any index 0))
-    (make (timeout text)
-          (setTimeout (@ (m:signal :test-app { :title-text text })
-                         (repeater (+ realIndex 1)))
-                      2000))
+
+    (make (timeout text nextclass)
+      (setTimeout
+        (@ (m:signal :test-app { :title-text text :state-class nextclass })
+           (repeater (+ realIndex 1)))
+        2000))
+
     (if (= 0 (% realIndex 2))
-          (timeout null)
-        (timeout `App is reactive! ${realIndex}`))))
+          (timeout null 'yy')
+        (timeout `App is reactive! ${realIndex}` 'xx'))))
 
 (repeater)
