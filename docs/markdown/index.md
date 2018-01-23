@@ -22,7 +22,7 @@ _**Be warned:** MapleScript is **not** compatible with Internet Explorer. It req
 
 ## Why did you make it?
 
-The purpose behind MapleScript is to allow you to trade out 100kb+ libraries for a much smaller language that gives you the same core power natively. To illustrate, the MapleScript repository includes an ~8kb framework called Syrup that leverages this power to help you build reactive, component-based applications with a redux-like state and lifecycle events.
+The purpose behind MapleScript is to allow you to trade out 100kb+ libraries for a much smaller language that gives you the same core power natively. To illustrate, the MapleScript repository includes an ~8.5kb framework called Syrup that leverages this power to help you build reactive, component-based applications with a redux-like state and lifecycle events.
 
 ## Installing
 

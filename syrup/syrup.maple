@@ -1,5 +1,5 @@
 ---
-Syrup.maple: ~8kb min
+Syrup.maple: ~8.7kb minified & browserified
 
 A framework utilizing MapleScript and its virtual-dom capabilities to
 provide a somewhat React.js-like experience.

@@ -1,3 +1,8 @@
+### v.0.0.7-a (coming soon)
+
+- Fixes some bugs in the Syrup library
+- Small readme updates
+
 ### v.0.0.6-a
 
 - Adds 2 new library functions:

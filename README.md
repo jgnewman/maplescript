@@ -18,7 +18,7 @@ MapleScript is an intuitive, application-focused Lisp dialect that compiles to J
 
 MapleScript is different from ClojureScript (another Lisp over JavaScript) in that it has a much simpler syntax, sticks to JavaScript's native data types, and implements functionalism less rigidly.
 
-The purpose behind MapleScript is to allow you to trade out 100kb+ libraries for a much smaller language that gives you the same core power natively. To illustrate, the MapleScript repository includes an ~8k framework called Syrup that leverages this power to help you build reactive, component-based applications with a redux-like state and lifecycle events.
+The purpose behind MapleScript is to allow you to trade out 100kb+ libraries for a much smaller language that gives you the same core power natively. To illustrate, the MapleScript repository includes an ~8.5k framework called Syrup that leverages this power to help you build reactive, component-based applications with a redux-like state and lifecycle events.
 
 Here are a few examples of things you can do in MapleScript:
 
