@@ -46,14 +46,30 @@ runs the reducer function and sets the new state to its result.
 To subsequently trigger the reducer, we can just sent a maple event
 on the state's event channel.
 
-@param {Object}   state    A state object.
-@param {Function} reducer  Produces a new state object.
+@param {Object}        state      A state object.
+@param {String|Symbol} namespace  Optional. If provided, we'll only reduce this namespace.
+@param {Function}      reducer    Produces a new state object.
 ---
-(make (reduce state reducer)
-  (do (m:handle (state:channel) (@ [action]
-        (make nextProps (reducer (state:get) action))
-        (state:set nextProps)))
-      state))
+(make
+
+  (reduce state reducer)
+    (do (m:handle
+          (state:channel)
+          (@ [action]
+            (make nextProps (reducer (state:get) action))
+            (state:set nextProps)))
+        state)
+
+  (reduce state namespace reducer)
+    (do (m:handle
+          (state:channel)
+          (@ [action]
+            (make stateVals (state:get))
+            (make nextNamespace (reducer (m:get stateVals namespace) action))
+            (make nextVals {})
+            (m:dangerouslyMutate namespace nextNamespace nextVals)
+            (state:set (m:merge stateVals nextVals))))
+        state))
 
 ---
 Export the state creator and the reducer creator.

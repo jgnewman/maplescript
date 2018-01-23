@@ -42,6 +42,27 @@ re-rendered, diffed, and patched.
       (runInitialHooks dom:current-tree initialState)))
 
 ---
+@private metaComponent
+
+Wraps a component in a meta component that attaches a lifecycle listener
+
+@param {event}    Symbol  The lifecycle event to watch
+@param {Function} comp    A function that produces a vnode tree.
+@param {Function} fun     A hook to run after mount. Called with attributes.
+---
+(make (metaComponent event comp fun)
+  (@ [attrs children]
+    (make inst (comp attrs children))
+    (make hook (@ (fun attrs)))
+    (if
+      inst
+        (do (m:dangerouslyMutate :lifecycle (any inst:lifecycle {}) inst)
+            (m:dangerouslyMutate event hook inst:lifecycle)
+            inst)
+      :else
+        inst)))
+
+---
 @public afterMount
 
 Takes a component function and a hook function; returns a new component
@@ -51,15 +72,7 @@ function that executes the hook after being mounted into the actual dom.
 @param {Function} fun   A hook to run after mount. Called with attributes.
 ---
 (make (afterMount comp fun)
-  (@ [attrs children]
-    (make inst (comp attrs children))
-    (make hook (@ (fun attrs)))
-    (if
-      inst
-        (do (m:dangerouslyMutate :lifecycle (any inst:lifecycle {}) inst)
-            (m:dangerouslyMutate :after-mount hook inst:lifecycle)))
-      :else
-        inst))
+  (metaComponent :after-mount comp fun))
 
 ---
 @public beforeUnmount
@@ -71,15 +84,7 @@ function that executes the hook beforeremoved from the actual dom.
 @param {Function} fun   A hook to run before ummount. Called with attributes.
 ---
 (make (beforeUnmount comp fun)
-  (@ [attrs children]
-    (make inst (comp attrs children))
-    (make hook (@ (fun attrs)))
-    (if
-      inst
-        (do (m:dangerouslyMutate :lifecycle (any inst:lifecycle {}) inst)
-            (m:dangerouslyMutate :before-unmount hook inst:lifecycle)))
-      :else
-        inst))
+  (metaComponent :before-unmount comp fun))
 
 ---
 Export all of our public functions.

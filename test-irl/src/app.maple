@@ -13,22 +13,33 @@
       (syrup:beforeUnmount & (@ [attrs] (m:log 'beforeunmount running with' attrs)))))
 
 (make (App attrs children)
-  <div { :class 'app' }>
-    (if
-      (= :string (m:typeof attrs:state:title-text))
-        <Title { :title-text attrs:state:title-text } />
-      null)
-  </div>
-)
+  (do
+    (make titleText attrs:state:subspace:title-text)
+    <div { :class 'app' }>
+      (if
+        (= :string (m:typeof titleText))
+          <Title { :title-text titleText } />
+        null)
+    </div>
+  ))
+
+-- Create initial state values
+(make initialStateVals {
+  :subspace {
+    :title-text 'App is alive!'
+  }
+})
 
 -- Create a reducer
 (make (reducer state action)
-      (m:merge state { :title-text action:title-text }))
+      (m:merge state {
+        :title-text action:title-text
+      }))
 
 -- Set up the state we'll use for this app
 (make initialState
-  (-> (syrup:state :test-app { :title-text 'App is alive!' })
-      (syrup:reduce & reducer)))
+  (-> (syrup:state :test-app initialStateVals)
+      (syrup:reduce & :subspace reducer)))
 
 -- Render our app (with state!) into the DOM
 (syrup:render App initialState '#app')

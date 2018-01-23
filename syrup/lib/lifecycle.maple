@@ -10,7 +10,7 @@ a node will be removed from the dom.
     (= patch.type 7)))
 
 ---
-@privare isAddition
+@private isAddition
 
 Determines whether a patch object created by virtual-dom indicates
 a node will be added to the dom
