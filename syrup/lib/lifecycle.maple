@@ -46,10 +46,14 @@ A function for looping over child nodes and returning their hook-ready nodes.
 ---
 (make (getChildHooks patch)
   (if
+
+    -- When there are child patches, flatten their hooks and return them
     patch.patch?.children
       (do (make children (Array.prototype.slice.call patch.patch.children))
           (make childPatches (children.map (@ [child] (flattenHooks child))))
           (collectChildHooks childPatches))
+
+    -- When there are no child patches, return empty lists
     :else
       { :removals [] :additions [] }))
 
@@ -64,27 +68,41 @@ the patches with hooks for aftermount hooks and beforeunmount hooks.
 
 (make
 
+  -- Called with just the patches, recurse with object keys and accumulators
   (flattenHooks patches)
     (flattenHooks patches (m:keys patches) [] [])
 
+  -- Called with an empty list of object keys, return the accumulators
   (flattenHooks patches [] removals additions)
     { :removals removals :additions additions }
 
+  -- Called with everything, recurse and accumulate
   (flattenHooks patches [first|rest] removals additions)
     (do
+
+      -- Reference the patch in question and handle its children if they exist
       (make patch (m:get patches first))
       (make childHooks (getChildHooks patch))
+
       (if
+
+        -- For removals, all children are being removed as well so we
+        -- can concat child patches into the removals list
         (isRemoval patch)
           (flattenHooks patches
                         rest
                         (removals.concat childHooks:removals patch)
                         (additions.concat childHooks:additions))
+
+        -- For additions, all children are being added as well so we
+        -- can concat child patches into the additions list
         (isAddition patch)
           (flattenHooks patches
                         rest
                         (removals.concat childHooks:removals)
                         (additions.concat childHooks:additions patch))
+
+        -- Otherwise, we're just recursing and not doing anything
         :else
           (flattenHooks patches rest removals additions))))
 
@@ -102,22 +120,26 @@ aftermount hooks.
 ---
 (make (applyPatches prevTree nextTree nodes)
   (do (make changes (m:vdom:diff prevTree nextTree))
+
+      -- Un-nest the patches
       (make hooks (flattenHooks changes))
 
+      -- For everything that looks like a removal, call before-unmount
       (hooks:removals.forEach
         (@ [patch]
-          (if
-            patch.vNode?:lifecycle?:before-unmount
-              (patch.vNode:lifecycle:before-unmount))))
+          (if patch.vNode?:lifecycle?:before-unmount
+            (patch.vNode:lifecycle:before-unmount))))
 
+      -- Apply the changes
       (m:vdom:patchNodes nodes changes)
 
+      -- For everything that looks like an addition, call after-mount
       (hooks:additions.forEach
         (@ [patch]
-          (if
-            patch.patch?:lifecycle?:after-mount
-              (patch.patch:lifecycle:after-mount))))
+          (if patch.patch?:lifecycle?:after-mount
+            (patch.patch:lifecycle:after-mount))))
 
+      -- Return the new vdom and real nodes
       { :newdom nextTree :nodes nodes }))
 
 
@@ -130,12 +152,15 @@ hooks.
 ---
 (make (runInitialHooks vtree)
   (do
+
+    -- recurse for children
     (if vtree.children
       (do (make children (Array.prototype.slice.call vtree.children))
           (children.forEach (@ [child] (runInitialHooks child)))))
-    (if
-      vtree:lifecycle?:after-mount
-        (vtree:lifecycle:after-mount))))
+
+    -- call aftermount if we have it
+    (if vtree:lifecycle?:after-mount
+      (vtree:lifecycle:after-mount))))
 
 
 ---
